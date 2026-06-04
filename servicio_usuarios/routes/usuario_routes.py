@@ -80,6 +80,7 @@ def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
             "options": {
                 "data": {
                     "role": "user"
+                    'email_redirect_to': 'https://ecosmartbin2.web.app/#/email-verifie'
                 }
             }
         })
