@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
 from jose import jwt, JWTError
-from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema
+from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema, PasswordResetRequestSchema
 from models.usuario_model import PerfilUsuario 
 from database import get_db
 from settings import settings
@@ -93,7 +93,6 @@ def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
             nombres=user_data.nombres,
             apellidos=user_data.apellidos,
             cedula=user_data.cedula,
-            tipo_usuario=user_data.tipo_usuario,
             facultad=user_data.facultad,
             role="user"
         )
@@ -167,7 +166,6 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db: Session =
             "nombres": perfil.nombres,
             "apellidos": perfil.apellidos,
             "cedula": perfil.cedula,
-            "tipo_usuario": perfil.tipo_usuario,
             "facultad": perfil.facultad,
             "role": perfil.role,
             "puntos_ecologicos": perfil.puntos_ecologicos,
@@ -177,3 +175,25 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db: Session =
     except Exception as e:
         print(f"DEBUG BACKEND: Error en get_my_profile: {str(e)}")
         raise e
+
+
+@router.post("/reset-password")
+def reset_password(request_data: PasswordResetRequestSchema):
+    """
+    Envía un correo electrónico al usuario con un enlace para restablecer su contraseña.
+    """
+    try:
+        # Reemplaza 'http://tudominio.com/update-password' con la URL real de tu Frontend
+        # a la que quieres que el usuario sea redirigido después de hacer clic en el correo.
+        supabase.auth.reset_password_email(
+            request_data.email,
+            options={"redirect_to": "http://localhost:3000/update-password"} # <-- CAMBIA ESTO
+        )
+        return {"message": "Si el correo está registrado, se ha enviado un enlace para restablecer la contraseña."}
+    except Exception as e:
+        # Por seguridad, no confirmamos si el correo existe o no en caso de error, 
+        # pero para debugging puedes dejar el mensaje de error.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al solicitar el restablecimiento de contraseña: {str(e)}"
+        )
