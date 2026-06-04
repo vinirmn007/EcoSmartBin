@@ -94,7 +94,6 @@ def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
             nombres=user_data.nombres,
             apellidos=user_data.apellidos,
             cedula=user_data.cedula,
-            tipo_usuario=user_data.tipo_usuario,
             facultad=user_data.facultad,
             role="user"
         )
@@ -168,7 +167,6 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db: Session =
             "nombres": perfil.nombres,
             "apellidos": perfil.apellidos,
             "cedula": perfil.cedula,
-            "tipo_usuario": perfil.tipo_usuario,
             "facultad": perfil.facultad,
             "role": perfil.role,
             "puntos_ecologicos": perfil.puntos_ecologicos,

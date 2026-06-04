@@ -18,7 +18,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _cedulaController = TextEditingController();
   final _facultadController = TextEditingController();
 
-  String _tipoUsuario = 'estudiante';
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
@@ -50,7 +49,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       nombres: _nombresController.text.trim(),
       apellidos: _apellidosController.text.trim(),
       cedula: _cedulaController.text.trim(),
-      tipoUsuario: _tipoUsuario,
       facultad: _facultadController.text.trim(),
     );
 
@@ -299,36 +297,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Tipo de Usuario Dropdown
-                      DropdownButtonFormField<String>(
-                        value: _tipoUsuario,
-                        dropdownColor: const Color(0xFF1E293B),
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
-                        decoration: _buildInputDecoration('Tipo de Usuario', Icons.supervised_user_circle_outlined),
-                        items: const [
-                          DropdownMenuItem(value: 'estudiante', child: Text('Estudiante')),
-                          DropdownMenuItem(value: 'docente', child: Text('Docente')),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _tipoUsuario = value;
-                              if (value == 'administrativo') {
-                                _facultadController.clear();
-                              }
-                            });
-                          }
-                        },
+                      // Facultad (Opcional)
+                      TextFormField(
+                        controller: _facultadController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: _buildInputDecoration('Facultad (Opcional)', Icons.school_outlined),
                       ),
-                      const SizedBox(height: 16),
-
-                      // Facultad (se muestra opcionalmente)
-                      if (_tipoUsuario != 'administrativo')
-                        TextFormField(
-                          controller: _facultadController,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: _buildInputDecoration('Facultad (Opcional)', Icons.school_outlined),
-                        ),
                       const SizedBox(height: 32),
 
                       // Register Button

@@ -6,7 +6,6 @@ class UserRegisterSchema(BaseModel):
     nombres: str
     apellidos: str
     cedula: str
-    tipo_usuario: str = "estudiante"  # estudiante, docente, administrativo
     facultad: str = None              # Opcional, puede ser None
 
 

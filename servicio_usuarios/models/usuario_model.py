@@ -13,7 +13,6 @@ class PerfilUsuario(Base):
     apellidos = Column(String, nullable=False)
     cedula = Column(String, unique=True, index=True, nullable=False) 
     
-    tipo_usuario = Column(String, default="estudiante", nullable=False) 
     facultad = Column(String, nullable=True) 
     
     role = Column(String, default="user", nullable=False) 
