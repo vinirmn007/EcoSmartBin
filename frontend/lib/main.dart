@@ -3,6 +3,9 @@ import 'screens/landing_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/recover_password_screen.dart';
+import 'screens/reset_password_screen.dart';
+import 'screens/email_verified_screen.dart';
 import 'services/api_service.dart';
 
 void main() async {
@@ -60,8 +63,12 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/profile': (context) => const ProfileScreen(),
+        '/recover-password': (context) => const RecoverPasswordScreen(),
+        '/reset-password': (context) => const ResetPasswordScreen(),
+        '/email-verified': (context) => const EmailVerifiedScreen(),
       },
     );
   }
 }
+
 

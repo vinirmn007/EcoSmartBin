@@ -3,7 +3,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
 from jose import jwt, JWTError
-from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema
+from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema, RecoverPasswordSchema, ResetPasswordSchema
+from supabase_auth import UserAttributes
 from models.usuario_model import PerfilUsuario 
 from database import get_db
 from settings import settings
@@ -177,3 +178,44 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db: Session =
     except Exception as e:
         print(f"DEBUG BACKEND: Error en get_my_profile: {str(e)}")
         raise e
+
+
+@router.post("/recover-password")
+def recover_password(data: RecoverPasswordSchema):
+    """
+    Envía un correo de recuperación de contraseña a través de Supabase Auth.
+    """
+    try:
+        options = {}
+        if data.redirect_url:
+            options["redirect_to"] = data.redirect_url
+        
+        supabase.auth.reset_password_for_email(data.email, options=options)
+        return {"message": "Correo de recuperación enviado exitosamente."}
+    except Exception as e:
+        print(f"DEBUG BACKEND: Error en recover_password: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al enviar correo de recuperación: {str(e)}"
+        )
+
+
+@router.post("/reset-password")
+def reset_password(data: ResetPasswordSchema, token: str = Depends(oauth2_scheme)):
+    """
+    Actualiza la contraseña del usuario utilizando el token JWT de recuperación.
+    """
+    try:
+        # Creamos un cliente temporal para asociarlo con la sesión del token actual
+        temp_supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+        temp_supabase.auth.set_session(token, "")
+        
+        # Actualizamos la contraseña del usuario
+        temp_supabase.auth.update_user(UserAttributes(password=data.new_password))
+        return {"message": "Contraseña restablecida exitosamente."}
+    except Exception as e:
+        print(f"DEBUG BACKEND: Error en reset_password: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al restablecer la contraseña: {str(e)}"
+        )

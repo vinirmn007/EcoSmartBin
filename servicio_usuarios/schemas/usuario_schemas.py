@@ -13,3 +13,12 @@ class UserRegisterSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+
+class RecoverPasswordSchema(BaseModel):
+    email: EmailStr
+    redirect_url: str = None
+
+
+class ResetPasswordSchema(BaseModel):
+    new_password: str

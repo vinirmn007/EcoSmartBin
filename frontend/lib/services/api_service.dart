@@ -173,4 +173,66 @@ class ApiService {
     final token = await getToken();
     return token != null;
   }
+
+  // Enviar correo de recuperación de contraseña
+  static Future<Map<String, dynamic>> recoverPassword(String email, {String? redirectUrl}) async {
+    final url = Uri.parse('$baseUrl/auth/recover-password');
+    try {
+      print('DEBUG: Enviando recuperación de contraseña a $url');
+      final Map<String, dynamic> body = {
+        'email': email,
+      };
+      if (redirectUrl != null) {
+        body['redirect_url'] = redirectUrl;
+      }
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      print('DEBUG: Respuesta de recuperación - Código: ${response.statusCode}');
+      final decodedData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': decodedData['message'] ?? 'Correo de recuperación enviado exitosamente'};
+      } else {
+        return {'success': false, 'message': decodedData['detail'] ?? 'Error al enviar correo de recuperación'};
+      }
+    } catch (e) {
+      print('DEBUG: Error en petición de recuperación: $e');
+      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+    }
+  }
+
+  // Restablecer contraseña con el token JWT de recuperación
+  static Future<Map<String, dynamic>> resetPassword(String newPassword, String token) async {
+    final url = Uri.parse('$baseUrl/auth/reset-password');
+    try {
+      print('DEBUG: Enviando restablecimiento de contraseña a $url');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'new_password': newPassword,
+        }),
+      );
+
+      print('DEBUG: Respuesta de restablecimiento - Código: ${response.statusCode}');
+      final decodedData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': decodedData['message'] ?? 'Contraseña restablecida exitosamente'};
+      } else {
+        return {'success': false, 'message': decodedData['detail'] ?? 'Error al restablecer la contraseña'};
+      }
+    } catch (e) {
+      print('DEBUG: Error en petición de restablecimiento: $e');
+      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+    }
+  }
 }
+
