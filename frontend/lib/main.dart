@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/landing_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/profile_screen.dart';
@@ -10,7 +11,7 @@ void main() async {
   // Verificar si ya existe una sesión activa al arrancar
   final bool loggedIn = await ApiService.hasSession();
 
-  runApp(MyApp(startRoute: loggedIn ? '/profile' : '/login'));
+  runApp(MyApp(startRoute: loggedIn ? '/profile' : '/'));
 }
 
 class MyApp extends StatelessWidget {
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
       // Configuración de Rutas
       initialRoute: startRoute,
       routes: {
+        '/': (context) => const LandingScreen(),
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/profile': (context) => const ProfileScreen(),
@@ -62,3 +64,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

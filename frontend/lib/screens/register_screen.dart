@@ -308,7 +308,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         items: const [
                           DropdownMenuItem(value: 'estudiante', child: Text('Estudiante')),
                           DropdownMenuItem(value: 'docente', child: Text('Docente')),
-                          DropdownMenuItem(value: 'administrativo', child: Text('Administrativo')),
                         ],
                         onChanged: (value) {
                           if (value != null) {

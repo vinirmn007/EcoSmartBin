@@ -131,3 +131,18 @@ Thumbs.db
 **/android/app/profile/
 **/android/app/release/
 
+# Firebase
+.firebase/
+.firebaserc
+firebase.json
+
+# Additional Caches
+.cache/
+**/.cache/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.dart_tool/
+**/.pub-cache/
+**/build/
+
