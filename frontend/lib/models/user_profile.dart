@@ -4,7 +4,6 @@ class UserProfile {
   final String nombres;
   final String apellidos;
   final String cedula;
-  final String tipoUsuario;
   final String? facultad;
   final String role;
   final int puntosEcologicos;
@@ -17,7 +16,6 @@ class UserProfile {
     required this.nombres,
     required this.apellidos,
     required this.cedula,
-    required this.tipoUsuario,
     this.facultad,
     required this.role,
     required this.puntosEcologicos,
@@ -32,7 +30,6 @@ class UserProfile {
       nombres: json['nombres'] ?? '',
       apellidos: json['apellidos'] ?? '',
       cedula: json['cedula'] ?? '',
-      tipoUsuario: json['tipo_usuario'] ?? 'estudiante',
       facultad: json['facultad'],
       role: json['role'] ?? 'user',
       puntosEcologicos: json['puntos_ecologicos'] ?? 0,
@@ -48,7 +45,6 @@ class UserProfile {
       'nombres': nombres,
       'apellidos': apellidos,
       'cedula': cedula,
-      'tipo_usuario': tipoUsuario,
       'facultad': facultad,
       'role': role,
       'puntos_ecologicos': puntosEcologicos,

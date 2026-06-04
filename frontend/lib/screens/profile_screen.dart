@@ -200,8 +200,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildInfoRow(Icons.email_outlined, 'Correo Electrónico', _profile?.email ?? ''),
           _buildDivider(),
           _buildInfoRow(Icons.badge_outlined, 'Cédula de Identidad', _profile?.cedula ?? ''),
-          _buildDivider(),
-          _buildInfoRow(Icons.supervised_user_circle_outlined, 'Tipo de Usuario', _capitalize(_profile?.tipoUsuario ?? '')),
           
           if (_profile?.facultad != null && _profile!.facultad!.isNotEmpty) ...[
             _buildDivider(),
