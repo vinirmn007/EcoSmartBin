@@ -179,8 +179,8 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db: Session =
         raise e
 
 
-@router.post("/recover-password")
-def recover_password(data: RecoverPasswordSchema):
+@router.post("/email-reset-password")
+def send_email_reset_password(data: RecoverPasswordSchema):
     """
     Envía un correo de recuperación de contraseña a través de Supabase Auth.
     """
@@ -199,21 +199,22 @@ def recover_password(data: RecoverPasswordSchema):
         )
 
 
-@router.post("/reset-password")
-def reset_password(data: ResetPasswordSchema, token: str = Depends(oauth2_scheme)):
+@router.post("/change-password")
+def change_password(data: ResetPasswordSchema):
     """
-    Actualiza la contraseña del usuario utilizando el token JWT de recuperación.
+    Actualiza la contraseña del usuario utilizando los tokens de recuperación
+    (access_token y refresh_token) que Supabase generó en el enlace del correo.
     """
     try:
-        # Creamos un cliente temporal para asociarlo con la sesión del token actual
+        # Creamos un cliente temporal para asociarlo con la sesión del token de recuperación
         temp_supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
-        temp_supabase.auth.set_session(token, "")
+        temp_supabase.auth.set_session(data.access_token, data.refresh_token)
         
-        # Actualizamos la contraseña del usuario
+        # Actualizamos la contraseña del usuario autenticado con la sesión de recuperación
         temp_supabase.auth.update_user(UserAttributes(password=data.new_password))
         return {"message": "Contraseña restablecida exitosamente."}
     except Exception as e:
-        print(f"DEBUG BACKEND: Error en reset_password: {str(e)}")
+        print(f"DEBUG BACKEND: Error en change_password: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error al restablecer la contraseña: {str(e)}"

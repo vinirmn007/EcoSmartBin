@@ -34,7 +34,10 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     
     // Obtenemos la URL actual de redirección si estamos en web para redireccionar de vuelta al app
     // de manera dinámica, o usamos un fallback del backend
-    final result = await ApiService.recoverPassword(email);
+    final result = await ApiService.recoverPassword(
+      email,
+      redirectUrl: 'https://ecosmartbin2.web.app/#/reset-password',
+    );
 
     if (mounted) {
       setState(() => _isLoading = false);
