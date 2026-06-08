@@ -20,4 +20,6 @@ class RecoverPasswordSchema(BaseModel):
 
 
 class ResetPasswordSchema(BaseModel):
+    access_token: str
+    refresh_token: str
     new_password: str

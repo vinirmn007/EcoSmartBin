@@ -18,6 +18,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String? _token;
+  String? _refreshToken;
   String? _errorMessage;
 
   @override
@@ -36,19 +37,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void _extractToken() {
     final uriBase = Uri.base;
     String? token;
+    String? refreshToken;
     final fragment = uriBase.fragment;
     
     if (fragment.isNotEmpty) {
+      // Supabase recovery links put tokens in the URL fragment like:
+      // #/reset-password?access_token=xxx&refresh_token=yyy&type=recovery
+      // or: #access_token=xxx&refresh_token=yyy&type=recovery
       if (fragment.startsWith('/')) {
         final subUri = Uri.parse('http://dummy$fragment');
         token = subUri.queryParameters['access_token'] ?? subUri.queryParameters['token'];
+        refreshToken = subUri.queryParameters['refresh_token'];
       } else {
         final subUri = Uri.parse('http://dummy?$fragment');
         token = subUri.queryParameters['access_token'] ?? subUri.queryParameters['token'];
+        refreshToken = subUri.queryParameters['refresh_token'];
       }
     }
     
     token ??= uriBase.queryParameters['access_token'] ?? uriBase.queryParameters['token'];
+    refreshToken ??= uriBase.queryParameters['refresh_token'];
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (token == null && mounted) {
@@ -56,19 +64,32 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         if (args is String) {
           setState(() => _token = args);
         } else if (args is Map<String, dynamic>) {
-          setState(() => _token = args['token'] ?? args['access_token']);
+          setState(() {
+            _token = args['token'] ?? args['access_token'];
+            _refreshToken = args['refresh_token'];
+          });
         }
       }
     });
 
     if (token != null) {
-      setState(() => _token = token);
+      setState(() {
+        _token = token;
+        _refreshToken = refreshToken;
+      });
     }
+
+    print('DEBUG: Extracted access_token: ${token != null ? "PRESENT" : "NULL"}');
+    print('DEBUG: Extracted refresh_token: ${refreshToken != null ? "PRESENT" : "NULL"}');
   }
 
   Future<void> _handleReset() async {
     if (_token == null) {
       setState(() => _errorMessage = 'No se encontró un token válido. Solicita un nuevo enlace.');
+      return;
+    }
+    if (_refreshToken == null) {
+      setState(() => _errorMessage = 'No se encontró el refresh token. Solicita un nuevo enlace de recuperación.');
       return;
     }
     if (!_formKey.currentState!.validate()) return;
@@ -79,7 +100,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     });
 
     final newPassword = _passwordController.text;
-    final result = await ApiService.resetPassword(newPassword, _token!);
+    final result = await ApiService.resetPassword(
+      newPassword,
+      _token!,
+      _refreshToken!,
+    );
 
     if (mounted) {
       setState(() => _isLoading = false);

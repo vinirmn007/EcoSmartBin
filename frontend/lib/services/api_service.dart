@@ -174,7 +174,7 @@ class ApiService {
 
   // Enviar correo de recuperación de contraseña
   static Future<Map<String, dynamic>> recoverPassword(String email, {String? redirectUrl}) async {
-    final url = Uri.parse('$baseUrl/auth/recover-password');
+    final url = Uri.parse('$baseUrl/auth/email-reset-password');
     try {
       print('DEBUG: Enviando recuperación de contraseña a $url');
       final Map<String, dynamic> body = {
@@ -203,18 +203,19 @@ class ApiService {
     }
   }
 
-  // Restablecer contraseña con el token JWT de recuperación
-  static Future<Map<String, dynamic>> resetPassword(String newPassword, String token) async {
-    final url = Uri.parse('$baseUrl/auth/reset-password');
+  // Restablecer contraseña con los tokens de recuperación de Supabase
+  static Future<Map<String, dynamic>> resetPassword(String newPassword, String accessToken, String refreshToken) async {
+    final url = Uri.parse('$baseUrl/auth/change-password');
     try {
       print('DEBUG: Enviando restablecimiento de contraseña a $url');
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
+          'access_token': accessToken,
+          'refresh_token': refreshToken,
           'new_password': newPassword,
         }),
       );
