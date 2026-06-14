@@ -8,21 +8,62 @@ import 'screens/recover_password_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/email_verified_screen.dart';
 import 'services/api_service.dart';
+import 'dart:html' as html;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Extraemos los tokens de la URL cruda ANTES de que Flutter limpie la URL
+  final hash = html.window.location.hash;
+  print('RAW HASH: $hash');
+  
+  String? extractedToken;
+  String? extractedRefreshToken;
+  String? initialRouteOverride;
+
+  if (hash.isNotEmpty) {
+    final fragment = hash.startsWith('#') ? hash.substring(1) : hash;
+    
+    // El fragmento en Supabase suele ser "access_token=xxx&refresh_token=yyy&type=recovery"
+    // Pero si comienza con "/reset-password?", lo ajustamos.
+    String queryStr = fragment;
+    if (fragment.startsWith('/')) {
+      final parts = fragment.split('?');
+      if (parts.length > 1) queryStr = parts[1];
+    }
+    
+    final params = Uri.splitQueryString(queryStr);
+    extractedToken = params['access_token'] ?? params['token'];
+    extractedRefreshToken = params['refresh_token'];
+  }
+
+  if (extractedToken != null) {
+    initialRouteOverride = '/reset-password';
+  }
+
   usePathUrlStrategy();
   
   // Verificar si ya existe una sesión activa al arrancar
   final bool loggedIn = await ApiService.hasSession();
 
-  runApp(MyApp(startRoute: loggedIn ? '/profile' : '/'));
+  runApp(MyApp(
+    startRoute: initialRouteOverride ?? (loggedIn ? '/profile' : '/'),
+    initialToken: extractedToken,
+    initialRefreshToken: extractedRefreshToken,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final String startRoute;
+  final String? initialToken;
+  final String? initialRefreshToken;
 
-  const MyApp({super.key, required this.startRoute});
+  const MyApp({
+    super.key, 
+    required this.startRoute,
+    this.initialToken,
+    this.initialRefreshToken,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +107,10 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/recover-password': (context) => const RecoverPasswordScreen(),
-        '/reset-password': (context) => const ResetPasswordScreen(),
+        '/reset-password': (context) => ResetPasswordScreen(
+              token: initialToken,
+              refreshToken: initialRefreshToken,
+            ),
         '/email-verified': (context) => const EmailVerifiedScreen(),
       },
     );

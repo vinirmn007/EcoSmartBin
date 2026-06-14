@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String? token;
+  final String? refreshToken;
+
+  const ResetPasswordScreen({
+    super.key,
+    this.token,
+    this.refreshToken,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -24,7 +31,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    _extractToken();
+    _token = widget.token;
+    _refreshToken = widget.refreshToken;
+
+    print('TOKEN: ${_token != null}');
+    print('REFRESH: ${_refreshToken != null}');
   }
 
   @override
@@ -32,55 +43,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  void _extractToken() {
-    final uriBase = Uri.base;
-    String? token;
-    String? refreshToken;
-    final fragment = uriBase.fragment;
-    
-    if (fragment.isNotEmpty) {
-      // Supabase recovery links put tokens in the URL fragment like:
-      // #/reset-password?access_token=xxx&refresh_token=yyy&type=recovery
-      // or: #access_token=xxx&refresh_token=yyy&type=recovery
-      if (fragment.startsWith('/')) {
-        final subUri = Uri.parse('http://dummy$fragment');
-        token = subUri.queryParameters['access_token'] ?? subUri.queryParameters['token'];
-        refreshToken = subUri.queryParameters['refresh_token'];
-      } else {
-        final subUri = Uri.parse('http://dummy?$fragment');
-        token = subUri.queryParameters['access_token'] ?? subUri.queryParameters['token'];
-        refreshToken = subUri.queryParameters['refresh_token'];
-      }
-    }
-    
-    token ??= uriBase.queryParameters['access_token'] ?? uriBase.queryParameters['token'];
-    refreshToken ??= uriBase.queryParameters['refresh_token'];
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (token == null && mounted) {
-        final args = ModalRoute.of(context)?.settings.arguments;
-        if (args is String) {
-          setState(() => _token = args);
-        } else if (args is Map<String, dynamic>) {
-          setState(() {
-            _token = args['token'] ?? args['access_token'];
-            _refreshToken = args['refresh_token'];
-          });
-        }
-      }
-    });
-
-    if (token != null) {
-      setState(() {
-        _token = token;
-        _refreshToken = refreshToken;
-      });
-    }
-
-    print('DEBUG: Extracted access_token: ${token != null ? "PRESENT" : "NULL"}');
-    print('DEBUG: Extracted refresh_token: ${refreshToken != null ? "PRESENT" : "NULL"}');
   }
 
   Future<void> _handleReset() async {
