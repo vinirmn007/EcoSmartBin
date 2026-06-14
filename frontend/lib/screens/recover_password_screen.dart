@@ -36,7 +36,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     // de manera dinámica, o usamos un fallback del backend
     final result = await ApiService.recoverPassword(
       email,
-      redirectUrl: 'https://ecosmartbin2.web.app/#/reset-password',
+      redirectUrl: 'https://ecosmartbin2.web.app/reset-password',
     );
 
     if (mounted) {
