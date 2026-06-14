@@ -241,7 +241,28 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 32),
+                      
+                      // Forgot password button
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            _showForgotPasswordDialog();
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF10B981),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            '¿Olvidaste tu contraseña?',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
 
                       // Login Button
                       ElevatedButton(
@@ -305,6 +326,105 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final resetEmailController = TextEditingController();
+    bool isRequesting = false;
+    String? resetError;
+    String? resetSuccess;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E293B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: const Text('Restablecer Contraseña', style: TextStyle(color: Colors.white)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
+                    style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  if (resetError != null) ...[
+                    Text(resetError!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                    const SizedBox(height: 10),
+                  ],
+                  if (resetSuccess != null) ...[
+                    Text(resetSuccess!, style: const TextStyle(color: Color(0xFF10B981), fontSize: 13)),
+                    const SizedBox(height: 10),
+                  ],
+                  TextField(
+                    controller: resetEmailController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Correo Electrónico',
+                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF10B981)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isRequesting ? null : () => Navigator.pop(context),
+                  style: TextButton.styleFrom(foregroundColor: Colors.white.withOpacity(0.6)),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: isRequesting
+                      ? null
+                      : () async {
+                          final email = resetEmailController.text.trim();
+                          if (email.isEmpty) {
+                            setStateDialog(() => resetError = 'Ingresa un correo');
+                            return;
+                          }
+                          setStateDialog(() {
+                            isRequesting = true;
+                            resetError = null;
+                            resetSuccess = null;
+                          });
+
+                          final res = await ApiService.requestPasswordReset(email);
+
+                          setStateDialog(() {
+                            isRequesting = false;
+                            if (res['success']) {
+                              resetSuccess = res['message'];
+                            } else {
+                              resetError = res['message'];
+                            }
+                          });
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: isRequesting
+                      ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text('Enviar Enlace'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

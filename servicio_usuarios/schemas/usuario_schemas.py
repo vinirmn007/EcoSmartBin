@@ -15,3 +15,8 @@ class UserLoginSchema(BaseModel):
 
 class PasswordResetRequestSchema(BaseModel):
     email: EmailStr
+
+class PasswordUpdateSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+    new_password: str

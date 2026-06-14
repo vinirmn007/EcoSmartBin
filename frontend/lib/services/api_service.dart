@@ -173,4 +173,54 @@ class ApiService {
     final token = await getToken();
     return token != null;
   }
+
+  // Solicitar restablecimiento de contraseña
+  static Future<Map<String, dynamic>> requestPasswordReset(String email) async {
+    final url = Uri.parse('$baseUrl/auth/reset-password');
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      final decodedData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': decodedData['message'] ?? 'Correo enviado'};
+      } else {
+        return {'success': false, 'message': decodedData['detail'] ?? 'Error al solicitar restablecimiento'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+    }
+  }
+
+  // Actualizar contraseña
+  static Future<Map<String, dynamic>> updatePassword(String accessToken, String refreshToken, String newPassword) async {
+    final url = Uri.parse('$baseUrl/auth/update-password');
+    
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'access_token': accessToken,
+          'refresh_token': refreshToken,
+          'new_password': newPassword,
+        }),
+      );
+
+      final decodedData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': decodedData['message'] ?? 'Contraseña actualizada'};
+      } else {
+        return {'success': false, 'message': decodedData['detail'] ?? 'Error al actualizar contraseña'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+    }
+  }
 }

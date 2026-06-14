@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
 from jose import jwt, JWTError
-from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema, PasswordResetRequestSchema
+from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema, PasswordResetRequestSchema, PasswordUpdateSchema
 from models.usuario_model import PerfilUsuario 
 from database import get_db
 from settings import settings
@@ -183,11 +183,10 @@ def reset_password(request_data: PasswordResetRequestSchema):
     Envía un correo electrónico al usuario con un enlace para restablecer su contraseña.
     """
     try:
-        # Reemplaza 'http://tudominio.com/update-password' con la URL real de tu Frontend
-        # a la que quieres que el usuario sea redirigido después de hacer clic en el correo.
+        # Reemplazado con la URL real de tu Frontend a la que el usuario será redirigido.
         supabase.auth.reset_password_email(
             request_data.email,
-            options={"redirect_to": "http://localhost:3000/update-password"} # <-- CAMBIA ESTO
+            options={"redirect_to": "https://ecosmartbin2.web.app/reset-password"}
         )
         return {"message": "Si el correo está registrado, se ha enviado un enlace para restablecer la contraseña."}
     except Exception as e:
@@ -196,4 +195,21 @@ def reset_password(request_data: PasswordResetRequestSchema):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error al solicitar el restablecimiento de contraseña: {str(e)}"
+        )
+
+@router.post("/update-password")
+def update_password(data: PasswordUpdateSchema):
+    """
+    Actualiza la contraseña del usuario utilizando el token extraído del enlace de recuperación.
+    """
+    # Creamos un cliente temporal para no alterar la sesión global
+    temp_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    try:
+        temp_client.auth.set_session(data.access_token, data.refresh_token)
+        temp_client.auth.update_user({"password": data.new_password})
+        return {"message": "Contraseña actualizada exitosamente."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"El token ha expirado o es inválido: {str(e)}"
         )
