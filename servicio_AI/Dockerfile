@@ -7,7 +7,6 @@ WORKDIR /app
 # Instalar dependencias del sistema necesarias
 # onnxruntime requiere libgomp.so.1 que viene en libgomp1
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
