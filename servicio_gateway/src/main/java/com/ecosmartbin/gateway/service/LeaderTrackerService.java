@@ -52,8 +52,9 @@ public class LeaderTrackerService {
 
     @Scheduled(fixedDelayString = "${gateway.poll-interval-ms:3000}")
     public void pollNodes() {
-        String detectedLeaderUrl = null;
-        int detectedLeaderId = -1;
+        // --- Paso 1: sondear a todos los nodos y guardar su estado ---
+        // Mapa temporal: nodeId → {url, alive, autoReportLeader}
+        Map<String, NodeInfo> tempMap = new java.util.LinkedHashMap<>();
 
         for (String url : config.getNodeUrls()) {
             try {
@@ -63,33 +64,48 @@ public class LeaderTrackerService {
 
                 if (status != null) {
                     int nodeId = (Integer) status.get("nodeId");
-                    boolean isLeader = Boolean.TRUE.equals(status.get("isLeader"));
-
-                    nodeInfoMap.put(url, new NodeInfo(nodeId, url, true, isLeader));
-
-                    if (isLeader) {
-                        detectedLeaderUrl = url;
-                        detectedLeaderId = nodeId;
-                    }
+                    boolean selfReportsLeader = Boolean.TRUE.equals(status.get("isLeader"));
+                    // Guardamos temporalmente con isLeader=false; lo corregiremos luego.
+                    tempMap.put(url, new NodeInfo(nodeId, url, true, selfReportsLeader));
                 }
             } catch (Exception e) {
                 // Nodo caído
                 NodeInfo prev = nodeInfoMap.get(url);
                 int id = (prev != null) ? prev.nodeId() : -1;
-                nodeInfoMap.put(url, new NodeInfo(id, url, false, false));
+                tempMap.put(url, new NodeInfo(id, url, false, false));
                 log.debug("[GATEWAY] Nodo {} no responde: {}", url, e.getMessage());
             }
         }
 
-        // Actualizar líder conocido
-        if (detectedLeaderUrl != null) {
-            String prevLeader = currentLeaderUrl.get();
-            currentLeaderUrl.set(detectedLeaderUrl);
-            currentLeaderId.set(detectedLeaderId);
+        // --- Paso 2: determinar el líder real (mayor nodeId que se auto-reporta líder y está vivo) ---
+        // Esto evita el split-brain visual: aunque varios nodos crean ser líder, solo
+        // el Gateway elige a uno como canónico.
+        int trueLeaderId = -1;
+        String trueLeaderUrl = null;
 
-            if (!detectedLeaderUrl.equals(prevLeader)) {
+        for (NodeInfo info : tempMap.values()) {
+            if (info.alive() && info.isLeader() && info.nodeId() > trueLeaderId) {
+                trueLeaderId = info.nodeId();
+                trueLeaderUrl = info.url();
+            }
+        }
+
+        // --- Paso 3: reescribir el mapa marcando SOLO al verdadero líder ---
+        for (Map.Entry<String, NodeInfo> entry : tempMap.entrySet()) {
+            NodeInfo n = entry.getValue();
+            boolean isCanonicalLeader = (trueLeaderUrl != null) && trueLeaderUrl.equals(n.url());
+            nodeInfoMap.put(entry.getKey(), new NodeInfo(n.nodeId(), n.url(), n.alive(), isCanonicalLeader));
+        }
+
+        // --- Paso 4: actualizar referencias del gateway ---
+        if (trueLeaderUrl != null) {
+            String prevLeader = currentLeaderUrl.get();
+            currentLeaderUrl.set(trueLeaderUrl);
+            currentLeaderId.set(trueLeaderId);
+
+            if (!trueLeaderUrl.equals(prevLeader)) {
                 log.info("[GATEWAY] *** CAMBIO DE LÍDER *** Nuevo líder: Nodo {} ({})",
-                        detectedLeaderId, detectedLeaderUrl);
+                        trueLeaderId, trueLeaderUrl);
             }
         } else {
             log.warn("[GATEWAY] No se detectó ningún líder activo — esperando elección Bully...");
