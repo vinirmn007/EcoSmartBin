@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
 
 class ApiService {
-  // Configuración de la URL Base según la plataforma
+  // ── URL del servicio de usuarios (producción) ──
   static String get baseUrl {
     if (kIsWeb) {
       return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
@@ -18,6 +18,15 @@ class ApiService {
       } catch (_) {}
       return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
     }
+  }
+
+  // ── Gateway local (Bully + servicio_puntos) ──
+  static String get gatewayUrl {
+    if (kIsWeb) return 'http://localhost:8080';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:8080';
+    } catch (_) {}
+      return 'http://localhost:8080';
   }
 
   // Clave para guardar el token en SharedPreferences
@@ -233,5 +242,120 @@ class ApiService {
       return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
     }
   }
-}
 
+  // ══════════════════════════════════════════════════
+  //  PUNTOS ECOLÓGICOS — via Gateway local (Bully)
+  // ══════════════════════════════════════════════════
+
+  /// Obtiene el balance de puntos del usuario autenticado.
+  static Future<Map<String, dynamic>> getBalance() async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/api/puntos/balance'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return {'success': false, 'message': 'Error ${response.statusCode}: ${response.body}'};
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  /// Registra un evento de reciclaje y acumula puntos.
+  static Future<Map<String, dynamic>> registrarReciclaje({
+    required int tipoReciclajeId,
+    required int cantidad,
+    String? usuarioId,
+  }) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    final body = <String, dynamic>{
+      'tipoReciclajeId': tipoReciclajeId,
+      'cantidad': cantidad,
+    };
+    if (usuarioId != null) body['usuarioId'] = usuarioId;
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/api/puntos/reciclar'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'message': err['message'] ?? 'Error al registrar reciclaje'};
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  /// Obtiene los tipos de reciclaje disponibles.
+  static Future<List<dynamic>> getTiposReciclaje() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/api/tipos-reciclaje'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getTiposReciclaje: $e');
+      return [];
+    }
+  }
+
+  /// Obtiene el historial de transacciones del usuario autenticado.
+  static Future<List<dynamic>> getTransacciones() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/api/transacciones/historial'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getTransacciones: $e');
+      return [];
+    }
+  }
+
+  /// Obtiene el estado del cluster Bully desde el gateway.
+  static Future<Map<String, dynamic>?> getGatewayStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/gateway/status'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 3));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+}

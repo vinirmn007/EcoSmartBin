@@ -137,7 +137,7 @@ public class RecompensaService {
 
         // Registrar transacción de tipo CANJE
         TransaccionPuntos transaccion = TransaccionPuntos.builder()
-                .usuarioId(usuarioId)
+                .usuario(perfil)
                 .puntos(recompensa.getCostoPuntos())
                 .tipo(TransaccionPuntos.TipoTransaccion.CANJE)
                 .descripcion(String.format("Canje de recompensa: %s — -%d puntos",
@@ -184,7 +184,7 @@ public class RecompensaService {
 
             // Registrar la devolución como transacción
             TransaccionPuntos devolucion = TransaccionPuntos.builder()
-                    .usuarioId(canje.getUsuarioId())
+                    .usuario(perfil)
                     .puntos(canje.getPuntosGastados())
                     .tipo(TransaccionPuntos.TipoTransaccion.ACUMULACION)
                     .descripcion(String.format("Devolución por canje cancelado #%d: +%d puntos",

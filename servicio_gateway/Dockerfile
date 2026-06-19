@@ -5,11 +5,9 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copiar archivos de dependencias primero (para aprovechar el cache de Docker)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copiar código fuente y compilar
 COPY src ./src
 RUN mvn clean package -DskipTests -B
 
@@ -20,16 +18,11 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Copiar el JAR compilado
 COPY --from=build /app/target/*.jar app.jar
 
-# Puerto por defecto (se sobreescribe con NODE_PORT)
-EXPOSE 8081
+EXPOSE 8080
 
-# Las variables NODE_ID, NODE_PORT y NODE_URLS se inyectan
-# desde el docker-compose de cada nodo en tiempo de ejecución.
+# NODE_URLS se configura desde el docker-compose con las IPs reales del switch
 ENTRYPOINT ["sh", "-c", "java \
-  -DNODE_ID=${NODE_ID:-1} \
-  -DNODE_PORT=${NODE_PORT:-8081} \
-  -DNODE_URLS=${NODE_URLS:-http://localhost:8081,http://localhost:8082,http://localhost:8083} \
+  -DGATEWAY_NODE_URLS=${NODE_URLS:-http://localhost:8081,http://localhost:8082,http://localhost:8083} \
   -jar app.jar"]

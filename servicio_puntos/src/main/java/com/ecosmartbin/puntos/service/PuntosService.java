@@ -63,7 +63,7 @@ public class PuntosService {
 
         // Crear registro de transacción
         TransaccionPuntos transaccion = TransaccionPuntos.builder()
-                .usuarioId(usuarioId)
+                .usuario(perfil)
                 .tipoReciclaje(tipoReciclaje)
                 .puntos(puntosGanados)
                 .tipo(TransaccionPuntos.TipoTransaccion.ACUMULACION)
@@ -74,7 +74,7 @@ public class PuntosService {
 
         return TransaccionResponse.builder()
                 .id(transaccion.getId())
-                .usuarioId(usuarioId)
+                .usuarioId(perfil.getId())
                 .tipoReciclaje(tipoReciclaje.getNombre())
                 .puntos(puntosGanados)
                 .tipo(transaccion.getTipo().name())
