@@ -1,16 +1,31 @@
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from settings import settings
 from routes import usuario_routes
 from database import Base, engine
 
-# Sincroniza el modelo con la base de datos al arrancar
-Base.metadata.create_all(bind=engine)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Sincroniza el modelo con la base de datos al arrancar
+    try:
+        logger.info("Intentando conectar a la base de datos y crear tablas...")
+        # Nota: create_all es sincrono, idealmente se ejecuta en un hilo o se usa alembic
+        Base.metadata.create_all(bind=engine)
+        logger.info("Conexión a la base de datos exitosa. Tablas sincronizadas.")
+    except Exception as e:
+        logger.error(f"Error crítico al conectar a la base de datos: {e}")
+    yield
 
 app = FastAPI(
     title="EcoSmartBin API",
     description="Backend core para la gestión y clasificación inteligente de residuos",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 app.include_router(usuario_routes.router)
 
