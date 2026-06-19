@@ -32,7 +32,7 @@ public class TransaccionService {
     private TransaccionResponse toResponse(TransaccionPuntos t) {
         return TransaccionResponse.builder()
                 .id(t.getId())
-                .usuarioId(t.getUsuario() != null ? t.getUsuario().getId() : null)
+                .usuarioId(t.getUsuarioId())
                 .tipoReciclaje(t.getTipoReciclaje() != null ? t.getTipoReciclaje().getNombre() : null)
                 .puntos(t.getPuntos())
                 .tipo(t.getTipo().name())
