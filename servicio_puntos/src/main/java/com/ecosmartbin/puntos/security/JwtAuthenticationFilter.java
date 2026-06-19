@@ -46,35 +46,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            // Bypass signature validation for local testing
-            String[] chunks = token.split("\\.");
-            if (chunks.length >= 2) {
-                String payload = new String(java.util.Base64.getUrlDecoder().decode(chunks[1]), StandardCharsets.UTF_8);
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                java.util.Map<String, Object> claims = mapper.readValue(payload, new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>>(){});
+            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 
-                String userId = (String) claims.get("sub");
-                String role = "user";
-                Object userMetadata = claims.get("user_metadata");
-                if (userMetadata instanceof java.util.Map) {
-                    java.util.Map<String, Object> metadata = (java.util.Map<String, Object>) userMetadata;
-                    Object roleObj = metadata.get("role");
-                    if (roleObj != null) {
-                        role = roleObj.toString();
-                    }
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            // El campo "sub" del JWT de Supabase contiene el user_id
+            String userId = claims.getSubject();
+
+            // Extraer el rol desde user_metadata del JWT de Supabase
+            String role = "user";
+            Object userMetadata = claims.get("user_metadata");
+            if (userMetadata instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> metadata = (Map<String, Object>) userMetadata;
+                Object roleObj = metadata.get("role");
+                if (roleObj != null) {
+                    role = roleObj.toString();
                 }
-
-                List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
-                );
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+
+            // Crear authorities basadas en el rol
+            List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                    new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
+            );
+
+            // Crear el token de autenticación de Spring con userId como principal
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userId, null, authorities);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
         } catch (Exception e) {
-            System.err.println("DEBUG JWT: Error al parsear token - " + e.getMessage());
-            e.printStackTrace();
+            // Token inválido o expirado: se continúa sin autenticación (será 403 si el endpoint requiere auth)
             SecurityContextHolder.clearContext();
         }
 

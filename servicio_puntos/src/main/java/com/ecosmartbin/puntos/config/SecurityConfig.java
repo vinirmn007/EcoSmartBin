@@ -31,8 +31,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos
                         .requestMatchers("/", "/error").permitAll()
-                        // Bully: inter-nodo y gateway — sin JWT
-                        .requestMatchers("/api/bully/**").permitAll()
                         // Listar recompensas es público (para que el frontend las muestre)
                         .requestMatchers(HttpMethod.GET, "/api/recompensas", "/api/recompensas/**").permitAll()
                         // Listar tipos de reciclaje es público

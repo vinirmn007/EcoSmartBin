@@ -23,13 +23,8 @@ WORKDIR /app
 # Copiar el JAR compilado
 COPY --from=build /app/target/*.jar app.jar
 
-# Puerto por defecto (se sobreescribe con NODE_PORT)
+# Exponer el puerto (Cloud Run usa PORT env variable)
 EXPOSE 8081
 
-# Las variables NODE_ID, NODE_PORT y NODE_URLS se inyectan
-# desde el docker-compose de cada nodo en tiempo de ejecución.
-ENTRYPOINT ["sh", "-c", "java \
-  -DNODE_ID=${NODE_ID:-1} \
-  -DNODE_PORT=${NODE_PORT:-8081} \
-  -DNODE_URLS=${NODE_URLS:-http://localhost:8081,http://localhost:8082,http://localhost:8083} \
-  -jar app.jar"]
+# Ejecutar la aplicación usando la variable PORT de Cloud Run (si existe)
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8081}"]

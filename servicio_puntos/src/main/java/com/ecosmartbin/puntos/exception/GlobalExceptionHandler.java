@@ -1,7 +1,5 @@
 package com.ecosmartbin.puntos.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,11 +17,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<Map<String, Object>> handleRecursoNoEncontrado(RecursoNoEncontradoException ex) {
-        log.warn("Recurso no encontrado: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
@@ -42,13 +37,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Argumento ilegal: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        log.error("Error no controlado en el servidor: ", ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Error interno del servidor: " + ex.getMessage());
     }

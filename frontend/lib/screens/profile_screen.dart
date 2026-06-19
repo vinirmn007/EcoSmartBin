@@ -93,22 +93,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             // Card del Score / Puntos Ecológicos
                             _buildEcoPointsCard(),
-                            const SizedBox(height: 12),
-
-                            // Botón para ir a la pantalla de puntos
-                            OutlinedButton.icon(
-                              onPressed: () => Navigator.pushNamed(context, '/puntos'),
-                              icon: const Icon(Icons.eco_rounded, size: 18),
-                              label: const Text('Ver mis EcoPuntos y Reciclar'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF10B981),
-                                side: const BorderSide(color: Color(0xFF10B981)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                            ),
                             const SizedBox(height: 24),
 
                             // Card de Datos Personales
