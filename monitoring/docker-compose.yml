@@ -11,6 +11,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
     ports:
       - "9090:9090" # Solo acceder internamente o restringido por IP en GCE
 
