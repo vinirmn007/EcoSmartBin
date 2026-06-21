@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s      # Frecuencia con la que raspa las métricas (por defecto 15s)
+  evaluation_interval: 15s  # Frecuencia para evaluar reglas (alertas)
+
+scrape_configs:
+  # 1. Monitoreo del propio Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2. Monitoreo del backend de Usuarios (FastAPI) en Cloud Run
+  - job_name: 'servicio_usuarios'
+    metrics_path: '/metrics'
+    scheme: 'https'
+    static_configs:
+      - targets: ['ecosmartbin-229724129072.southamerica-west1.run.app']
+
+  # 3. Monitoreo de la base de datos PostgreSQL de Supabase
+  # El postgres-exporter corre en el mismo docker-compose en el puerto 9187
+  - job_name: 'postgres_supabase'
+    static_configs:
+      - targets: ['postgres-exporter:9187']

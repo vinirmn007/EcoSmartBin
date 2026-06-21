@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from settings import settings
 from routes import usuario_routes
 from database import Base, engine
@@ -28,6 +29,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 app.include_router(usuario_routes.router)
+
+# --- MÉTRICAS DE PROMETHEUS ---
+# Instrumentar la aplicación para recolectar métricas HTTP automáticamente.
+# Expondrá los datos en la ruta /metrics para que Prometheus los raspe.
+Instrumentator().instrument(app).expose(app)
 
 # --- CONFIGURACIÓN DINÁMICA DE CORS ---
 # Si settings.CORS_ORIGINS contiene ["*"], allow_credentials DEBE ser False por especificación de seguridad.
