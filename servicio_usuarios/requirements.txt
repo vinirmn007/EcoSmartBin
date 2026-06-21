@@ -63,7 +63,6 @@ sentry-sdk==2.61.1
 shellingham==1.5.4
 six==1.17.0
 SQLAlchemy==2.0.50
-starlette==1.2.1
 storage3==2.30.1
 StrEnum==0.4.15
 strictyaml==1.7.3
