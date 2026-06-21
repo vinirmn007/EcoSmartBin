@@ -29,7 +29,7 @@ services:
 
   postgres-exporter:
     # Cambiamos al contenedor oficial de la comunidad de Prometheus (Soporta Postgres 17)
-    image: prometheus-community/postgres-exporter:v0.15.0
+    image: prometheuscommunity/postgres-exporter:v0.15.0
     container_name: postgres-exporter
     environment:
       # Usa aquí la cadena de conexión DIRECTA que copiaste en el Paso 1
