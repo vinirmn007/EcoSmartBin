@@ -28,13 +28,15 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin_secure_password}
 
   postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:v0.15.0
+    # Cambiamos al contenedor oficial de la comunidad de Prometheus (Soporta Postgres 17)
+    image: prometheus-community/postgres-exporter:v0.15.0
     container_name: postgres-exporter
-    restart: unless-stopped
     environment:
-      # Data source URL de Supabase (usando la cadena de conexión estándar o de pooler de Supabase)
-      # El formato es: postgresql://[user]:[password]@[host]:[port]/[database]?sslmode=disable
-      - DATA_SOURCE_NAME=${SUPABASE_DB_URL}
+      # Usa aquí la cadena de conexión DIRECTA que copiaste en el Paso 1
+      - DATA_SOURCE_NAME=postgresql://postgres:[TU_PASSWORD]@db.xxxxxxxxx.supabase.co:5432/postgres?sslmode=disable
+      
+      # Truco extra: Desactivamos métricas obsoletas de motores viejos para limpiar el log
+      - PG_EXPORTER_DISABLE_DEFAULT_METRICS=false
     ports:
       - "9187:9187"
 
