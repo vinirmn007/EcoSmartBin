@@ -363,11 +363,11 @@ class ApiService {
   // ══════════════════════════════════════════════════
 
   /// URLs directas de cada nodo (para el laboratorio distribuido).
-  /// En producción con switch real, estas IPs deben coincidir con NODE_URLS.
+  /// ⚠️ ACTUALIZAR con las IPs reales de la red cuando se use switch/router.
   static List<String> get nodeUrls => [
-    'http://localhost:8081',
-    'http://localhost:8082',
-    'http://localhost:8083',
+    'http://192.168.110.127:8081',   // Nodo 1 — PC1 (Marco)
+    'http://192.168.110.90:8082',    // Nodo 2 — PC2 (Compañero)
+    'http://192.168.1.12:8083',      // Nodo 3 — PC3 (sin conectar aún)
   ];
 
   // ── Lamport ───────────────────────────────────────
