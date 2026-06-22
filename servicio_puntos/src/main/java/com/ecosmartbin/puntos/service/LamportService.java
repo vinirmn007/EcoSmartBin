@@ -75,6 +75,18 @@ public class LamportService {
         return buildStatus();
     }
 
+    /**
+     * Incrementa el reloj lógico de Lamport para una transacción de negocio y lo propaga.
+     * Retorna el timestamp definitivo asignado localmente antes de propagar.
+     */
+    public long incrementAndPropagate(String detail) {
+        long ts = clock.incrementAndGet();
+        addEvent("TRANSACTION", ts, config.getNodeId(), -1);
+        log.info("[LAMPORT] Nodo {} — TRANSACTION event ({}) → clock={}", config.getNodeId(), detail, ts);
+        propagate(ts);
+        return ts;
+    }
+
     // ──────────────────────────────────────────────────────────
     //  RECIBIR timestamp de otro nodo
     // ──────────────────────────────────────────────────────────

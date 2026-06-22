@@ -6,6 +6,7 @@ import com.ecosmartbin.puntos.exception.RecursoNoEncontradoException;
 import com.ecosmartbin.puntos.exception.SaldoInsuficienteException;
 import com.ecosmartbin.puntos.model.*;
 import com.ecosmartbin.puntos.repository.*;
+import com.ecosmartbin.puntos.config.BullyConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +23,21 @@ public class RecompensaService {
     private final CanjeRepository canjeRepository;
     private final PerfilUsuarioRepository perfilRepository;
     private final TransaccionPuntosRepository transaccionRepository;
+    private final LamportService lamportService;
+    private final BullyConfig config;
 
     public RecompensaService(RecompensaRepository recompensaRepository,
                              CanjeRepository canjeRepository,
                              PerfilUsuarioRepository perfilRepository,
-                             TransaccionPuntosRepository transaccionRepository) {
+                             TransaccionPuntosRepository transaccionRepository,
+                             LamportService lamportService,
+                             BullyConfig config) {
         this.recompensaRepository = recompensaRepository;
         this.canjeRepository = canjeRepository;
         this.perfilRepository = perfilRepository;
         this.transaccionRepository = transaccionRepository;
+        this.lamportService = lamportService;
+        this.config = config;
     }
 
     /**
@@ -135,13 +142,18 @@ public class RecompensaService {
                 .build();
         canjeRepository.save(canje);
 
+        // Obtener y propagar timestamp de Lamport
+        String desc = String.format("Canje de recompensa: %s — -%d puntos", recompensa.getNombre(), recompensa.getCostoPuntos());
+        long lamportTs = lamportService.incrementAndPropagate(desc);
+
         // Registrar transacción de tipo CANJE
         TransaccionPuntos transaccion = TransaccionPuntos.builder()
                 .usuario(perfil)
                 .puntos(recompensa.getCostoPuntos())
                 .tipo(TransaccionPuntos.TipoTransaccion.CANJE)
-                .descripcion(String.format("Canje de recompensa: %s — -%d puntos",
-                        recompensa.getNombre(), recompensa.getCostoPuntos()))
+                .descripcion(desc)
+                .lamportTimestamp(lamportTs)
+                .nodeId(config.getNodeId())
                 .build();
         transaccionRepository.save(transaccion);
 
@@ -182,13 +194,18 @@ public class RecompensaService {
             recompensa.setStock(recompensa.getStock() + 1);
             recompensaRepository.save(recompensa);
 
+            // Obtener y propagar timestamp de Lamport
+            String descDevolucion = String.format("Devolución por canje cancelado #%d: +%d puntos", canjeId, canje.getPuntosGastados());
+            long lamportTs = lamportService.incrementAndPropagate(descDevolucion);
+
             // Registrar la devolución como transacción
             TransaccionPuntos devolucion = TransaccionPuntos.builder()
                     .usuario(perfil)
                     .puntos(canje.getPuntosGastados())
                     .tipo(TransaccionPuntos.TipoTransaccion.ACUMULACION)
-                    .descripcion(String.format("Devolución por canje cancelado #%d: +%d puntos",
-                            canjeId, canje.getPuntosGastados()))
+                    .descripcion(descDevolucion)
+                    .lamportTimestamp(lamportTs)
+                    .nodeId(config.getNodeId())
                     .build();
             transaccionRepository.save(devolucion);
         }

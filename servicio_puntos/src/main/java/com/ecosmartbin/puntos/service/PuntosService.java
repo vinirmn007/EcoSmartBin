@@ -10,6 +10,7 @@ import com.ecosmartbin.puntos.model.TransaccionPuntos;
 import com.ecosmartbin.puntos.repository.PerfilUsuarioRepository;
 import com.ecosmartbin.puntos.repository.TipoReciclajeRepository;
 import com.ecosmartbin.puntos.repository.TransaccionPuntosRepository;
+import com.ecosmartbin.puntos.config.BullyConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,19 @@ public class PuntosService {
     private final PerfilUsuarioRepository perfilRepository;
     private final TipoReciclajeRepository tipoReciclajeRepository;
     private final TransaccionPuntosRepository transaccionRepository;
+    private final LamportService lamportService;
+    private final BullyConfig config;
 
     public PuntosService(PerfilUsuarioRepository perfilRepository,
                          TipoReciclajeRepository tipoReciclajeRepository,
-                         TransaccionPuntosRepository transaccionRepository) {
+                         TransaccionPuntosRepository transaccionRepository,
+                         LamportService lamportService,
+                         BullyConfig config) {
         this.perfilRepository = perfilRepository;
         this.tipoReciclajeRepository = tipoReciclajeRepository;
         this.transaccionRepository = transaccionRepository;
+        this.lamportService = lamportService;
+        this.config = config;
     }
 
     /**
@@ -61,14 +68,19 @@ public class PuntosService {
         perfil.setPuntosEcologicos(perfil.getPuntosEcologicos() + puntosGanados);
         perfilRepository.save(perfil);
 
+        // Obtener y propagar timestamp de Lamport
+        String desc = String.format("Reciclaje de %s (x%d) — +%d puntos", tipoReciclaje.getNombre(), cantidad, puntosGanados);
+        long lamportTs = lamportService.incrementAndPropagate(desc);
+
         // Crear registro de transacción
         TransaccionPuntos transaccion = TransaccionPuntos.builder()
                 .usuario(perfil)
                 .tipoReciclaje(tipoReciclaje)
                 .puntos(puntosGanados)
                 .tipo(TransaccionPuntos.TipoTransaccion.ACUMULACION)
-                .descripcion(String.format("Reciclaje de %s (x%d) — +%d puntos",
-                        tipoReciclaje.getNombre(), cantidad, puntosGanados))
+                .descripcion(desc)
+                .lamportTimestamp(lamportTs)
+                .nodeId(config.getNodeId())
                 .build();
         transaccionRepository.save(transaccion);
 
@@ -80,6 +92,8 @@ public class PuntosService {
                 .tipo(transaccion.getTipo().name())
                 .descripcion(transaccion.getDescripcion())
                 .fecha(transaccion.getFecha())
+                .lamportTimestamp(transaccion.getLamportTimestamp())
+                .nodeId(transaccion.getNodeId())
                 .build();
     }
 

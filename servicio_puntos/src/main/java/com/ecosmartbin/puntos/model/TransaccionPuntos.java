@@ -44,6 +44,12 @@ public class TransaccionPuntos {
     @Column(name = "fecha", nullable = false)
     private LocalDateTime fecha;
 
+    @Column(name = "lamport_timestamp")
+    private Long lamportTimestamp;
+
+    @Column(name = "node_id")
+    private Integer nodeId;
+
     @PrePersist
     protected void onCreate() {
         if (fecha == null) {

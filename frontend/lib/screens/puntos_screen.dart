@@ -753,6 +753,8 @@ class _PuntosScreenState extends State<PuntosScreen>
                 final tipo = t['tipo'] as String? ?? '';
                 final desc = t['descripcion'] as String? ?? '';
                 final fecha = t['fecha'] as String? ?? '';
+                final lamportTs = t['lamportTimestamp'];
+                final nodeId = t['nodeId'];
                 final isAcum = tipo == 'ACUMULACION';
 
                 return Padding(
@@ -788,14 +790,37 @@ class _PuntosScreenState extends State<PuntosScreen>
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (fecha.isNotEmpty)
-                              Text(
-                                _formatFecha(fecha),
-                                style: const TextStyle(
-                                  color: Colors.white38,
-                                  fontSize: 11,
-                                ),
-                              ),
+                            Row(
+                              children: [
+                                if (fecha.isNotEmpty)
+                                  Text(
+                                    _formatFecha(fecha),
+                                    style: const TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                if (lamportTs != null && nodeId != null) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF3B82F6).withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
+                                    ),
+                                    child: Text(
+                                      'ts: $lamportTs (Nodo $nodeId)',
+                                      style: const TextStyle(
+                                        color: Color(0xFF60A5FA),
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ],
                         ),
                       ),

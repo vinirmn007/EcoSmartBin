@@ -20,4 +20,6 @@ public class TransaccionResponse {
     private String tipo; // ACUMULACION o CANJE
     private String descripcion;
     private LocalDateTime fecha;
+    private Long lamportTimestamp;
+    private Integer nodeId;
 }

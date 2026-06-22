@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface TransaccionPuntosRepository extends JpaRepository<TransaccionPuntos, Long> {
 
-    List<TransaccionPuntos> findByUsuarioIdOrderByFechaDesc(String usuarioId);
+    List<TransaccionPuntos> findByUsuarioIdOrderByLamportTimestampDescNodeIdDesc(String usuarioId);
 }

@@ -21,10 +21,10 @@ public class TransaccionService {
     }
 
     /**
-     * Obtiene el historial de transacciones de un usuario, ordenado por fecha descendente.
+     * Obtiene el historial de transacciones de un usuario, ordenado por marca de tiempo lógica de Lamport.
      */
     public List<TransaccionResponse> obtenerHistorial(String usuarioId) {
-        return transaccionRepository.findByUsuarioIdOrderByFechaDesc(usuarioId).stream()
+        return transaccionRepository.findByUsuarioIdOrderByLamportTimestampDescNodeIdDesc(usuarioId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -38,6 +38,8 @@ public class TransaccionService {
                 .tipo(t.getTipo().name())
                 .descripcion(t.getDescripcion())
                 .fecha(t.getFecha())
+                .lamportTimestamp(t.getLamportTimestamp())
+                .nodeId(t.getNodeId())
                 .build();
     }
 }
