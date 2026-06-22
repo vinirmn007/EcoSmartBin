@@ -193,28 +193,68 @@ public class MutexService {
      */
     private synchronized void enterCriticalSection() {
         state = State.HELD;
+
+        // Simulación de lectura de un recurso compartido ficticio
+        int currentStock = 100;
+        try {
+            java.io.File file = new java.io.File("shared_resource.txt");
+            if (file.exists()) {
+                try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+                    String line = br.readLine();
+                    if (line != null) {
+                        currentStock = Integer.parseInt(line.trim());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("No se pudo leer el stock de shared_resource.txt, usando default de 100");
+        }
+
+        int finalStock = currentStock - 1;
         addEvent("ENTER_SC", clock.incrementAndGet(), config.getNodeId(), -1,
-                "¡ENTRÓ a la Sección Crítica!");
+                "¡ENTRÓ a la SC! Leyó stock=" + currentStock + " de 'shared_resource.txt'");
         log.info("[MUTEX] ████ Nodo {} ENTRÓ a la Sección Crítica ████", config.getNodeId());
+        log.info("[MUTEX] Leyendo recurso 'shared_resource.txt': stock={}", currentStock);
 
         // Simular trabajo en SC (3 segundos)
         new Thread(() -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1500);
+                // Escritura en el recurso ficticio
+                try (java.io.FileWriter fw = new java.io.FileWriter("shared_resource.txt")) {
+                    fw.write(String.valueOf(finalStock));
+                    log.info("[MUTEX] Nodo {} actualizó stock a {} en 'shared_resource.txt'", config.getNodeId(), finalStock);
+                } catch (Exception e) {
+                    log.error("Error escribiendo en recurso compartido: {}", e.getMessage());
+                }
+                Thread.sleep(1500);
             } catch (InterruptedException ignored) {}
-            releaseCriticalSection();
+            releaseCriticalSection(finalStock);
         }).start();
     }
 
     /**
-     * Sale de la sección crítica y envía OK a todos los diferidos.
+     * Sale de la sección crítica (por defecto).
      */
     public synchronized void releaseCriticalSection() {
+        releaseCriticalSection(-1);
+    }
+
+    /**
+     * Sale de la sección crítica e informa el stock final guardado.
+     */
+    public synchronized void releaseCriticalSection(int finalStock) {
         if (state != State.HELD) return;
         state = State.RELEASED;
         clock.incrementAndGet();
-        addEvent("RELEASE_SC", clock.get(), config.getNodeId(), -1,
-                "Salió de la SC — enviando OKs diferidos: " + deferredQueue);
+        
+        String detail = "Salió de la SC";
+        if (finalStock != -1) {
+            detail += " [Stock guardado: " + finalStock + "]";
+        }
+        detail += " — enviando OKs diferidos: " + deferredQueue;
+        
+        addEvent("RELEASE_SC", clock.get(), config.getNodeId(), -1, detail);
         log.info("[MUTEX] Nodo {} SALIÓ de la SC — notificando {} nodos en cola",
                 config.getNodeId(), deferredQueue.size());
 
