@@ -357,4 +357,99 @@ class ApiService {
       return null;
     }
   }
+
+  // ══════════════════════════════════════════════════
+  //  LABORATORIO DISTRIBUIDO — acceso directo a nodos
+  // ══════════════════════════════════════════════════
+
+  /// URLs directas de cada nodo (para el laboratorio distribuido).
+  /// En producción con switch real, estas IPs deben coincidir con NODE_URLS.
+  static List<String> get nodeUrls => [
+    'http://localhost:8081',
+    'http://localhost:8082',
+    'http://localhost:8083',
+  ];
+
+  // ── Lamport ───────────────────────────────────────
+
+  /// Obtiene el estado del reloj de Lamport de un nodo específico.
+  static Future<Map<String, dynamic>?> getLamportStatus(String nodeUrl) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$nodeUrl/api/lamport/status'),
+      ).timeout(const Duration(seconds: 3));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Dispara un evento interno de Lamport en un nodo específico.
+  static Future<Map<String, dynamic>?> triggerLamportEvent(String nodeUrl) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$nodeUrl/api/lamport/event'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ── Mutex (Ricart-Agrawala) ───────────────────────
+
+  /// Obtiene el estado del mutex de un nodo específico.
+  static Future<Map<String, dynamic>?> getMutexStatus(String nodeUrl) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$nodeUrl/api/mutex/status'),
+      ).timeout(const Duration(seconds: 3));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Solicita la Sección Crítica desde un nodo específico.
+  static Future<Map<String, dynamic>?> requestMutex(String nodeUrl) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$nodeUrl/api/mutex/request'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 8));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Fuerza la liberación de la Sección Crítica en un nodo.
+  static Future<Map<String, dynamic>?> releaseMutex(String nodeUrl) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$nodeUrl/api/mutex/release'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
+

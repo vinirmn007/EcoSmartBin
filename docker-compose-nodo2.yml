@@ -5,7 +5,6 @@
 #
 #  INSTRUCCIONES:
 #  1. Averigua las IPs de las 3 computadoras en la red del switch.
-#     Ejemplo: PC1=192.168.1.10 | PC2=192.168.1.11 | PC3=192.168.1.12
 #
 #  2. Edita las variables de entorno de abajo con esas IPs reales.
 #
@@ -35,7 +34,7 @@ services:
       NODE_URLS: "http://192.168.1.10:8081,http://192.168.1.11:8082,http://192.168.1.12:8083"
 
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8082/api/bully/status"]
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8082/api/bully/status" ]
       interval: 10s
       timeout: 5s
       retries: 3

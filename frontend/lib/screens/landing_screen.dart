@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LandingScreen extends StatefulWidget {
-  const LandingScreen({Key? key}) : super(key: key);
+  const LandingScreen({super.key});
 
   @override
   State<LandingScreen> createState() => _LandingScreenState();
@@ -84,10 +84,10 @@ class _LandingScreenState extends State<LandingScreen> {
         vertical: 20.0,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withOpacity(0.95),
+        color: const Color(0xFF0F172A).withValues(alpha: 0.95),
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -128,7 +128,7 @@ class _LandingScreenState extends State<LandingScreen> {
                   Navigator.pushNamed(context, '/login');
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white.withOpacity(0.9),
+                  foregroundColor: Colors.white.withValues(alpha: 0.9),
                   padding: EdgeInsets.symmetric(
                     horizontal: isDesktop ? 20 : 12,
                     vertical: 12,
@@ -190,10 +190,10 @@ class _LandingScreenState extends State<LandingScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.1),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(
-                    color: const Color(0xFF10B981).withOpacity(0.3),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.3),
                   ),
                 ),
                 child: const Row(
@@ -236,7 +236,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 'EcoSmartBin es la solución moderna para la gestión de residuos. Monitorea el llenado en tiempo real, optimiza la recolección y promueve una cultura de reciclaje sostenible en tu comunidad.',
                 textAlign: isDesktop ? TextAlign.left : TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.65),
+                  color: Colors.white.withValues(alpha: 0.65),
                   fontSize: isDesktop ? 18 : 15,
                   height: 1.6,
                 ),
@@ -262,7 +262,7 @@ class _LandingScreenState extends State<LandingScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 8,
-                      shadowColor: const Color(0xFF10B981).withOpacity(0.3),
+                      shadowColor: const Color(0xFF10B981).withValues(alpha: 0.3),
                     ),
                     child: const Row(
                       children: [
@@ -289,7 +289,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 28,
                         vertical: 18,
@@ -347,8 +347,8 @@ class _LandingScreenState extends State<LandingScreen> {
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            const Color(0xFF10B981).withOpacity(0.2),
-            const Color(0xFF10B981).withOpacity(0.0),
+            const Color(0xFF10B981).withValues(alpha: 0.2),
+            const Color(0xFF10B981).withValues(alpha: 0.0),
           ],
         ),
       ),
@@ -357,15 +357,15 @@ class _LandingScreenState extends State<LandingScreen> {
           width: 240,
           height: 240,
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B).withOpacity(0.7),
+            color: const Color(0xFF1E293B).withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(40),
             border: Border.all(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF10B981).withOpacity(0.15),
+                color: const Color(0xFF10B981).withValues(alpha: 0.15),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
@@ -414,10 +414,10 @@ class _LandingScreenState extends State<LandingScreen> {
       margin: EdgeInsets.symmetric(horizontal: isDesktop ? 80.0 : 24.0),
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.02),
+        color: Colors.white.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           width: 1,
         ),
       ),
@@ -441,7 +441,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     stat['lbl']!,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 14,
                     ),
                   ),
@@ -511,7 +511,7 @@ class _LandingScreenState extends State<LandingScreen> {
             'Herramientas avanzadas integradas para transformar tu experiencia ecológica.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.55),
+              color: Colors.white.withValues(alpha: 0.55),
               fontSize: 15,
             ),
           ),
@@ -587,7 +587,7 @@ class _LandingScreenState extends State<LandingScreen> {
         horizontal: isDesktop ? 80.0 : 24.0,
         vertical: 60.0,
       ),
-      color: Colors.black.withOpacity(0.15),
+      color: Colors.black.withValues(alpha: 0.15),
       child: Column(
         children: [
           Text(
@@ -604,7 +604,7 @@ class _LandingScreenState extends State<LandingScreen> {
             'Tres simples pasos para formar parte del cambio ecológico tecnológico.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.55),
+              color: Colors.white.withValues(alpha: 0.55),
               fontSize: 15,
             ),
           ),
@@ -615,10 +615,10 @@ class _LandingScreenState extends State<LandingScreen> {
                 return Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.01),
+                    color: Colors.white.withValues(alpha: 0.01),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.03),
+                      color: Colors.white.withValues(alpha: 0.03),
                     ),
                   ),
                   child: Column(
@@ -645,7 +645,7 @@ class _LandingScreenState extends State<LandingScreen> {
                       Text(
                         s['desc']!,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 14,
                           height: 1.5,
                         ),
@@ -703,7 +703,7 @@ class _LandingScreenState extends State<LandingScreen> {
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF10B981).withOpacity(0.3),
+                color: const Color(0xFF10B981).withValues(alpha: 0.3),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
@@ -767,7 +767,7 @@ class _LandingScreenState extends State<LandingScreen> {
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -786,7 +786,7 @@ class _LandingScreenState extends State<LandingScreen> {
               Text(
                 'EcoSmartBin © 2026',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -797,7 +797,7 @@ class _LandingScreenState extends State<LandingScreen> {
           Text(
             'Hacia un campus y comunidad sin residuos.',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               fontSize: 12,
             ),
           ),
@@ -813,11 +813,11 @@ class _HoverFeatureCard extends StatefulWidget {
   final String desc;
 
   const _HoverFeatureCard({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.desc,
-  }) : super(key: key);
+  });
 
   @override
   State<_HoverFeatureCard> createState() => _HoverFeatureCardState();
@@ -839,19 +839,19 @@ class _HoverFeatureCardState extends State<_HoverFeatureCard> {
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           color: _isHovered
-              ? Colors.white.withOpacity(0.05)
-              : Colors.white.withOpacity(0.02),
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.white.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: _isHovered
-                ? const Color(0xFF10B981).withOpacity(0.4)
-                : Colors.white.withOpacity(0.05),
+                ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                : Colors.white.withValues(alpha: 0.05),
             width: 1.5,
           ),
           boxShadow: [
             if (_isHovered)
               BoxShadow(
-                color: const Color(0xFF10B981).withOpacity(0.1),
+                color: const Color(0xFF10B981).withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               )
@@ -864,7 +864,7 @@ class _HoverFeatureCardState extends State<_HoverFeatureCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withOpacity(0.1),
+                color: const Color(0xFF10B981).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -886,7 +886,7 @@ class _HoverFeatureCardState extends State<_HoverFeatureCard> {
             Text(
               widget.desc,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.55),
+                color: Colors.white.withValues(alpha: 0.55),
                 fontSize: 13,
                 height: 1.5,
               ),

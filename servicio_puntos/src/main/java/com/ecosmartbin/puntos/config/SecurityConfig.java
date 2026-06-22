@@ -33,6 +33,10 @@ public class SecurityConfig {
                         .requestMatchers("/", "/error").permitAll()
                         // Bully: inter-nodo y gateway — sin JWT
                         .requestMatchers("/api/bully/**").permitAll()
+                        // Lamport: inter-nodo — sin JWT
+                        .requestMatchers("/api/lamport/**").permitAll()
+                        // Mutex (Ricart-Agrawala): inter-nodo — sin JWT
+                        .requestMatchers("/api/mutex/**").permitAll()
                         // Listar recompensas es público (para que el frontend las muestre)
                         .requestMatchers(HttpMethod.GET, "/api/recompensas", "/api/recompensas/**").permitAll()
                         // Listar tipos de reciclaje es público

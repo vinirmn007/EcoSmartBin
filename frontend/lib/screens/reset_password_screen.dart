@@ -122,15 +122,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               child: Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -181,7 +181,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             'Nueva Contraseña',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -191,7 +191,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             'Ingresa tu nueva contraseña para recuperar el acceso a tu cuenta.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 13,
               height: 1.5,
             ),
@@ -203,9 +203,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.1),
+                color: Colors.redAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -230,22 +230,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               labelText: 'Nueva Contraseña',
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-              prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.6)),
+              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+              prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withValues(alpha: 0.6)),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 },
               ),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.03),
+              fillColor: Colors.white.withValues(alpha: 0.03),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -279,22 +279,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               labelText: 'Confirmar Contraseña',
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-              prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.6)),
+              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+              prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withValues(alpha: 0.6)),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                 ),
                 onPressed: () {
                   setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
                 },
               ),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.03),
+              fillColor: Colors.white.withValues(alpha: 0.03),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -327,7 +327,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              disabledBackgroundColor: const Color(0xFF10B981).withOpacity(0.5),
+              disabledBackgroundColor: const Color(0xFF10B981).withValues(alpha: 0.5),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -379,7 +379,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           'Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tus nuevas credenciales.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
             height: 1.5,
           ),
@@ -432,7 +432,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           'No pudimos detectar un token de recuperación válido en la dirección URL. Por favor, asegúrate de haber copiado el enlace completo o solicita uno nuevo.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
             height: 1.5,
           ),

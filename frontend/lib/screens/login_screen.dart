@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -80,15 +80,15 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Accede a tu cuenta ecológica',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 14,
                         ),
                       ),
@@ -136,9 +136,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent.withOpacity(0.1),
+                            color: Colors.redAccent.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             children: [
@@ -163,13 +163,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'Correo Electrónico',
-                          labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                          prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.6)),
+                          labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                          prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withValues(alpha: 0.6)),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.03),
+                          fillColor: Colors.white.withValues(alpha: 0.03),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -204,22 +204,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
-                          labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                          prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.6)),
+                          labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                          prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withValues(alpha: 0.6)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                              color: Colors.white.withOpacity(0.6),
+                              color: Colors.white.withValues(alpha: 0.6),
                             ),
                             onPressed: () {
                               setState(() => _obscurePassword = !_obscurePassword);
                             },
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.03),
+                          fillColor: Colors.white.withValues(alpha: 0.03),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -274,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF10B981),
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: const Color(0xFF10B981).withOpacity(0.5),
+                          disabledBackgroundColor: const Color(0xFF10B981).withValues(alpha: 0.5),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -303,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Text(
                             '¿No tienes una cuenta? ',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
                           ),
                           TextButton(
                             onPressed: () {

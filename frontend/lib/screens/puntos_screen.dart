@@ -192,6 +192,11 @@ class _PuntosScreenState extends State<PuntosScreen>
         ),
         actions: [
           IconButton(
+            tooltip: 'Laboratorio Distribuido',
+            icon: const Icon(Icons.science_rounded, color: Color(0xFF8B5CF6)),
+            onPressed: () => Navigator.pushNamed(context, '/lab'),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Color(0xFF10B981)),
             onPressed: _loadAll,
           ),
@@ -217,6 +222,10 @@ class _PuntosScreenState extends State<PuntosScreen>
 
               // Cluster Bully Visualizer
               _buildBullyClusterPanel(),
+              const SizedBox(height: 12),
+
+              // Botón Laboratorio Distribuido
+              _buildLabButton(),
               const SizedBox(height: 20),
 
               // Formulario de reciclaje
@@ -816,4 +825,65 @@ class _PuntosScreenState extends State<PuntosScreen>
       return fecha;
     }
   }
+
+  // ── Botón Laboratorio Distribuido ─────────────────────
+  Widget _buildLabButton() {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/lab'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF6D28D9), Color(0xFF4C1D95)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8B5CF6).withOpacity(0.25),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.science_rounded, color: Colors.white, size: 22),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Laboratorio Distribuido',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Bully · Lamport · Exclusión Mutua — tiempo real',
+                    style: TextStyle(color: Colors.white60, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
 }
+

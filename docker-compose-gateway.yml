@@ -31,10 +31,10 @@ services:
       #  URLs de los 3 nodos Bully con sus IPs reales en la red
       #  CAMBIA las IPs por las de cada computadora del switch
       # ──────────────────────────────────────────────────────────
-      NODE_URLS: "http://192.168.1.10:8081,http://192.168.1.11:8082,http://192.168.1.12:8083"
+      NODE_URLS: "http://192.168.110.127:8081,http://192.168.1.11:8082,http://192.168.1.12:8083"
 
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/gateway/status"]
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8080/gateway/status" ]
       interval: 10s
       timeout: 5s
       retries: 3
