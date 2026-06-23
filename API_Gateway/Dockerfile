@@ -1,10 +1,16 @@
-FROM kong:3.4-alpine
+FROM kong:3.4
 
-# Cambiar a usuario root para copiar archivos
+# Cambiar a usuario root para copiar archivos y ajustar permisos
 USER root
+
+# Crear el directorio por si no existe
+RUN mkdir -p /usr/local/kong/declarative/
 
 # Copiar el archivo de configuración declarativa al contenedor
 COPY kong.yml /usr/local/kong/declarative/kong.yml
+
+# Asegurar que el usuario kong sea dueño del archivo de configuración
+RUN chown -R kong:kong /usr/local/kong/declarative/
 
 # Configurar variables de entorno requeridas por Kong para modo DB-less
 ENV KONG_DATABASE=off
@@ -16,11 +22,11 @@ ENV KONG_ADMIN_ACCESS_LOG=/dev/stdout
 ENV KONG_PROXY_ERROR_LOG=/dev/stderr
 ENV KONG_ADMIN_ERROR_LOG=/dev/stderr
 
-# Forzamos a Kong de manera global a escuchar en el puerto 8080 (el que Cloud Run exige)
+# Forzamos a Kong a escuchar en el puerto 8080 (Cloud Run)
 ENV KONG_PROXY_LISTEN="0.0.0.0:8080 reuseport"
 
-# Volvemos al usuario kong por seguridad antes de ejecutar
+# Volvemos al usuario kong por seguridad
 USER kong
 
-# Usamos el comando de entrada por defecto de la imagen oficial sin envoltorios extra
+# Comando de entrada
 CMD ["kong", "docker-start"]
