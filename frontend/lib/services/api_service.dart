@@ -9,14 +9,14 @@ class ApiService {
   // Configuración de la URL Base según la plataforma
   static String get baseUrl {
     if (kIsWeb) {
-      return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
+      return 'https://gateway-229724129072.southamerica-west1.run.app';
     } else {
       try {
         if (Platform.isAndroid) {
-          return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
+          return 'https://gateway-229724129072.southamerica-west1.run.app';
         }
       } catch (_) {}
-      return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
+      return 'https://gateway-229724129072.southamerica-west1.run.app';
     }
   }
 
