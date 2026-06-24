@@ -146,3 +146,6 @@ firebase.json
 **/.pub-cache/
 **/build/
 
+# Machine Learning Models
+*.onnx
+*.onnx.data
