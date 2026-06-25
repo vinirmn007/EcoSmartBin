@@ -11,7 +11,7 @@ import java.util.List;
  * Controlador REST para consultar el catálogo de tipos de reciclaje.
  */
 @RestController
-@RequestMapping("/api/tipos-reciclaje")
+@RequestMapping("/points/tipos-reciclaje")
 public class TipoReciclajeController {
 
     private final TipoReciclajeRepository tipoReciclajeRepository;

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  servicio-puntos:
+    build:
+      context: ./servicio_puntos
+      dockerfile: Dockerfile
+    container_name: ecosmartbin-puntos
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://aws-1-us-east-1.pooler.supabase.com:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres.vqxblugxfhsiecyhvlgx
+      - SPRING_DATASOURCE_PASSWORD=MarcoCouRoman1492
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_SQL_INIT_MODE=always
+      - SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true
+      - APP_JWT_SECRET=912e2ffd-9948-49c2-9ba8-f786ad24ea85
+    restart: unless-stopped

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+part 'landing_view.dart';
+
 class LandingScreen extends StatefulWidget {
   const LandingScreen({Key? key}) : super(key: key);
 
@@ -18,63 +20,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 900;
-    final isTablet = size.width > 600 && size.width <= 900;
-
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A), // Slate 900
-              Color(0xFF1E293B), // Slate 800
-              Color(0xFF0D1527), // Slate 950
-            ],
-          ),
-        ),
-        child: Column(
-          children: [
-            // Responsive Navbar
-            _buildNavbar(context, isDesktop),
-
-            // Scrollable Content
-            Expanded(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    // Hero Section
-                    _buildHeroSection(context, isDesktop, isTablet),
-
-                    // Stats Banner
-                    _buildStatsBanner(context, isDesktop),
-
-                    // Features Section
-                    _buildFeaturesSection(context, isDesktop, isTablet),
-
-                    // How It Works Section
-                    _buildHowItWorksSection(context, isDesktop),
-
-                    // Call To Action Section
-                    _buildCTASection(context),
-
-                    // Footer
-                    _buildFooter(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return _LandingView(state: this);
   }
 
   Widget _buildNavbar(BuildContext context, bool isDesktop) {
