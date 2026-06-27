@@ -8,7 +8,9 @@ VALUES
     (3, 'Vidrio', 15, 'Botellas y frascos de vidrio', '🫙'),
     (4, 'Orgánico', 3, 'Residuos orgánicos compostables (cáscaras, restos de comida)', '🌱'),
     (5, 'Metal', 20, 'Latas de aluminio, chatarra metálica', '🥫'),
-    (6, 'Electrónico', 30, 'Equipos electrónicos, baterías, cables', '🔌')
+    (6, 'Electrónico', 30, 'Equipos electrónicos, baterías, cables', '🔌'),
+    (7, 'Cartón', 8, 'Cajas de cartón, empaques y envases de cartón', '📦'),
+    (8, 'Basura General', 1, 'Residuos no reciclables o mixtos', '🗑️')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================

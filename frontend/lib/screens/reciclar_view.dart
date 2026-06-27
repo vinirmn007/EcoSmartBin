@@ -5,6 +5,25 @@ class _ReciclarView extends StatelessWidget {
 
   const _ReciclarView({required this.state});
 
+  // Mapeo de tipos de reciclaje a iconos y colores para la UI
+  static const Map<String, Map<String, dynamic>> _tipoVisual = {
+    'plastic': {'icon': Icons.local_drink_rounded, 'color': 0xFF3B82F6, 'emoji': '♻️'},
+    'paper': {'icon': Icons.description_rounded, 'color': 0xFF8B5CF6, 'emoji': '📄'},
+    'glass': {'icon': Icons.wine_bar_rounded, 'color': 0xFF06B6D4, 'emoji': '🫙'},
+    'metal': {'icon': Icons.hardware_rounded, 'color': 0xFFF59E0B, 'emoji': '🥫'},
+    'cardboard': {'icon': Icons.inventory_2_rounded, 'color': 0xFFD97706, 'emoji': '📦'},
+    'trash': {'icon': Icons.delete_rounded, 'color': 0xFF6B7280, 'emoji': '🗑️'},
+  };
+
+  static const Map<String, String> _tipoNombreES = {
+    'plastic': 'Plástico',
+    'paper': 'Papel',
+    'glass': 'Vidrio',
+    'metal': 'Metal',
+    'cardboard': 'Cartón',
+    'trash': 'Basura General',
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,7 +31,7 @@ class _ReciclarView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Navigator.canPop(context)
+        leading: (Navigator.canPop(context) && ModalRoute.of(context)?.settings.name == '/puntos/reciclar')
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
@@ -39,10 +58,12 @@ class _ReciclarView extends StatelessWidget {
       case 0:
         return _buildScanningStep();
       case 1:
-        return _buildSelectionStep();
+        return _buildWaitingIAStep();
       case 2:
-        return _buildSubmittingStep();
+        return _buildConfirmationStep();
       case 3:
+        return _buildSubmittingStep();
+      case 4:
         return _buildSuccessStep(context);
       default:
         return const SizedBox();
@@ -180,10 +201,105 @@ class _ReciclarView extends StatelessWidget {
     );
   }
 
-  // ── PASO 1: Selección de Material y Cantidad ─────────
-  Widget _buildSelectionStep() {
+  // ── PASO 1: Esperando que la IA clasifique ──────────
+  Widget _buildWaitingIAStep() {
+    return Center(
+      key: const ValueKey('waiting_ia'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Banner de basurero conectado
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '¡Basurero Conectado!',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          state._detectedBinId,
+                          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 48),
+
+            // Animación de escáner IA
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withOpacity(0.1),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
+              ),
+              child: const Icon(
+                Icons.psychology_rounded,
+                color: Color(0xFF3B82F6),
+                size: 56,
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Analizando con IA...',
+              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'La cámara del basurero está clasificando\ntu residuo automáticamente',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13, height: 1.5),
+            ),
+            const SizedBox(height: 32),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation(Color(0xFF3B82F6)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Intento ${state._pollingAttempts}/${_ReciclarScreenState._maxPollingAttempts}',
+                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── PASO 2: Confirmar Clasificación (IA o Manual) ────
+  Widget _buildConfirmationStep() {
+    final bool tieneIA = state._clasificacionIA != null && !state._modoManual;
+
     return SingleChildScrollView(
-      key: const ValueKey('selection'),
+      key: const ValueKey('confirmation'),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -221,119 +337,301 @@ class _ReciclarView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Título de la sección
-          const Text(
-            'Registrar Material Reciclado',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Selecciona el residuo que vas a depositar en el basurero',
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
-          ),
-          const SizedBox(height: 24),
-
-          if (state._loadingTipos)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Color(0xFF10B981))),
-              ),
-            )
-          else ...[
-            // Selector de Materiales
-            const Text(
-              'Material:',
-              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<int>(
-              value: state._tipoSeleccionado,
-              dropdownColor: const Color(0xFF1E293B),
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFF10B981)),
-                ),
-              ),
-              items: state._tiposReciclaje.map<DropdownMenuItem<int>>((t) {
-                return DropdownMenuItem<int>(
-                  value: t['id'] as int,
-                  child: Text(
-                    '${t['nombre']} — ${t['puntosPorUnidad']} pts/ud',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                );
-              }).toList(),
-              onChanged: (v) => state.setState(() => state._tipoSeleccionado = v),
-            ),
-            const SizedBox(height: 20),
-
-            // Selector de Cantidad
-            const Text(
-              'Cantidad de unidades:',
-              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-            const SizedBox(height: 8),
+          // ── Resultado de la IA ──
+          if (tieneIA) ...[
+            _buildIADetectionCard(),
+            const SizedBox(height: 12),
+            // Botones secundarios
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  onPressed: () {
-                    if (state._cantidad > 1) {
-                      state.setState(() => state._cantidad--);
-                    }
-                  },
-                  icon: const Icon(Icons.remove_circle_outline_rounded, color: Color(0xFF10B981), size: 28),
-                ),
-                Container(
-                  width: 60,
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${state._cantidad}',
-                    style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: state._switchToManualMode,
+                    icon: Icon(Icons.edit_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
+                    label: Text(
+                      'Cambiar manual',
+                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                    ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    state.setState(() => state._cantidad++);
-                  },
-                  icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF10B981), size: 28),
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed: state._retryScan,
+                    icon: Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
+                    label: Text(
+                      'Tomar otra foto',
+                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 40),
-
-            // Botón para Confirmar Depósito
-            ElevatedButton.icon(
-              onPressed: state._submitReciclaje,
-              icon: const Icon(Icons.eco_rounded),
-              label: const Text('Confirmar Depósito'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+          ] else ...[
+            // ── Modo manual (dropdown) ──
+            const Text(
+              'Selección Manual',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
             ),
+            const SizedBox(height: 6),
+            Text(
+              'Selecciona el residuo que vas a depositar en el basurero',
+              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+            ),
+            const SizedBox(height: 24),
+            if (state._loadingTipos)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Color(0xFF10B981))),
+                ),
+              )
+            else ...[
+              const Text(
+                'Material:',
+                style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<int>(
+                value: state._tipoSeleccionado,
+                dropdownColor: const Color(0xFF1E293B),
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.05),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Color(0xFF10B981)),
+                  ),
+                ),
+                items: state._tiposReciclaje.map<DropdownMenuItem<int>>((t) {
+                  return DropdownMenuItem<int>(
+                    value: t['id'] as int,
+                    child: Text(
+                      '${t['nombre']} — ${t['puntosPorUnidad']} pts/ud',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (v) => state.setState(() => state._tipoSeleccionado = v),
+              ),
+            ],
           ],
+
+          const SizedBox(height: 20),
+
+          // Selector de Cantidad
+          const Text(
+            'Cantidad de unidades:',
+            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  if (state._cantidad > 1) {
+                    state.setState(() => state._cantidad--);
+                  }
+                },
+                icon: const Icon(Icons.remove_circle_outline_rounded, color: Color(0xFF10B981), size: 28),
+              ),
+              Container(
+                width: 60,
+                alignment: Alignment.center,
+                child: Text(
+                  '${state._cantidad}',
+                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  state.setState(() => state._cantidad++);
+                },
+                icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF10B981), size: 28),
+              ),
+            ],
+          ),
+          const SizedBox(height: 40),
+
+          // Botón para Confirmar Depósito
+          ElevatedButton.icon(
+            onPressed: state._submitReciclaje,
+            icon: const Icon(Icons.eco_rounded),
+            label: Text(tieneIA ? 'Confirmar Clasificación IA' : 'Confirmar Depósito'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // ── PASO 2: Enviando registro... ─────────────────────
+  /// Card grande que muestra el resultado de la IA
+  Widget _buildIADetectionCard() {
+    final clasificacion = state._clasificacionIA!;
+    final tipoDetectado = clasificacion['tipoDetectado'] as String? ?? 'trash';
+    final confianza = (clasificacion['confianza'] as num?)?.toDouble() ?? 0.0;
+    final nombreTipo = clasificacion['nombreTipo'] as String? ??
+        _tipoNombreES[tipoDetectado] ?? 'Desconocido';
+
+    final visual = _tipoVisual[tipoDetectado] ?? _tipoVisual['trash']!;
+    final color = Color(visual['color'] as int);
+    final icon = visual['icon'] as IconData;
+    final confianzaPct = (confianza * 100).toStringAsFixed(1);
+
+    final String? imagenBase64Full = clasificacion['imagenBase64'] as String?;
+    String? base64Str;
+    if (imagenBase64Full != null && imagenBase64Full.contains(',')) {
+      base64Str = imagenBase64Full.split(',').last;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.15),
+            color.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+      ),
+      child: Column(
+        children: [
+          // Imagen capturada por ESP32
+          if (base64Str != null) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300),
+                child: Image.memory(
+                  base64Decode(base64Str),
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: double.infinity,
+                      height: 180,
+                      color: Colors.black26,
+                      child: const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // Icono del tipo con badge de IA
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 48),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: color, width: 2),
+                  ),
+                  child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 16),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Label "IA detectó"
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              '🤖 Detectado por IA',
+              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Nombre del tipo
+          Text(
+            nombreTipo,
+            style: TextStyle(
+              color: color,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Barra de confianza
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Confianza: ',
+                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+              ),
+              Text(
+                '$confianzaPct%',
+                style: TextStyle(
+                  color: confianza >= 0.7 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Barra visual de confianza
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: confianza,
+              minHeight: 6,
+              backgroundColor: Colors.white.withOpacity(0.1),
+              valueColor: AlwaysStoppedAnimation(
+                confianza >= 0.7 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── PASO 3: Enviando registro... ─────────────────────
   Widget _buildSubmittingStep() {
     return Center(
       key: const ValueKey('submitting'),
@@ -358,7 +656,7 @@ class _ReciclarView extends StatelessWidget {
     );
   }
 
-  // ── PASO 3: Éxito y Acumulación ──────────────────────
+  // ── PASO 4: Éxito y Acumulación ──────────────────────
   Widget _buildSuccessStep(BuildContext context) {
     return Center(
       key: const ValueKey('success'),
@@ -402,7 +700,20 @@ class _ReciclarView extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  final isModal = ModalRoute.of(context)?.settings.name == '/puntos/reciclar';
+                  if (isModal) {
+                    Navigator.pop(context);
+                  } else {
+                    // Si estamos embebidos en el ProfileScreen (tab), forzamos
+                    // el reemplazo al ProfileScreen para que actualice la info y cambie a la pestaña 0
+                    state.setState(() {
+                      state._step = 0;
+                      state._puntosGanados = 0;
+                    });
+                    Navigator.pushReplacementNamed(context, '/profile');
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E293B),
                   foregroundColor: Colors.white,

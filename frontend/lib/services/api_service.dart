@@ -478,4 +478,39 @@ class ApiService {
       return [];
     }
   }
+
+  // ══════════════════════════════════════════════════
+  //  CLASIFICACIÓN IA — Consultar resultado pendiente
+  // ══════════════════════════════════════════════════
+
+  /// Consulta si hay una clasificación pendiente de la IA para un basurero.
+  /// Retorna null si no hay clasificación pendiente (HTTP 204).
+  static Future<Map<String, dynamic>?> getClasificacionPendiente(String binId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/clasificacion-pendiente/$binId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      // 204 = no hay clasificación pendiente
+      return null;
+    } catch (e) {
+      print('DEBUG: Error getClasificacionPendiente: $e');
+      return null;
+    }
+  }
+
+  /// Limpia la clasificación pendiente después de confirmar el reciclaje.
+  static Future<void> limpiarClasificacionPendiente(String binId) async {
+    try {
+      await http.delete(
+        Uri.parse('$gatewayUrl/points/clasificacion-pendiente/$binId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      print('DEBUG: Error limpiarClasificacionPendiente: $e');
+    }
+  }
 }
