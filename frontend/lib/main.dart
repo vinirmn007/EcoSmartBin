@@ -7,6 +7,11 @@ import 'screens/profile_screen.dart';
 import 'screens/recover_password_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/email_verified_screen.dart';
+import 'screens/puntos_screen.dart';
+import 'screens/reciclaje_historial_screen.dart';
+import 'screens/canjes_historial_screen.dart';
+import 'screens/canjear_screen.dart';
+import 'screens/reciclar_screen.dart';
 import 'services/api_service.dart';
 import 'dart:html' as html;
 
@@ -112,6 +117,11 @@ class MyApp extends StatelessWidget {
               refreshToken: initialRefreshToken,
             ),
         '/email-verified': (context) => const EmailVerifiedScreen(),
+        '/puntos': (context) => const PuntosScreen(),
+        '/puntos/historial-canjes': (context) => const CanjesHistorialScreen(),
+        '/puntos/historial-reciclaje': (context) => const ReciclajeHistorialScreen(),
+        '/puntos/canjear': (context) => const CanjearScreen(),
+        '/puntos/reciclar': (context) => const ReciclarScreen(),
       },
     );
   }

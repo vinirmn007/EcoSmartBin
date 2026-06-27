@@ -12,7 +12,7 @@ import java.util.List;
  * Controlador REST para consultar el historial de transacciones de puntos.
  */
 @RestController
-@RequestMapping("/api/transacciones")
+@RequestMapping("/points/transacciones")
 public class TransaccionController {
 
     private final TransaccionService transaccionService;
@@ -27,7 +27,8 @@ public class TransaccionController {
      */
     @GetMapping("/historial")
     public ResponseEntity<List<TransaccionResponse>> historial(Authentication authentication) {
-        String userId = authentication.getName();
+        // TODO-DEV: userId desde token; en pruebas puede ser nulo si no hay autenticación
+        String userId = (authentication != null) ? authentication.getName() : "test-user-id";
         return ResponseEntity.ok(transaccionService.obtenerHistorial(userId));
     }
 }

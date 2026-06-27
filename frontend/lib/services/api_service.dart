@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
@@ -18,6 +18,19 @@ class ApiService {
       } catch (_) {}
       return 'https://gateway-229724129072.southamerica-west1.run.app';
     }
+  }
+
+  // ── Puntos local o producción ──
+  static String get gatewayUrl {
+    if (kReleaseMode) {
+      // TODO: Reemplazar con la URL real de Cloud Run del servicio de puntos cuando se despliegue
+      return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
+    }
+    if (kIsWeb) return 'http://localhost:8081';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:8081';
+    } catch (_) {}
+    return 'http://localhost:8081';
   }
 
   // Clave para guardar el token en SharedPreferences
@@ -231,6 +244,222 @@ class ApiService {
     } catch (e) {
       print('DEBUG: Error en petición de restablecimiento: $e');
       return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  PUNTOS ECOLÓGICOS — via Servicio Local
+  // ══════════════════════════════════════════════════
+
+  /// Obtiene el balance de puntos del usuario autenticado.
+  static Future<Map<String, dynamic>> getBalance() async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/balance'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      return {
+        'success': false,
+        'message': 'Error ${response.statusCode}: ${response.body}',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  /// Registra un evento de reciclaje y acumula puntos.
+  static Future<Map<String, dynamic>> registrarReciclaje({
+    required int tipoReciclajeId,
+    required int cantidad,
+    String? usuarioId,
+  }) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    final body = <String, dynamic>{
+      'tipoReciclajeId': tipoReciclajeId,
+      'cantidad': cantidad,
+    };
+    if (usuarioId != null) body['usuarioId'] = usuarioId;
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/points/reciclar'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['message'] ?? 'Error al registrar reciclaje',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  /// Obtiene los tipos de reciclaje disponibles.
+  static Future<List<dynamic>> getTiposReciclaje() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/tipos-reciclaje'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getTiposReciclaje: $e');
+      return [];
+    }
+  }
+
+  /// Obtiene el historial de transacciones del usuario autenticado.
+  static Future<List<dynamic>> getTransacciones() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/transacciones/historial'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getTransacciones: $e');
+      return [];
+    }
+  }
+
+  /// Obtiene la lista de recompensas activas.
+  static Future<List<dynamic>> getRecompensas() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/recompensas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getRecompensas: $e');
+      return [];
+    }
+  }
+
+  /// Canjea una recompensa.
+  static Future<Map<String, dynamic>> canjearRecompensa(
+    int recompensaId,
+  ) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/points/canjes'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'recompensaId': recompensaId}),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['message'] ?? 'Error al canjear recompensa',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  /// Obtiene el historial de canjes del usuario autenticado.
+  static Future<List<dynamic>> getCanjes() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/canjes/mis-canjes'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getCanjes: $e');
+      return [];
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  CLASIFICACIÓN IA — Consultar resultado pendiente
+  // ══════════════════════════════════════════════════
+
+  /// Consulta si hay una clasificación pendiente de la IA para un basurero.
+  /// Retorna null si no hay clasificación pendiente (HTTP 204).
+  static Future<Map<String, dynamic>?> getClasificacionPendiente(String binId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/clasificacion-pendiente/$binId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      // 204 = no hay clasificación pendiente
+      return null;
+    } catch (e) {
+      print('DEBUG: Error getClasificacionPendiente: $e');
+      return null;
+    }
+  }
+
+  /// Limpia la clasificación pendiente después de confirmar el reciclaje.
+  static Future<void> limpiarClasificacionPendiente(String binId) async {
+    try {
+      await http.delete(
+        Uri.parse('$gatewayUrl/points/clasificacion-pendiente/$binId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      print('DEBUG: Error limpiarClasificacionPendiente: $e');
     }
   }
 }
