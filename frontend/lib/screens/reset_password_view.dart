@@ -50,11 +50,11 @@ class _ResetPasswordView extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: state._success 
-                    ? state._buildSuccessWidget(theme) 
-                    : (state._token == null 
-                        ? state._buildMissingTokenWidget(theme) 
-                        : state._buildFormWidget(theme)),
+                child: state._success
+                    ? state._buildSuccessWidget(theme)
+                    : (state._token == null
+                          ? state._buildMissingTokenWidget(theme)
+                          : state._buildFormWidget(theme)),
               ),
             ),
           ),

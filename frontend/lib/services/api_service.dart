@@ -26,11 +26,13 @@ class ApiService {
       // TODO: Reemplazar con la URL real de Cloud Run del servicio de puntos cuando se despliegue
       return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
     }
-    if (kIsWeb) return 'http://localhost:8081';
+    if (kIsWeb)
+      return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
     try {
-      if (Platform.isAndroid) return 'http://10.0.2.2:8081';
+      if (Platform.isAndroid)
+        return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
     } catch (_) {}
-    return 'http://localhost:8081';
+    return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
   }
 
   // Clave para guardar el token en SharedPreferences
@@ -46,7 +48,7 @@ class ApiService {
     String? facultad,
   }) async {
     final url = Uri.parse('$baseUrl/auth/register');
-    
+
     final Map<String, dynamic> body = {
       'email': email,
       'password': password,
@@ -54,7 +56,7 @@ class ApiService {
       'apellidos': apellidos,
       'cedula': cedula,
     };
-    
+
     if (facultad != null && facultad.isNotEmpty) {
       body['facultad'] = facultad;
     }
@@ -74,29 +76,38 @@ class ApiService {
       final decodedData = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        return {'success': true, 'message': decodedData['message'] ?? 'Registro exitoso'};
+        return {
+          'success': true,
+          'message': decodedData['message'] ?? 'Registro exitoso',
+        };
       } else {
-        return {'success': false, 'message': decodedData['detail'] ?? 'Error desconocido en registro'};
+        return {
+          'success': false,
+          'message': decodedData['detail'] ?? 'Error desconocido en registro',
+        };
       }
     } catch (e) {
       print('DEBUG: Error en petición de registro: $e');
-      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+      return {
+        'success': false,
+        'message': 'No se pudo conectar al servidor: $e',
+      };
     }
   }
 
   // Iniciar sesión
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String email,
+    String password,
+  ) async {
     final url = Uri.parse('$baseUrl/auth/login');
-    
+
     try {
       print('DEBUG: Enviando login POST a $url');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       print('DEBUG: Respuesta de login - Código: ${response.statusCode}');
@@ -107,26 +118,36 @@ class ApiService {
       if (response.statusCode == 200) {
         final token = decodedData['access_token'];
         print('DEBUG: Login exitoso. Guardando token...');
-        
+
         // Guardar token localmente
         final prefs = await SharedPreferences.getInstance();
         final success = await prefs.setString(_tokenKey, token);
-        print('DEBUG: ¿Token guardado exitosamente en SharedPreferences?: $success');
+        print(
+          'DEBUG: ¿Token guardado exitosamente en SharedPreferences?: $success',
+        );
 
         return {'success': true, 'token': token};
       } else {
-        return {'success': false, 'message': decodedData['detail'] ?? 'Credenciales incorrectas'};
+        return {
+          'success': false,
+          'message': decodedData['detail'] ?? 'Credenciales incorrectas',
+        };
       }
     } catch (e) {
       print('DEBUG: Error en petición de login: $e');
-      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+      return {
+        'success': false,
+        'message': 'No se pudo conectar al servidor: $e',
+      };
     }
   }
 
   // Obtener perfil del usuario autenticado
   static Future<UserProfile?> getProfile() async {
     final token = await getToken();
-    print('DEBUG: getProfile convocado. Token en memoria: ${token != null ? "PRESENTE (longitud: ${token.length})" : "NULO"}');
+    print(
+      'DEBUG: getProfile convocado. Token en memoria: ${token != null ? "PRESENTE (longitud: ${token.length})" : "NULO"}',
+    );
     if (token == null) {
       print('DEBUG: getProfile cancelado porque el token es nulo.');
       return null;
@@ -153,7 +174,9 @@ class ApiService {
       } else {
         // Si el token es inválido o expiró, borramos el token guardado
         if (response.statusCode == 401) {
-          print('DEBUG: Token no autorizado (401). Eliminando token local y cerrando sesión.');
+          print(
+            'DEBUG: Token no autorizado (401). Eliminando token local y cerrando sesión.',
+          );
           await logout();
         }
         return null;
@@ -169,7 +192,9 @@ class ApiService {
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
-    print('DEBUG: SharedPreferences leyó token: ${token != null ? "ENCONTRADO" : "NULO"}');
+    print(
+      'DEBUG: SharedPreferences leyó token: ${token != null ? "ENCONTRADO" : "NULO"}',
+    );
     return token;
   }
 
@@ -186,13 +211,14 @@ class ApiService {
   }
 
   // Enviar correo de recuperación de contraseña
-  static Future<Map<String, dynamic>> recoverPassword(String email, {String? redirectUrl}) async {
+  static Future<Map<String, dynamic>> recoverPassword(
+    String email, {
+    String? redirectUrl,
+  }) async {
     final url = Uri.parse('$baseUrl/auth/email-reset-password');
     try {
       print('DEBUG: Enviando recuperación de contraseña a $url');
-      final Map<String, dynamic> body = {
-        'email': email,
-      };
+      final Map<String, dynamic> body = {'email': email};
       if (redirectUrl != null) {
         body['redirect_url'] = redirectUrl;
       }
@@ -202,30 +228,46 @@ class ApiService {
         body: jsonEncode(body),
       );
 
-      print('DEBUG: Respuesta de recuperación - Código: ${response.statusCode}');
+      print(
+        'DEBUG: Respuesta de recuperación - Código: ${response.statusCode}',
+      );
       final decodedData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': decodedData['message'] ?? 'Correo de recuperación enviado exitosamente'};
+        return {
+          'success': true,
+          'message':
+              decodedData['message'] ??
+              'Correo de recuperación enviado exitosamente',
+        };
       } else {
-        return {'success': false, 'message': decodedData['detail'] ?? 'Error al enviar correo de recuperación'};
+        return {
+          'success': false,
+          'message':
+              decodedData['detail'] ?? 'Error al enviar correo de recuperación',
+        };
       }
     } catch (e) {
       print('DEBUG: Error en petición de recuperación: $e');
-      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+      return {
+        'success': false,
+        'message': 'No se pudo conectar al servidor: $e',
+      };
     }
   }
 
   // Restablecer contraseña con los tokens de recuperación de Supabase
-  static Future<Map<String, dynamic>> resetPassword(String newPassword, String accessToken, String refreshToken) async {
+  static Future<Map<String, dynamic>> resetPassword(
+    String newPassword,
+    String accessToken,
+    String refreshToken,
+  ) async {
     final url = Uri.parse('$baseUrl/auth/change-password');
     try {
       print('DEBUG: Enviando restablecimiento de contraseña a $url');
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'access_token': accessToken,
           'refresh_token': refreshToken,
@@ -233,17 +275,30 @@ class ApiService {
         }),
       );
 
-      print('DEBUG: Respuesta de restablecimiento - Código: ${response.statusCode}');
+      print(
+        'DEBUG: Respuesta de restablecimiento - Código: ${response.statusCode}',
+      );
       final decodedData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return {'success': true, 'message': decodedData['message'] ?? 'Contraseña restablecida exitosamente'};
+        return {
+          'success': true,
+          'message':
+              decodedData['message'] ?? 'Contraseña restablecida exitosamente',
+        };
       } else {
-        return {'success': false, 'message': decodedData['detail'] ?? 'Error al restablecer la contraseña'};
+        return {
+          'success': false,
+          'message':
+              decodedData['detail'] ?? 'Error al restablecer la contraseña',
+        };
       }
     } catch (e) {
       print('DEBUG: Error en petición de restablecimiento: $e');
-      return {'success': false, 'message': 'No se pudo conectar al servidor: $e'};
+      return {
+        'success': false,
+        'message': 'No se pudo conectar al servidor: $e',
+      };
     }
   }
 
@@ -434,7 +489,9 @@ class ApiService {
 
   /// Consulta si hay una clasificación pendiente de la IA para un basurero.
   /// Retorna null si no hay clasificación pendiente (HTTP 204).
-  static Future<Map<String, dynamic>?> getClasificacionPendiente(String binId) async {
+  static Future<Map<String, dynamic>?> getClasificacionPendiente(
+    String binId,
+  ) async {
     try {
       final response = await http.get(
         Uri.parse('$gatewayUrl/points/clasificacion-pendiente/$binId'),
@@ -463,4 +520,3 @@ class ApiService {
     }
   }
 }
-

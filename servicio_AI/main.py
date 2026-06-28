@@ -10,7 +10,7 @@ from PIL import Image
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from contextlib import asynccontextmanager
 
-PUNTOS_SERVICE_URL = os.getenv("PUNTOS_SERVICE_URL", "http://host.docker.internal:8081")
+PUNTOS_SERVICE_URL = os.getenv("PUNTOS_SERVICE_URL", "https://servicio-puntos-229724129072.southamerica-west1.run.app")
 BIN_ID = os.getenv("BIN_ID", "EcoSmartBin-Q04")
 
 # Global instances
