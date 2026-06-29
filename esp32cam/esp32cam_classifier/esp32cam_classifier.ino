@@ -21,14 +21,15 @@
 // ===========================
 
 // WiFi
-const char* ssid     = "Marco_Omar";
-const char* password = "1720500Mm.";
+
+// WiFi
+const char* ssid     = "Internet_UNL";
+const char* password = "UNL1859WiFi";
 
 // URL del servicio de IA
 // LOCAL (Docker en tu PC):  "http://192.168.X.X:8080/predict"  ← IP de tu PC en la red local
 // NUBE  (Cloud Run):        "https://servicio-ia-XXXXX.run.app/predict"
-const char* serverUrl = "http://192.168.110.127:8080/predict";
-
+const char* serverUrl = "http://136.68.254.51/predict";
 // Pin del botón para disparar captura (GPIO 13 — seguro en ESP32-CAM)
 #define BUTTON_PIN    13
 // LED Flash integrado del ESP32-CAM
@@ -133,11 +134,17 @@ void connectWiFi() {
 String captureAndClassify() {
   Serial.println("\n📸 Capturando foto...");
 
+  // Limpiar el buffer (descartar el frame anterior/viejo)
+  camera_fb_t *dummy = esp_camera_fb_get();
+  if (dummy) {
+    esp_camera_fb_return(dummy);
+  }
+
   // Encender flash brevemente
   digitalWrite(FLASH_LED_PIN, HIGH);
-  delay(100);
+  delay(250); // Dar más tiempo para autoexposición
 
-  // Capturar frame
+  // Capturar el frame real y actual
   camera_fb_t *fb = esp_camera_fb_get();
 
   // Apagar flash

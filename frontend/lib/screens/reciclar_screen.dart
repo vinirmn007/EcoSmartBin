@@ -103,7 +103,9 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       _pollingAttempts++;
 
-      final clasificacion = await ApiService.getClasificacionPendiente('EcoSmartBin-Q04');
+      final clasificacion = await ApiService.getClasificacionPendiente(
+        'EcoSmartBin-Q04',
+      );
 
       if (clasificacion != null && mounted) {
         timer.cancel();
@@ -173,13 +175,16 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     if (mounted) {
       if (result['success'] == true) {
         // Limpiar la clasificación pendiente en el backend
-        ApiService.limpiarClasificacionPendiente('EcoSmartBin-Q04');
+        ApiService.limpiarClasificacionPendiente('EcoSmartBin-001');
         setState(() {
           _puntosGanados = result['data']['puntos'] ?? 0;
           _step = 4;
         });
       } else {
-        _showSnack(result['message'] ?? 'Error al procesar reciclaje', isError: true);
+        _showSnack(
+          result['message'] ?? 'Error al procesar reciclaje',
+          isError: true,
+        );
         setState(() {
           _step = 2;
         });

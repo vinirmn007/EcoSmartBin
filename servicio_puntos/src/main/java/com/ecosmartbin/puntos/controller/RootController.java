@@ -17,7 +17,6 @@ public class RootController {
         return ResponseEntity.ok(Map.of(
                 "message", "Bienvenido al Servicio de Puntos Ecológicos — EcoSmartBin API v1",
                 "service", "servicio-puntos",
-                "status", "online"
-        ));
+                "status", "online"));
     }
 }

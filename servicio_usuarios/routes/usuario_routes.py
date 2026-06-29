@@ -206,7 +206,7 @@ def change_password(data: ResetPasswordSchema):
     (access_token y refresh_token) que Supabase generó en el enlace del correo.
     """
     try:
-        # Creamos un cliente temporal para asociarlo con la sesión del token de recuperación
+        # Creamos un cliente temporal para asociarlo con la sesión del token pa probar
         temp_supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
         temp_supabase.auth.set_session(data.access_token, data.refresh_token)
         
