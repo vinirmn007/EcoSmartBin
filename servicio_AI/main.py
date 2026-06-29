@@ -16,7 +16,7 @@ BIN_ID = os.getenv("BIN_ID", "EcoSmartBin-Q04")
 # Global instances
 ort_session = None
 labels = None
-http_client = None  # Persistent HTTP client pool
+# Removed global http_client to prevent DNS caching issues on startup
 
 IMAGENET_MEAN = np.array([0.5, 0.5, 0.5], dtype=np.float32)
 IMAGENET_STD = np.array([0.5, 0.5, 0.5], dtype=np.float32)
@@ -32,19 +32,21 @@ def preprocess_image(image: Image.Image) -> np.ndarray:
 async def send_to_points_service(payload: dict):
     """Background task to ensure true fire-and-forget behavior."""
     try:
-        # Reusing the global client pool avoids TCP handshake overhead
-        resp = await http_client.post(
-            f"{PUNTOS_SERVICE_URL}/points/clasificacion-pendiente",
-            json=payload
-        )
-        print(f"📤 Background sync successful: HTTP {resp.status_code}")
+        # Creating a fresh client per background task prevents DNS poisoning
+        # and a 30-second timeout allows Cloud Run to cold-start properly.
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{PUNTOS_SERVICE_URL}/points/clasificacion-pendiente",
+                json=payload
+            )
+            print(f"📤 Background sync successful: HTTP {resp.status_code}")
     except Exception as fwd_err:
         print(f"⚠️ Background sync failed: {fwd_err}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manages start/stop lifecycles cleanly."""
-    global ort_session, labels, http_client
+    global ort_session, labels
     print("Loading lightweight ONNX model components...")
     
     # Configure ONNX Runtime for serverless constraints
@@ -57,13 +59,9 @@ async def lifespan(app: FastAPI):
     with open("labels.json", "r") as f:
         labels = {int(k): v for k, v in json.load(f).items()}
         
-    # Initialize a single reusable HTTP client pool
-    http_client = httpx.AsyncClient(timeout=5.0, limits=httpx.Limits(max_connections=100))
-    
     print("All components initialized successfully!")
     yield
     # Cleanup
-    await http_client.aclose()
     ort_session = None
 
 app = FastAPI(
