@@ -71,6 +71,9 @@ class _ReciclarScreenState extends State<ReciclarScreen>
   }
 
   void _startSimulatedScan() {
+    // Limpiar clasificación pendiente previa para asegurar datos nuevos
+    ApiService.limpiarClasificacionPendiente('EcoSmartBin-Q04');
+
     _scanTimer = Timer(const Duration(milliseconds: 2500), () {
       if (mounted) {
         setState(() {
@@ -99,6 +102,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
 
   /// Polling cada 2 segundos al servicio de puntos para ver si la IA ya clasificó
   void _startPollingClasificacion() {
+    _pollingTimer?.cancel();
     _pollingAttempts = 0;
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       _pollingAttempts++;
@@ -106,23 +110,31 @@ class _ReciclarScreenState extends State<ReciclarScreen>
       final clasificacion = await ApiService.getClasificacionPendiente('EcoSmartBin-Q04');
 
       if (clasificacion != null && mounted) {
-        timer.cancel();
-        setState(() {
-          _clasificacionIA = clasificacion;
-          // Auto-seleccionar el tipo de reciclaje detectado
-          final tipoReciclajeId = clasificacion['tipoReciclajeId'];
-          if (tipoReciclajeId != null) {
-            _tipoSeleccionado = (tipoReciclajeId is int)
-                ? tipoReciclajeId
-                : int.tryParse(tipoReciclajeId.toString());
-          }
-          _step = 2; // Mostrar resultado de la IA
-        });
+        // Verificar si es una clasificación nueva comparando timestamps
+        final int? newTimestamp = clasificacion['timestamp'] as int?;
+        final int? currentTimestamp = _clasificacionIA?['timestamp'] as int?;
+
+        // Actualizar si no hay clasificación actual o si la nueva es más reciente
+        if (_clasificacionIA == null || (newTimestamp != null && currentTimestamp != null && newTimestamp > currentTimestamp)) {
+          setState(() {
+            _clasificacionIA = clasificacion;
+            // Auto-seleccionar el tipo de reciclaje detectado
+            final tipoReciclajeId = clasificacion['tipoReciclajeId'];
+            if (tipoReciclajeId != null) {
+              _tipoSeleccionado = (tipoReciclajeId is int)
+                  ? tipoReciclajeId
+                  : int.tryParse(tipoReciclajeId.toString());
+            }
+            if (_step == 1) {
+              _step = 2; // Mostrar resultado de la IA
+            }
+          });
+        }
         return;
       }
 
       // Timeout: después de 30 segundos sin respuesta, ir a modo manual
-      if (_pollingAttempts >= _maxPollingAttempts && mounted) {
+      if (_step == 1 && _pollingAttempts >= _maxPollingAttempts && mounted) {
         timer.cancel();
         setState(() {
           _modoManual = true;
@@ -160,6 +172,8 @@ class _ReciclarScreenState extends State<ReciclarScreen>
       _showSnack('Por favor selecciona un tipo de material', isError: true);
       return;
     }
+
+    _pollingTimer?.cancel();
 
     setState(() {
       _step = 3;
