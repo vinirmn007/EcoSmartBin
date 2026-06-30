@@ -18,21 +18,119 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="EcoSmartBin - Sistema inteligente de gestión de residuos con IA. Recicla, acumula puntos y contribuye al medio ambiente.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="ecosmartbin_frontend">
+  <meta name="apple-mobile-web-app-title" content="EcoSmartBin">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>ecosmartbin_frontend</title>
+  <title>EcoSmartBin</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Loading screen styles */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0F172A;
+      overflow: hidden;
+    }
+
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0D1527 100%);
+      z-index: 9999;
+      transition: opacity 0.4s ease-out;
+    }
+
+    #loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-icon {
+      font-size: 48px;
+      margin-bottom: 24px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .loading-title {
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .loading-subtitle {
+      color: rgba(255, 255, 255, 0.5);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .loading-bar-container {
+      width: 200px;
+      height: 4px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .loading-bar {
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, #10B981, #34D399);
+      border-radius: 4px;
+      animation: loading 1.2s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+  </style>
 </head>
 <body>
+  <!-- Loading screen visible while Flutter initializes -->
+  <div id="loading-screen">
+    <div class="loading-icon">♻️</div>
+    <div class="loading-title">EcoSmartBin</div>
+    <div class="loading-subtitle">Cargando experiencia ecológica...</div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+  </div>
+
+  <script>
+    // Remove loading screen once Flutter is ready
+    window.addEventListener('flutter-first-frame', function() {
+      var loader = document.getElementById('loading-screen');
+      if (loader) {
+        loader.classList.add('fade-out');
+        setTimeout(function() { loader.remove(); }, 400);
+      }
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
