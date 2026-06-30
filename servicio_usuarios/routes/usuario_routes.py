@@ -8,6 +8,7 @@ from supabase_auth import UserAttributes
 from models.usuario_model import PerfilUsuario 
 from database import get_db
 from settings import settings
+from logger import business_logger
 
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
@@ -103,6 +104,13 @@ def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(nuevo_perfil)
 
+        business_logger.info("Nuevo usuario registrado en el sistema", extra={
+            "event_type": "USER_CREATED",
+            "user_email": nuevo_perfil.email,
+            "user_id": nuevo_perfil.id,
+            "role": nuevo_perfil.role
+        })
+
         return {
             "message": "Usuario y perfil creados exitosamente en el ecosistema EcoSmartBin.",
             "user_id": nuevo_perfil.id,
@@ -130,6 +138,12 @@ def login_user(user_data: UserLoginSchema):
         response = supabase.auth.sign_in_with_password({
             "email": user_data.email,
             "password": user_data.password
+        })
+        
+        business_logger.info("Usuario inició sesión", extra={
+            "event_type": "USER_LOGIN_SUCCESS",
+            "user_email": response.user.email,
+            "user_id": response.user.id
         })
         
         return {
@@ -190,6 +204,12 @@ def send_email_reset_password(data: RecoverPasswordSchema):
             options["redirect_to"] = data.redirect_url
         
         supabase.auth.reset_password_for_email(data.email, options=options)
+        
+        business_logger.info("Usuario solicitó recuperación de contraseña", extra={
+            "event_type": "PASSWORD_RESET_REQUESTED",
+            "user_email": data.email
+        })
+        
         return {"message": "Correo de recuperación enviado exitosamente."}
     except Exception as e:
         print(f"DEBUG BACKEND: Error en recover_password: {str(e)}")
@@ -211,7 +231,15 @@ def change_password(data: ResetPasswordSchema):
         temp_supabase.auth.set_session(data.access_token, data.refresh_token)
         
         # Actualizamos la contraseña del usuario autenticado con la sesión de recuperación
-        temp_supabase.auth.update_user(UserAttributes(password=data.new_password))
+        user_response = temp_supabase.auth.update_user(UserAttributes(password=data.new_password))
+        
+        user = user_response.user
+        business_logger.info("Usuario cambió su contraseña exitosamente", extra={
+            "event_type": "PASSWORD_CHANGED",
+            "user_email": user.email if user else "Desconocido",
+            "user_id": user.id if user else "Desconocido"
+        })
+        
         return {"message": "Contraseña restablecida exitosamente."}
     except Exception as e:
         print(f"DEBUG BACKEND: Error en change_password: {str(e)}")

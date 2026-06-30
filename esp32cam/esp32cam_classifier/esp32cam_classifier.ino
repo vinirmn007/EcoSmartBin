@@ -133,11 +133,17 @@ void connectWiFi() {
 String captureAndClassify() {
   Serial.println("\n📸 Capturando foto...");
 
+  // Limpiar el buffer (descartar el frame anterior/viejo)
+  camera_fb_t *dummy = esp_camera_fb_get();
+  if (dummy) {
+    esp_camera_fb_return(dummy);
+  }
+
   // Encender flash brevemente
   digitalWrite(FLASH_LED_PIN, HIGH);
-  delay(100);
+  delay(250); // Dar más tiempo para autoexposición
 
-  // Capturar frame
+  // Capturar el frame real y actual
   camera_fb_t *fb = esp_camera_fb_get();
 
   // Apagar flash

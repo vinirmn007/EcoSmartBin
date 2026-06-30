@@ -80,3 +80,4 @@ websockets==15.0.1
 yarl==1.24.2
 zstandard==0.25.0
 prometheus-fastapi-instrumentator==7.0.0
+python-json-logger==2.0.7
