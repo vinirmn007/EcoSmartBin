@@ -6,17 +6,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
 
 class ApiService {
-  // Configuración de la URL Base según la plataforma
+  // ── URL del servicio de usuarios (producción) ──
   static String get baseUrl {
     if (kIsWeb) {
-      return 'https://gateway-229724129072.southamerica-west1.run.app';
+      return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
     } else {
       try {
         if (Platform.isAndroid) {
-          return 'https://gateway-229724129072.southamerica-west1.run.app';
+          return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
         }
       } catch (_) {}
-      return 'https://gateway-229724129072.southamerica-west1.run.app';
+      return 'https://ecosmartbin-229724129072.southamerica-west1.run.app';
     }
   }
 
@@ -26,13 +26,11 @@ class ApiService {
       // TODO: Reemplazar con la URL real de Cloud Run del servicio de puntos cuando se despliegue
       return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
     }
-    if (kIsWeb)
-      return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
+    if (kIsWeb) return 'http://localhost:8081';
     try {
-      if (Platform.isAndroid)
-        return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
+      if (Platform.isAndroid) return 'http://10.0.2.2:8081';
     } catch (_) {}
-    return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
+    return 'http://localhost:8081';
   }
 
   // Clave para guardar el token en SharedPreferences
@@ -215,7 +213,7 @@ class ApiService {
     String email, {
     String? redirectUrl,
   }) async {
-    final url = Uri.parse('$baseUrl/auth/email-reset-password');
+    final url = Uri.parse('$baseUrl/auth/recover-password');
     try {
       print('DEBUG: Enviando recuperación de contraseña a $url');
       final Map<String, dynamic> body = {'email': email};
@@ -256,23 +254,21 @@ class ApiService {
     }
   }
 
-  // Restablecer contraseña con los tokens de recuperación de Supabase
+  // Restablecer contraseña con el token JWT de recuperación
   static Future<Map<String, dynamic>> resetPassword(
     String newPassword,
-    String accessToken,
-    String refreshToken,
+    String token,
   ) async {
-    final url = Uri.parse('$baseUrl/auth/change-password');
+    final url = Uri.parse('$baseUrl/auth/reset-password');
     try {
       print('DEBUG: Enviando restablecimiento de contraseña a $url');
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'access_token': accessToken,
-          'refresh_token': refreshToken,
-          'new_password': newPassword,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'new_password': newPassword}),
       );
 
       print(
@@ -489,9 +485,7 @@ class ApiService {
 
   /// Consulta si hay una clasificación pendiente de la IA para un basurero.
   /// Retorna null si no hay clasificación pendiente (HTTP 204).
-  static Future<Map<String, dynamic>?> getClasificacionPendiente(
-    String binId,
-  ) async {
+  static Future<Map<String, dynamic>?> getClasificacionPendiente(String binId) async {
     try {
       final response = await http.get(
         Uri.parse('$gatewayUrl/points/clasificacion-pendiente/$binId'),
