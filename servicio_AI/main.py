@@ -12,6 +12,8 @@ from contextlib import asynccontextmanager
 # URL del servicio de puntos (configurable via variable de entorno)
 # Local: http://host.docker.internal:8081  |  Cloud Run: URL interna del servicio
 PUNTOS_SERVICE_URL = os.getenv("PUNTOS_SERVICE_URL", "http://host.docker.internal:8081")
+# URL del servicio de basureros para validar sesiones activas
+BASUREROS_SERVICE_URL = os.getenv("BASUREROS_SERVICE_URL", "http://host.docker.internal:8082")
 # ID del basurero asociado a este servicio de IA
 BIN_ID = os.getenv("BIN_ID", "EcoSmartBin-Q04")
 
@@ -77,13 +79,45 @@ app = FastAPI(
 )
 
 @app.post("/predict")
-async def predict_garbage(file: UploadFile = File(...)):
+async def predict_garbage(file: UploadFile = File(...), bin_id: str = None):
     """
     Procesa la imagen proveniente del ESP32-CAM o frontend, ejecuta inferencia
     manual y retorna las predicciones estructuradas.
+    
+    Antes de clasificar, valida que el basurero tenga una sesión activa
+    consultando al servicio de basureros. Si no la tiene, rechaza la petición.
     """
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Provided file payload is not an image.")
+
+    # Determinar el ID del basurero (parámetro explícito o variable de entorno)
+    effective_bin_id = bin_id or BIN_ID
+
+    # ── Validar sesión activa con servicio_basureros ──
+    session_user_id = None
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            session_resp = await client.get(
+                f"{BASUREROS_SERVICE_URL}/internal/bins/{effective_bin_id}/session"
+            )
+            if session_resp.status_code == 200:
+                session_data = session_resp.json()
+                session_user_id = session_data.get("usuario_id")
+                print(f"✅ Sesión activa encontrada para bin '{effective_bin_id}' → usuario: {session_user_id}")
+            else:
+                error_detail = session_resp.json().get("detail", "Sin sesión activa")
+                print(f"❌ No hay sesión activa para bin '{effective_bin_id}': {error_detail}")
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"No hay usuario conectado al basurero '{effective_bin_id}'. "
+                           f"El usuario debe escanear el QR del basurero primero. Detalle: {error_detail}"
+                )
+    except httpx.RequestError as e:
+        print(f"⚠️ No se pudo contactar al servicio de basureros: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="No se pudo verificar la sesión del basurero. Servicio de basureros no disponible."
+        )
 
     try:
         contents = await file.read()
@@ -140,16 +174,17 @@ async def predict_garbage(file: UploadFile = File(...)):
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 payload = {
-                    "binId": BIN_ID,
+                    "binId": effective_bin_id,
                     "tipoDetectado": label,
                     "confianza": round(score, 4),
-                    "imagenBase64": f"data:{file.content_type};base64,{image_base64}"
+                    "imagenBase64": f"data:{file.content_type};base64,{image_base64}",
+                    "usuarioId": session_user_id
                 }
                 resp = await client.post(
                     f"{PUNTOS_SERVICE_URL}/points/clasificacion-pendiente",
                     json=payload
                 )
-                print(f"📤 Clasificación enviada al servicio de puntos: {label} ({round(score*100, 1)}%) → HTTP {resp.status_code}")
+                print(f"📤 Clasificación enviada al servicio de puntos: {label} ({round(score*100, 1)}%) → usuario: {session_user_id} → HTTP {resp.status_code}")
         except Exception as fwd_err:
             # No fallar la respuesta al ESP32 si el reenvío falla
             print(f"⚠️ No se pudo reenviar al servicio de puntos: {fwd_err}")

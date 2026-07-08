@@ -12,6 +12,17 @@ services:
         paths:
           - /auth
         strip_path: false
+
+  # 2. Servicio de Basureros
+  - name: bin-service
+    protocol: http
+    host: localhost
+    port: 8082
+    routes:
+      - name: bin-routes
+        paths:
+          - /bins
+        strip_path: false
 plugins:
   - name: cors
     config:
