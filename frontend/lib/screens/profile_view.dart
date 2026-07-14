@@ -56,8 +56,8 @@ class _ProfileView extends StatelessWidget {
               label: 'Perfil',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.qr_code_scanner_rounded),
-              activeIcon: Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF10B981)),
+              icon: Icon(Icons.eco_rounded),
+              activeIcon: Icon(Icons.eco_rounded, color: Color(0xFF10B981)),
               label: 'Reciclar',
             ),
             BottomNavigationBarItem(
@@ -135,6 +135,12 @@ class _ProfileView extends StatelessWidget {
 
                         // Card de Datos Personales
                         _buildPersonalInfoCard(theme),
+
+                        // Card del Administrador
+                        if (state._profile?.role == 'admin') ...[
+                          const SizedBox(height: 24),
+                          _buildAdminCard(context),
+                        ],
                       ],
                     ),
                   ),
@@ -359,6 +365,83 @@ class _ProfileView extends StatelessWidget {
                 child: const Text('Ir al Login'),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3B82F6).withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3B82F6).withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: Color(0xFF3B82F6),
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Panel de Administrador',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Gestiona usuarios, recompensas y canjes.',
+                      style: TextStyle(
+                        color: Colors.white60,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/admin/dashboard');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF3B82F6),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Acceder al Panel'),
           ),
         ],
       ),

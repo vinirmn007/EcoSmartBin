@@ -21,9 +21,26 @@ import java.util.Map;
 public class RecompensaController {
 
     private final RecompensaService recompensaService;
+    private final com.ecosmartbin.puntos.repository.PerfilUsuarioRepository perfilRepository;
 
-    public RecompensaController(RecompensaService recompensaService) {
+    public RecompensaController(RecompensaService recompensaService, com.ecosmartbin.puntos.repository.PerfilUsuarioRepository perfilRepository) {
         this.recompensaService = recompensaService;
+        this.perfilRepository = perfilRepository;
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        if (authentication == null) return false;
+        boolean hasAdminRole = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (hasAdminRole) return true;
+
+        try {
+            return perfilRepository.findById(authentication.getName())
+                    .map(p -> "admin".equalsIgnoreCase(p.getRole()))
+                    .orElse(false);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // ===== RECOMPENSAS =====
@@ -51,7 +68,12 @@ public class RecompensaController {
      * Crear nueva recompensa (solo admin).
      */
     @PostMapping("/recompensas")
-    public ResponseEntity<RecompensaResponse> crearRecompensa(@Valid @RequestBody RecompensaResponse request) {
+    public ResponseEntity<?> crearRecompensa(
+            @Valid @RequestBody RecompensaResponse request,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("detail", "No tienes permisos de administrador."));
+        }
         RecompensaResponse response = recompensaService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -61,9 +83,13 @@ public class RecompensaController {
      * Actualizar recompensa existente (solo admin).
      */
     @PutMapping("/recompensas/{id}")
-    public ResponseEntity<RecompensaResponse> actualizarRecompensa(
+    public ResponseEntity<?> actualizarRecompensa(
             @PathVariable Long id,
-            @Valid @RequestBody RecompensaResponse request) {
+            @Valid @RequestBody RecompensaResponse request,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("detail", "No tienes permisos de administrador."));
+        }
         return ResponseEntity.ok(recompensaService.actualizar(id, request));
     }
 
@@ -72,7 +98,12 @@ public class RecompensaController {
      * Desactivar recompensa (soft delete, solo admin).
      */
     @DeleteMapping("/recompensas/{id}")
-    public ResponseEntity<Map<String, String>> desactivarRecompensa(@PathVariable Long id) {
+    public ResponseEntity<?> desactivarRecompensa(
+            @PathVariable Long id,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("detail", "No tienes permisos de administrador."));
+        }
         recompensaService.desactivar(id);
         return ResponseEntity.ok(Map.of("message", "Recompensa desactivada exitosamente."));
     }
@@ -111,9 +142,13 @@ public class RecompensaController {
      * Body: { "estado": "ENTREGADO" } o { "estado": "CANCELADO" }
      */
     @PutMapping("/canjes/{id}/estado")
-    public ResponseEntity<CanjeResponse> cambiarEstadoCanje(
+    public ResponseEntity<?> cambiarEstadoCanje(
             @PathVariable Long id,
-            @RequestBody Map<String, String> body) {
+            @RequestBody Map<String, String> body,
+            Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("detail", "No tienes permisos de administrador."));
+        }
 
         String nuevoEstado = body.get("estado");
         if (nuevoEstado == null || nuevoEstado.isBlank()) {

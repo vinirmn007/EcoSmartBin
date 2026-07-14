@@ -211,9 +211,22 @@ public class RecompensaService {
     }
 
     private CanjeResponse toCanjeResponse(Canje c) {
+        String email = null;
+        String nombre = null;
+        try {
+            PerfilUsuario perfil = perfilRepository.findById(c.getUsuarioId()).orElse(null);
+            if (perfil != null) {
+                email = perfil.getEmail();
+                nombre = perfil.getNombres() + " " + perfil.getApellidos();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
         return CanjeResponse.builder()
                 .id(c.getId())
                 .usuarioId(c.getUsuarioId())
+                .usuarioEmail(email)
+                .usuarioNombre(nombre)
                 .recompensaNombre(c.getRecompensa().getNombre())
                 .puntosGastados(c.getPuntosGastados())
                 .fecha(c.getFecha())

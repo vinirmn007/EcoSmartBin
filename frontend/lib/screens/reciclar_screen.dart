@@ -20,7 +20,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
   // 2 = IA detectó el tipo, usuario confirma
   // 3 = Registrando reciclaje...
   // 4 = Éxito
-  int _step = 0;
+  int _step = 2;
 
   // Lógica de escaneo simulado
   late AnimationController _scannerController;
@@ -42,7 +42,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
   int _puntosGanados = 0;
 
   // Modo manual (fallback si la IA falla o clasifica mal)
-  bool _modoManual = false;
+  bool _modoManual = true;
 
   @override
   void initState() {
@@ -59,7 +59,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     );
 
     // Iniciar escaneo simulado automático
-    _startSimulatedScan();
+    _loadTiposReciclaje();
   }
 
   @override

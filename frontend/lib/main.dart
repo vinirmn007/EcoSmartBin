@@ -12,6 +12,7 @@ import 'screens/reciclaje_historial_screen.dart';
 import 'screens/canjes_historial_screen.dart';
 import 'screens/canjear_screen.dart';
 import 'screens/reciclar_screen.dart';
+import 'screens/admin_dashboard_screen.dart';
 import 'services/api_service.dart';
 import 'dart:html' as html;
 
@@ -122,6 +123,7 @@ class MyApp extends StatelessWidget {
         '/puntos/historial-reciclaje': (context) => const ReciclajeHistorialScreen(),
         '/puntos/canjear': (context) => const CanjearScreen(),
         '/puntos/reciclar': (context) => const ReciclarScreen(),
+        '/admin/dashboard': (context) => const AdminDashboardScreen(),
       },
     );
   }

@@ -6,8 +6,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
 
 class ApiService {
+  // Cambiar a true para conectarse a los servicios corriendo localmente
+  static const bool useLocalBackend = true;
+
   // Configuración de la URL Base según la plataforma
   static String get baseUrl {
+    if (useLocalBackend) {
+      if (!kIsWeb) {
+        try {
+          if (Platform.isAndroid) {
+            return 'http://10.0.2.2:8081';
+          }
+        } catch (_) {}
+      }
+      return 'http://localhost:8081';
+    }
     if (kIsWeb) {
       return 'https://gateway-229724129072.southamerica-west1.run.app';
     } else {
@@ -22,6 +35,16 @@ class ApiService {
 
   // ── Puntos local o producción ──
   static String get gatewayUrl {
+    if (useLocalBackend) {
+      if (!kIsWeb) {
+        try {
+          if (Platform.isAndroid) {
+            return 'http://10.0.2.2:8081';
+          }
+        } catch (_) {}
+      }
+      return 'http://localhost:8081';
+    }
     if (kReleaseMode) {
       // TODO: Reemplazar con la URL real de Cloud Run del servicio de puntos cuando se despliegue
       return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
@@ -33,6 +56,21 @@ class ApiService {
         return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
     } catch (_) {}
     return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
+  }
+
+  // ── IA local o producción ──
+  static String get iaServiceUrl {
+    if (kReleaseMode) {
+      // TODO: Reemplazar con la URL real de Cloud Run del servicio de IA cuando se despliegue
+      return 'https://servicio-ia-229724129072.southamerica-west1.run.app';
+    }
+    if (kIsWeb)
+      return 'https://servicio-ia-229724129072.southamerica-west1.run.app';
+    try {
+      if (Platform.isAndroid)
+        return 'https://servicio-ia-229724129072.southamerica-west1.run.app';
+    } catch (_) {}
+    return 'https://servicio-ia-229724129072.southamerica-west1.run.app';
   }
 
   // Clave para guardar el token en SharedPreferences
@@ -517,6 +555,160 @@ class ApiService {
       );
     } catch (e) {
       print('DEBUG: Error limpiarClasificacionPendiente: $e');
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  ENDPOINTS ADMINISTRADOR
+  // ══════════════════════════════════════════════════
+
+  static Future<List<dynamic>> getAdminUsuarios() async {
+    final token = await getToken();
+    if (token == null) return [];
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/admin/usuarios'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getAdminUsuarios: $e');
+      return [];
+    }
+  }
+
+  static Future<List<dynamic>> getAdminCanjes() async {
+    final token = await getToken();
+    if (token == null) return [];
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/admin/canjes'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getAdminCanjes: $e');
+      return [];
+    }
+  }
+
+  static Future<List<dynamic>> getAdminRecompensas() async {
+    final token = await getToken();
+    if (token == null) return [];
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/admin/recompensas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getAdminRecompensas: $e');
+      return [];
+    }
+  }
+
+  static Future<Map<String, dynamic>> crearRecompensa(Map<String, dynamic> data) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/points/recompensas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'message': err['detail'] ?? err['message'] ?? 'Error al crear recompensa'};
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> actualizarRecompensa(int id, Map<String, dynamic> data) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+    try {
+      final response = await http.put(
+        Uri.parse('$gatewayUrl/points/recompensas/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'message': err['detail'] ?? err['message'] ?? 'Error al actualizar recompensa'};
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> desactivarRecompensa(int id) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+    try {
+      final response = await http.delete(
+        Uri.parse('$gatewayUrl/points/recompensas/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'message': err['detail'] ?? err['message'] ?? 'Error al desactivar recompensa'};
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> cambiarEstadoCanje(int id, String estado) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+    try {
+      final response = await http.put(
+        Uri.parse('$gatewayUrl/points/canjes/$id/estado'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'estado': estado}),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'message': err['detail'] ?? err['message'] ?? 'Error al cambiar estado de canje'};
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al gateway: $e'};
     }
   }
 }

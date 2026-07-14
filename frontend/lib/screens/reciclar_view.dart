@@ -708,8 +708,9 @@ class _ReciclarView extends StatelessWidget {
                     // Si estamos embebidos en el ProfileScreen (tab), forzamos
                     // el reemplazo al ProfileScreen para que actualice la info y cambie a la pestaña 0
                     state.setState(() {
-                      state._step = 0;
+                      state._step = 2;
                       state._puntosGanados = 0;
+                      state._cantidad = 1;
                     });
                     Navigator.pushReplacementNamed(context, '/profile');
                   }

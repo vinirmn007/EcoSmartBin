@@ -15,6 +15,8 @@ public class CanjeResponse {
 
     private Long id;
     private String usuarioId;
+    private String usuarioEmail;
+    private String usuarioNombre;
     private String recompensaNombre;
     private Integer puntosGastados;
     private LocalDateTime fecha;

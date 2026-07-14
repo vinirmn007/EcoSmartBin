@@ -63,9 +63,9 @@ class _PuntosView extends StatelessWidget {
 
               // Grid de opciones
               _buildDashboardOption(
-                title: 'Reciclar en Basurero',
-                description: 'Escanea el QR de un basurero para depositar y ganar puntos.',
-                icon: Icons.qr_code_scanner_rounded,
+                title: 'Registrar Reciclaje',
+                description: 'Registra tus materiales reciclados para ganar EcoPuntos.',
+                icon: Icons.eco_rounded,
                 colors: [const Color(0xFF10B981), const Color(0xFF059669)],
                 onTap: () => Navigator.pushNamed(context, '/puntos/reciclar').then((_) => state._loadBalance()),
               ),

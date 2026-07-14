@@ -59,6 +59,7 @@ public class GlobalExceptionHandler {
         body.put("status", status.value());
         body.put("error", status.getReasonPhrase());
         body.put("message", message);
+        body.put("detail", message); // compatibilidad con el cliente Flutter (estilo FastAPI)
         return new ResponseEntity<>(body, status);
     }
 }
