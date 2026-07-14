@@ -135,6 +135,12 @@ class _ProfileView extends StatelessWidget {
 
                         // Card de Datos Personales
                         _buildPersonalInfoCard(theme),
+                        
+                        // Panel de Administración (Solo Admins)
+                        if (state._profile?.role == 'admin') ...[
+                          const SizedBox(height: 24),
+                          _buildAdminAccessButton(context),
+                        ],
                       ],
                     ),
                   ),
@@ -298,6 +304,28 @@ class _ProfileView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Divider(color: Colors.white.withOpacity(0.08), height: 1),
+    );
+  }
+
+  Widget _buildAdminAccessButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        Navigator.pushNamed(context, '/admin');
+      },
+      icon: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white),
+      label: const Text(
+        'Panel de Administración',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF6366F1), // Indigo color to distinguish from Eco actions
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 4,
+        shadowColor: const Color(0xFF6366F1).withOpacity(0.4),
+      ),
     );
   }
 

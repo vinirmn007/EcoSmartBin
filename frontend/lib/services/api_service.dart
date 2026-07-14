@@ -513,4 +513,63 @@ class ApiService {
       print('DEBUG: Error limpiarClasificacionPendiente: $e');
     }
   }
+
+  // ══════════════════════════════════════════════════
+  //  BASUREROS — via Gateway
+  // ══════════════════════════════════════════════════
+
+  static Future<List<dynamic>> getBasureros() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/bins'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getBasureros: $e');
+      return [];
+    }
+  }
+
+  static Future<Map<String, dynamic>> crearBasurero({
+    required String publicId,
+    required String localizacion,
+  }) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final body = {
+        'public_id': publicId,
+        'localizacion_geografica': localizacion,
+      };
+      final response = await http.post(
+        Uri.parse('$baseUrl/bins'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 201) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['detail'] ?? 'Error al crear basurero',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
 }
