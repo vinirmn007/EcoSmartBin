@@ -42,8 +42,8 @@ class Basurero(Base):
     # Indica si un usuario está usando este basurero actualmente
     is_occupied = Column(Boolean, default=False, nullable=False)
     
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relación con sesiones
@@ -73,8 +73,8 @@ class SesionBasurero(Base):
     session_token = Column(String, unique=True, index=True, nullable=False,
                            default=lambda: str(uuid.uuid4()))
     
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
     
     # Si la sesión sigue vigente (se pone False al desconectar o expirar)
     is_active = Column(Boolean, default=True, nullable=False)
