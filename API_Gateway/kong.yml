@@ -13,6 +13,16 @@ services:
           - /auth
         strip_path: false
 
+  # 2. Servicio de Basureros
+  - name: bin-service
+    protocol: http
+    host: localhost
+    port: 8082
+    routes:
+      - name: bin-routes
+        paths:
+          - /bins
+        strip_path: false
 plugins:
   - name: cors
     config:
@@ -20,9 +30,6 @@ plugins:
         - https://ecosmartbin2.web.app
         - http://localhost:8000
         - http://localhost:5000
-        - http://localhost:3000
-        - http://localhost:8080
-        - http://localhost:49430
       methods:
         - GET
         - POST
