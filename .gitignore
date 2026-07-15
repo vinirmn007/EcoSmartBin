@@ -149,3 +149,6 @@ firebase.json
 # Machine Learning Models
 *.onnx
 *.onnx.data
+
+# Scripts utilitarios
+make_admin.py
