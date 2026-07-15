@@ -1,14 +1,41 @@
 steps:
   # 0. Validación y Pruebas
   - name: 'python:3.12-slim'
+    id: 'Quality Gate'
     dir: 'servicio_usuarios'
     entrypoint: /bin/sh
     args:
       - '-c'
       - |
+        set -e
+
+        echo "=========================================="
+        echo " Instalando dependencias"
+        echo "=========================================="
+
         pip install -r requirements.txt pytest ruff
-        ruff check .
-        pytest tests/
+
+        # Intenta limpiar la pantalla (si el terminal lo permite)
+        clear || true
+
+        echo ""
+        echo "=========================================="
+        echo " Ejecutando Ruff"
+        echo "=========================================="
+
+        ruff check . --output-format=full
+
+        echo ""
+        echo "=========================================="
+        echo " Ejecutando Pytest"
+        echo "=========================================="
+
+        pytest -vv -ra --tb=short tests/
+
+        echo ""
+        echo "=========================================="
+        echo " ✅ QUALITY GATE SUPERADO"
+        echo "=========================================="
 
   # 1. Construir la imagen Docker usando el Dockerfile y apuntando a Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -40,16 +67,12 @@ steps:
       - '$_REGION'
       - '--allow-unauthenticated'
 
-# Registrar la imagen en Artifact Registry para historial
 images:
   - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
 
-# Opciones adicionales de build
 options:
   logging: CLOUD_LOGGING_ONLY
 
-
-# Variables por defecto para parametrización
 substitutions:
   _SERVICE_NAME: 'servicio-usuarios'
   _REPO_NAME: 'servicio-usuarios-registry'
