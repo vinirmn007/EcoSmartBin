@@ -1,0 +1,51 @@
+steps:
+  # 0. Validación y Pruebas
+  - name: 'python:3.12-slim'
+    entrypoint: /bin/sh
+    args:
+      - '-c'
+      - |
+        pip install -r requirements.txt pytest ruff
+        ruff check .
+        pytest tests/
+
+  # 1. Construir la imagen Docker usando el Dockerfile y apuntando a Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '.'
+
+  # 2. Subir la imagen al repositorio de Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+
+  # 3. Desplegar la imagen en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '$_SERVICE_NAME'
+      - '--image'
+      - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--region'
+      - '$_REGION'
+      - '--allow-unauthenticated'
+
+# Registrar la imagen en Artifact Registry para historial
+images:
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+
+# Configuración de cuenta de servicio activa y opciones adicionales
+options:
+  serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/229724129072-compute@developer.gserviceaccount.com'
+
+# Variables por defecto para parametrización
+substitutions:
+  _SERVICE_NAME: 'servicio-usuarios'
+  _REPO_NAME: 'servicio-usuarios-registry'
+  _REGION: 'southamerica-west1'

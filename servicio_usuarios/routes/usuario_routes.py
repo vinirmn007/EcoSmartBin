@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
-from jose import jwt, JWTError
 from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema, RecoverPasswordSchema, ResetPasswordSchema
 from supabase_auth import UserAttributes
 from models.usuario_model import PerfilUsuario 
