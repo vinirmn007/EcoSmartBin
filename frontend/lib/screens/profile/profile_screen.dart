@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/user_profile.dart';
-import '../services/api_service.dart';
-import 'reciclar_screen.dart';
-import 'canjear_screen.dart';
-import 'reciclaje_historial_screen.dart';
-import 'canjes_historial_screen.dart';
+import '../../models/user_profile.dart';
+import '../../services/api_service.dart';
+import '../puntos/reciclar_screen.dart';
+import '../puntos/canjear_screen.dart';
+import '../puntos/reciclaje_historial_screen.dart';
+import '../puntos/canjes_historial_screen.dart';
 
 part 'profile_view.dart';
 
