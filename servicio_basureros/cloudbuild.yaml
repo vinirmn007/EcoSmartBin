@@ -38,3 +38,6 @@ images:
 substitutions:
   _SERVICE_NAME: 'servicio-basureros' # El nombre que tendrá tu servicio en Cloud Run
   _REGION: 'us-central1'              # La región donde lo estás desplegando
+
+options:
+  logging: CLOUD_LOGGING_ONLY
