@@ -66,7 +66,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     });
 
     final newPassword = _passwordController.text;
-    final result = await ApiService.resetPassword(newPassword, _token!);
+    final result = await ApiService.resetPassword(newPassword, _token!, _refreshToken!);
 
     if (mounted) {
       setState(() => _isLoading = false);
