@@ -16,6 +16,7 @@ import 'screens/puntos/canjear_screen.dart';
 import 'screens/puntos/reciclar_screen.dart';
 import 'screens/admin/admin_screen.dart';
 import 'screens/admin/admin_basureros_screen.dart';
+import 'screens/admin/admin_usuarios_screen.dart';
 import 'services/api_service.dart';
 import 'dart:html' as html;
 
@@ -269,6 +270,7 @@ class MyApp extends StatelessWidget {
         '/puntos/reciclar': (context) => const ReciclarScreen(),
         '/admin': (context) => const AdminScreen(),
         '/admin/basureros': (context) => const AdminBasurerosScreen(),
+        '/admin/usuarios': (context) => const AdminUsuariosScreen(),
       },
     );
   }

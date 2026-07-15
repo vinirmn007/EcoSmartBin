@@ -1,9 +1,9 @@
-part of 'admin_basureros_screen.dart';
+part of 'admin_usuarios_screen.dart';
 
-class _AdminBasurerosView extends StatelessWidget {
-  final _AdminBasurerosScreenState state;
+class _AdminUsuariosView extends StatelessWidget {
+  final _AdminUsuariosScreenState state;
 
-  const _AdminBasurerosView({required this.state});
+  const _AdminUsuariosView({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class _AdminBasurerosView extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          'Gestión de Basureros',
+          'Gestión de Usuarios',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
@@ -25,28 +25,20 @@ class _AdminBasurerosView extends StatelessWidget {
         child: state._isLoading
             ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
             : RefreshIndicator(
-                onRefresh: state._fetchBasureros,
+                onRefresh: state._fetchUsuarios,
                 color: const Color(0xFF10B981),
                 backgroundColor: const Color(0xFF1E293B),
-                child: state._basureros.isEmpty
+                child: state._usuarios.isEmpty
                     ? _buildEmptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: state._basureros.length,
+                        itemCount: state._usuarios.length,
                         itemBuilder: (context, index) {
-                          final b = state._basureros[index];
-                          final isActive = b['is_active'] ?? true;
-                          final status = b['status'] ?? 'libre'; // libre/ocupado
-                          return _buildBasureroCard(b, isActive, status);
+                          final u = state._usuarios[index];
+                          return _buildUsuarioCard(context, u);
                         },
                       ),
               ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: state._mostrarModalCreacion,
-        backgroundColor: const Color(0xFF10B981),
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text('Nuevo Basurero', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -56,10 +48,10 @@ class _AdminBasurerosView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.delete_outline_rounded, size: 80, color: Colors.white.withOpacity(0.2)),
+          Icon(Icons.people_outline_rounded, size: 80, color: Colors.white.withOpacity(0.2)),
           const SizedBox(height: 16),
           Text(
-            'No hay basureros registrados.',
+            'No hay usuarios registrados.',
             style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 16),
           ),
         ],
@@ -67,7 +59,14 @@ class _AdminBasurerosView extends StatelessWidget {
     );
   }
 
-  Widget _buildBasureroCard(Map<String, dynamic> b, bool isActive, String status) {
+  Widget _buildUsuarioCard(BuildContext context, Map<String, dynamic> u) {
+    final isActive = u['is_active'] ?? true;
+    final role = u['role'] ?? 'user';
+    final nombres = u['nombres'] ?? '';
+    final apellidos = u['apellidos'] ?? '';
+    final email = u['email'] ?? '';
+    final puntos = u['puntos_ecologicos'] ?? 0;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -76,24 +75,22 @@ class _AdminBasurerosView extends StatelessWidget {
         border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: isActive 
-                ? (status == 'libre' ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2))
-                : Colors.red.withOpacity(0.2),
+            color: role == 'admin' 
+                ? const Color(0xFF10B981).withOpacity(0.2)
+                : Colors.blue.withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.delete_rounded,
-            color: isActive 
-                ? (status == 'libre' ? Colors.greenAccent : Colors.orangeAccent)
-                : Colors.redAccent,
+            role == 'admin' ? Icons.admin_panel_settings_rounded : Icons.person_rounded,
+            color: role == 'admin' ? const Color(0xFF10B981) : Colors.blueAccent,
           ),
         ),
         title: Text(
-          '${b['nombre'] ?? 'Desconocido'} (${b['public_id'] ?? ''})',
+          '$nombres $apellidos',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
@@ -101,16 +98,9 @@ class _AdminBasurerosView extends StatelessWidget {
           children: [
             const SizedBox(height: 4),
             Text(
-              b['ubicacion'] ?? 'Sin ubicación',
+              email,
               style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
             ),
-            if (b['latitud'] != null && b['longitud'] != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                'Lat: ${b['latitud']}, Lng: ${b['longitud']}',
-                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11),
-              ),
-            ],
             const SizedBox(height: 4),
             Row(
               children: [
@@ -130,23 +120,25 @@ class _AdminBasurerosView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: status == 'libre' ? Colors.blue.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    status.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: status == 'libre' ? Colors.lightBlueAccent : Colors.orangeAccent,
-                    ),
-                  ),
-                ),
+                Text(
+                  '⭐️ $puntos pts',
+                  style: const TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                )
               ],
             )
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit_rounded, color: Colors.blueAccent),
+              onPressed: () => state._mostrarModalEdicion(u),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_rounded, color: Colors.redAccent),
+              onPressed: () => state._eliminarUsuario(u['id']),
+            ),
           ],
         ),
       ),

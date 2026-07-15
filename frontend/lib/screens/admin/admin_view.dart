@@ -52,6 +52,16 @@ class _AdminView extends StatelessWidget {
                   );
                 },
               ),
+              const SizedBox(height: 16),
+              _buildAdminCard(
+                context,
+                title: 'Gestión de Usuarios',
+                subtitle: 'Ver, editar o eliminar usuarios registrados en el sistema.',
+                icon: Icons.people_alt_rounded,
+                onTap: () {
+                  Navigator.pushNamed(context, '/admin/usuarios');
+                },
+              ),
             ],
           ),
         ),

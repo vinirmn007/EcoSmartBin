@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from supabase import create_client, Client
 from schemas.usuario_schemas import UserRegisterSchema, UserLoginSchema, RecoverPasswordSchema, ResetPasswordSchema
 from supabase_auth import UserAttributes
@@ -245,4 +246,157 @@ def change_password(data: ResetPasswordSchema):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Error al restablecer la contraseña: {str(e)}"
+        )
+
+
+# ═══════════════════════════════════════════════
+# UTILERÍAS DE ADMINISTRACIÓN DE USUARIOS
+# ═══════════════════════════════════════════════
+
+def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    if current_user.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Operación no autorizada. Se requieren privilegios de administrador."
+        )
+    return current_user
+
+
+@router.get("/users", response_model=None)
+def list_users(
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_admin)
+):
+    """
+    Lista todos los usuarios registrados en el sistema (perfiles).
+    Solo accesible para administradores.
+    """
+    try:
+        users = db.query(PerfilUsuario).order_by(PerfilUsuario.created_at.desc()).all()
+        return [
+            {
+                "id": u.id,
+                "email": u.email,
+                "nombres": u.nombres,
+                "apellidos": u.apellidos,
+                "cedula": u.cedula,
+                "facultad": u.facultad,
+                "role": u.role,
+                "puntos_ecologicos": u.puntos_ecologicos,
+                "is_active": u.is_active,
+                "created_at": u.created_at
+            }
+            for u in users
+        ]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al listar usuarios: {str(e)}"
+        )
+
+
+@router.put("/users/{user_id}", response_model=None)
+def update_user_admin(
+    user_id: str,
+    data: dict,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_admin)
+):
+    """
+    Actualiza la información de un usuario desde el panel de admin.
+    Actualiza tanto 'perfiles' como 'auth.users' de Supabase directamente vía SQL.
+    """
+    try:
+        perfil = db.query(PerfilUsuario).filter(PerfilUsuario.id == user_id).first()
+        if not perfil:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+        
+        email = data.get("email")
+        nombres = data.get("nombres")
+        apellidos = data.get("apellidos")
+        cedula = data.get("cedula")
+        facultad = data.get("facultad")
+        role = data.get("role")
+        is_active = data.get("is_active")
+
+        # 1. Actualizar perfiles local
+        if email is not None:
+            perfil.email = email
+        if nombres is not None:
+            perfil.nombres = nombres
+        if apellidos is not None:
+            perfil.apellidos = apellidos
+        if cedula is not None:
+            perfil.cedula = cedula
+        if facultad is not None:
+            perfil.facultad = facultad
+        if role is not None:
+            perfil.role = role
+        if is_active is not None:
+            perfil.is_active = is_active
+        
+        db.commit()
+
+        # 2. Sincronizar con auth.users en Supabase directamente por SQL
+        if email is not None:
+            db.execute(
+                text("UPDATE auth.users SET email = :email WHERE id = :uid"),
+                {"email": email, "uid": user_id}
+            )
+        
+        if role is not None:
+            db.execute(
+                text("""
+                    UPDATE auth.users 
+                    SET raw_user_meta_data = jsonb_set(
+                        COALESCE(raw_user_meta_data, '{}'::jsonb), 
+                        '{role}', 
+                        :role
+                    ) 
+                    WHERE id = :uid
+                """),
+                {"role": f'"{role}"', "uid": user_id}
+            )
+        
+        db.commit()
+        return {"message": "Usuario actualizado exitosamente."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al actualizar usuario: {str(e)}"
+        )
+
+
+@router.delete("/users/{user_id}", response_model=None)
+def delete_user_admin(
+    user_id: str,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_admin)
+):
+    """
+    Elimina un usuario y su perfil tanto de la tabla local como de auth.users de Supabase.
+    """
+    try:
+        perfil = db.query(PerfilUsuario).filter(PerfilUsuario.id == user_id).first()
+        if not perfil:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+        
+        # 1. Eliminar perfil de 'perfiles'
+        db.delete(perfil)
+        db.commit()
+
+        # 2. Eliminar usuario de 'auth.users'
+        db.execute(
+            text("DELETE FROM auth.users WHERE id = :uid"),
+            {"uid": user_id}
+        )
+        db.commit()
+
+        return {"message": "Usuario eliminado exitosamente."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error al eliminar usuario: {str(e)}"
         )

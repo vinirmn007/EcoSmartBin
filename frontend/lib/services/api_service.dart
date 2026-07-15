@@ -535,7 +535,11 @@ class ApiService {
 
   static Future<Map<String, dynamic>> crearBasurero({
     required String publicId,
-    required String localizacion,
+    required String nombre,
+    String? ubicacion,
+    double? latitud,
+    double? longitud,
+    String estado = 'activo',
   }) async {
     final token = await getToken();
     if (token == null) return {'success': false, 'message': 'No autenticado'};
@@ -543,7 +547,11 @@ class ApiService {
     try {
       final body = {
         'public_id': publicId,
-        'localizacion_geografica': localizacion,
+        'nombre': nombre,
+        'ubicacion': ubicacion,
+        'latitud': latitud,
+        'longitud': longitud,
+        'estado': estado,
       };
       final response = await http.post(
         Uri.parse('$gatewayUrl/bins'),
@@ -553,13 +561,93 @@ class ApiService {
         },
         body: jsonEncode(body),
       );
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       }
       final err = jsonDecode(response.body);
       return {
         'success': false,
         'message': err['detail'] ?? 'Error al crear basurero',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  //  USUARIOS — via Gateway (Solo Admin)
+  // ══════════════════════════════════════════════════
+
+  static Future<List<dynamic>> getUsuarios() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/auth/users'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getUsuarios: $e');
+      return [];
+    }
+  }
+
+  static Future<Map<String, dynamic>> actualizarUsuario(
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.put(
+        Uri.parse('$gatewayUrl/auth/users/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Usuario actualizado exitosamente'};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['detail'] ?? 'Error al actualizar usuario',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> eliminarUsuario(String userId) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$gatewayUrl/auth/users/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Usuario eliminado exitosamente'};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['detail'] ?? 'Error al eliminar usuario',
       };
     } catch (e) {
       return {'success': false, 'message': 'Sin conexión al servidor: $e'};
