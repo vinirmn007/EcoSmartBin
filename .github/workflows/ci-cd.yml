@@ -27,8 +27,7 @@ jobs:
       - name: Build and Test Backend
         run: |
           cd Backend
-          chmod +x mvnw
-          ./mvnw clean test
+          mvn clean test
 
   frontend-ci:
     name: Frontend CI (Flutter)
@@ -40,7 +39,6 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.8' # Usando la misma versión del pubspec
           channel: 'stable'
           cache: true
 
@@ -138,7 +136,6 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.10.8'
           channel: 'stable'
           cache: true
 
