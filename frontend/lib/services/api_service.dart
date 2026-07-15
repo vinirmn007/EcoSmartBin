@@ -7,7 +7,10 @@ import '../models/user_profile.dart';
 
 class ApiService {
   // Cambiar a true para conectarse a los servicios corriendo localmente
-  static const bool useLocalBackend = true;
+  static const bool useLocalBackend = false;
+
+  // URL del backend desplegado en AWS EC2
+  static const String _ec2BackendUrl = 'http://3.235.187.126:8081';
 
   // Configuración de la URL Base según la plataforma
   static String get baseUrl {
@@ -21,16 +24,7 @@ class ApiService {
       }
       return 'http://localhost:8081';
     }
-    if (kIsWeb) {
-      return 'https://gateway-229724129072.southamerica-west1.run.app';
-    } else {
-      try {
-        if (Platform.isAndroid) {
-          return 'https://gateway-229724129072.southamerica-west1.run.app';
-        }
-      } catch (_) {}
-      return 'https://gateway-229724129072.southamerica-west1.run.app';
-    }
+    return _ec2BackendUrl;
   }
 
   // ── Puntos local o producción ──
@@ -45,17 +39,7 @@ class ApiService {
       }
       return 'http://localhost:8081';
     }
-    if (kReleaseMode) {
-      // TODO: Reemplazar con la URL real de Cloud Run del servicio de puntos cuando se despliegue
-      return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
-    }
-    if (kIsWeb)
-      return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
-    try {
-      if (Platform.isAndroid)
-        return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
-    } catch (_) {}
-    return 'https://servicio-puntos-229724129072.southamerica-west1.run.app';
+    return _ec2BackendUrl;
   }
 
   // ── IA local o producción ──
