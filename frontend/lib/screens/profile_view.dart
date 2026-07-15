@@ -17,16 +17,16 @@ class _ProfileView extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Slate 900
+      backgroundColor: const Color(0xFFF8FAFC), // Light background
       body: IndexedStack(
         index: state._currentIndex,
         children: _tabs,
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Colors.white.withOpacity(0.08),
+              color: Color(0xFFE2E8F0),
               width: 1,
             ),
           ),
@@ -42,9 +42,9 @@ class _ProfileView extends StatelessWidget {
               state._fetchProfile();
             }
           },
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: Colors.white,
           selectedItemColor: const Color(0xFF10B981),
-          unselectedItemColor: Colors.white38,
+          unselectedItemColor: const Color(0xFF64748B),
           type: BottomNavigationBarType.fixed,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
@@ -88,14 +88,14 @@ class _ProfileView extends StatelessWidget {
     final isDesktop = size.width > 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Mi Perfil Ecológico',
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -152,14 +152,14 @@ class _ProfileView extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF047857), // Emerald 700
-            Color(0xFF065F46), // Emerald 800
+            Color(0xFF10B981), // Emerald 500
+            Color(0xFF059669), // Emerald 600
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF10B981).withOpacity(0.3),
+            color: const Color(0xFF10B981).withOpacity(0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -213,9 +213,16 @@ class _ProfileView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +230,7 @@ class _ProfileView extends StatelessWidget {
           Text(
             'Información Personal',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
+              color: const Color(0xFF0F172A),
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
             ),
@@ -273,8 +280,8 @@ class _ProfileView extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
                   fontSize: 12,
                 ),
               ),
@@ -282,7 +289,7 @@ class _ProfileView extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF0F172A),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -295,9 +302,9 @@ class _ProfileView extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Divider(color: Colors.white.withOpacity(0.08), height: 1),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Divider(color: Color(0xFFE2E8F0), height: 1),
     );
   }
 
@@ -306,9 +313,16 @@ class _ProfileView extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -322,17 +336,17 @@ class _ProfileView extends StatelessWidget {
           const Text(
             'Error al cargar el perfil',
             style: TextStyle(
-              color: Colors.white,
+              color: Color(0xFF0F172A),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Asegúrate de que el servidor esté levantado y tu sesión sea válida.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Color(0xFF475569),
               fontSize: 14,
             ),
           ),

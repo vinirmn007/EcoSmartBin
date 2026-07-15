@@ -15,17 +15,7 @@ class _LoginView extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A), // Slate 900
-              Color(0xFF1E293B), // Slate 800
-              Color(0xFF0F172A), // Slate 900
-            ],
-          ),
-        ),
+        color: const Color(0xFFF8FAFC),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -36,17 +26,22 @@ class _LoginView extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: const Color(0xFFE2E8F0),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.03),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -62,14 +57,14 @@ class _LoginView extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.recycling_rounded,
-                            color: Color(0xFF10B981), // Emerald 500
+                            color: Color(0xFF10B981),
                             size: 40,
                           ),
                           const SizedBox(width: 12),
                           Text(
                             'EcoSmartBin',
                             style: theme.textTheme.headlineMedium?.copyWith(
-                              color: Colors.white,
+                              color: const Color(0xFF0F172A),
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
                             ),
@@ -81,7 +76,7 @@ class _LoginView extends StatelessWidget {
                         'Accede a tu cuenta ecológica',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: const Color(0xFF475569),
                           fontSize: 14,
                         ),
                       ),
@@ -115,17 +110,17 @@ class _LoginView extends StatelessWidget {
                       // Email Input
                       TextFormField(
                         controller: state._emailController,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'Correo Electrónico',
-                          labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                          prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.6)),
+                          labelStyle: const TextStyle(color: Color(0xFF475569)),
+                          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF475569)),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.03),
+                          fillColor: const Color(0xFFF1F5F9),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -157,25 +152,25 @@ class _LoginView extends StatelessWidget {
                       TextFormField(
                         controller: state._passwordController,
                         obscureText: state._obscurePassword,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
-                          labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                          prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.6)),
+                          labelStyle: const TextStyle(color: Color(0xFF475569)),
+                          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF475569)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               state._obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                              color: Colors.white.withOpacity(0.6),
+                              color: const Color(0xFF475569),
                             ),
                             onPressed: () {
                               state.setState(() => state._obscurePassword = !state._obscurePassword);
                             },
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.03),
+                          fillColor: const Color(0xFFF1F5F9),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -223,7 +218,6 @@ class _LoginView extends StatelessWidget {
                       ),
                       const SizedBox(height: 32),
 
-
                       // Login Button
                       ElevatedButton(
                         onPressed: state._isLoading ? null : state._handleLogin,
@@ -257,9 +251,9 @@ class _LoginView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
+                          const Text(
                             '¿No tienes una cuenta? ',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
+                            style: TextStyle(color: Color(0xFF475569), fontSize: 13),
                           ),
                           TextButton(
                             onPressed: () {

@@ -5,7 +5,7 @@ class _ReciclarView extends StatelessWidget {
 
   const _ReciclarView({required this.state});
 
-  // Mapeo de tipos de reciclaje a iconos y colores para la UI
+  // ── Mapeo de tipos de reciclaje a iconos y colores para la UI ──────────────
   static const Map<String, Map<String, dynamic>> _tipoVisual = {
     'plastic': {'icon': Icons.local_drink_rounded, 'color': 0xFF3B82F6, 'emoji': '♻️'},
     'paper': {'icon': Icons.description_rounded, 'color': 0xFF8B5CF6, 'emoji': '📄'},
@@ -24,30 +24,55 @@ class _ReciclarView extends StatelessWidget {
     'trash': 'Basura General',
   };
 
+  static const Color _emerald = Color(0xFF10B981);
+  static const Color _bgLight = Color(0xFFF8FAFC);
+  static const Color _cardLight = Color(0xFFFFFFFF);
+  static const Color _textDark = Color(0xFF0F172A);
+  static const Color _textGray = Color(0xFF475569);
+  static const Color _borderLight = Color(0xFFE2E8F0);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: _bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: _cardLight,
         elevation: 0,
-        leading: (Navigator.canPop(context) && ModalRoute.of(context)?.settings.name == '/puntos/reciclar')
+        surfaceTintColor: Colors.transparent,
+        leading: (Navigator.canPop(context) &&
+                ModalRoute.of(context)?.settings.name == '/puntos/reciclar')
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: _textDark),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
-        title: const Text(
+        title: Text(
           'Reciclar y Acumular',
-          style: TextStyle(
-            color: Colors.white,
+          style: GoogleFonts.poppins(
+            color: _textDark,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
       ),
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.0, 0.06),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              )),
+              child: child,
+            ),
+          );
+        },
         child: _buildBodyForStep(context),
       ),
     );
@@ -70,116 +95,160 @@ class _ReciclarView extends StatelessWidget {
     }
   }
 
-  // ── PASO 0: Cámara Escáner Simulado ──────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASO 0: Escáner de Código QR
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildScanningStep() {
-    return Column(
+    return Center(
       key: const ValueKey('scanning'),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 40),
-          child: Text(
-            'Escaneando Basurero Inteligente',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Alinea el código QR del basurero en el recuadro',
-          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
-        ),
-        const SizedBox(height: 40),
-
-        // Contenedor del visor de la cámara simulada
-        Center(
-          child: Container(
-            width: 260,
-            height: 260,
-            decoration: BoxDecoration(
-              color: Colors.black38,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF10B981), width: 2),
-            ),
-            child: Stack(
-              children: [
-                // Esquinas del visor (diseño premium de escaneo)
-                _buildCorner(top: 10, left: 10, angle: 0),
-                _buildCorner(top: 10, right: 10, angle: 90),
-                _buildCorner(bottom: 10, left: 10, angle: 270),
-                _buildCorner(bottom: 10, right: 10, angle: 180),
-
-                // Código QR simulado en el centro con opacidad
-                Center(
-                  child: Opacity(
-                    opacity: 0.15,
-                    child: Icon(
-                      Icons.qr_code_2_rounded,
-                      size: 160,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                  ),
-                ),
-
-                // Línea láser animada
-                AnimatedBuilder(
-                  animation: state._scannerAnimation,
-                  builder: (context, child) {
-                    final topOffset = state._scannerAnimation.value * 230 + 10;
-                    return Positioned(
-                      top: topOffset,
-                      left: 20,
-                      right: 20,
-                      child: Container(
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF10B981),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withOpacity(0.8),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 45),
-
-        const Row(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(Color(0xFF10B981)),
-              ),
-            ),
-            SizedBox(width: 12),
+            // Header
             Text(
-              'Buscando basurero cercano...',
-              style: TextStyle(color: Color(0xFF10B981), fontSize: 14, fontWeight: FontWeight.w600),
-            ),
+              'Escaneando Basurero',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: _textDark,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ).animate().fadeIn(duration: 500.ms),
+            const SizedBox(height: 8),
+            Text(
+              'Alinea el código QR del basurero en el recuadro',
+              style: GoogleFonts.poppins(
+                color: _textGray,
+                fontSize: 13,
+              ),
+            ).animate().fadeIn(delay: 100.ms, duration: 500.ms),
+            const SizedBox(height: 48),
+
+            // Visor del escáner premium
+            Center(
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  color: _cardLight,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: _emerald.withOpacity(0.5), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 30,
+                      spreadRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    // Esquinas del visor
+                    _buildCorner(top: 12, left: 12, angle: 0),
+                    _buildCorner(top: 12, right: 12, angle: 90),
+                    _buildCorner(bottom: 12, left: 12, angle: 270),
+                    _buildCorner(bottom: 12, right: 12, angle: 180),
+
+                    // QR simulado
+                    Center(
+                      child: Opacity(
+                        opacity: 0.1,
+                        child: Icon(
+                          Icons.qr_code_2_rounded,
+                          size: 180,
+                          color: _textDark,
+                        ),
+                      ),
+                    ),
+
+                    // Línea láser animada
+                    AnimatedBuilder(
+                      animation: state._scannerAnimation,
+                      builder: (context, child) {
+                        final topOffset =
+                            state._scannerAnimation.value * 246 + 16;
+                        return Positioned(
+                          top: topOffset,
+                          left: 20,
+                          right: 20,
+                          child: Container(
+                            height: 2.5,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  _emerald.withOpacity(0),
+                                  _emerald,
+                                  _emerald.withOpacity(0),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _emerald.withOpacity(0.9),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
+            const SizedBox(height: 48),
+
+            // Indicador de búsqueda
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: _cardLight,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: _borderLight),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(_emerald),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Buscando basurero cercano...',
+                    style: GoogleFonts.poppins(
+                      color: _emerald,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
           ],
         ),
-        const SizedBox(height: 20),
-      ],
+      ),
     );
   }
 
-  Widget _buildCorner({double? top, double? bottom, double? left, double? right, required double angle}) {
+  Widget _buildCorner(
+      {double? top, double? bottom, double? left, double? right, required double angle}) {
     return Positioned(
       top: top,
       bottom: bottom,
@@ -188,12 +257,12 @@ class _ReciclarView extends StatelessWidget {
       child: Transform.rotate(
         angle: angle * 3.14159 / 180,
         child: Container(
-          width: 24,
-          height: 24,
+          width: 26,
+          height: 26,
           decoration: const BoxDecoration(
             border: Border(
-              top: BorderSide(color: Color(0xFF10B981), width: 4),
-              left: BorderSide(color: Color(0xFF10B981), width: 4),
+              top: BorderSide(color: _emerald, width: 4),
+              left: BorderSide(color: _emerald, width: 4),
             ),
           ),
         ),
@@ -201,290 +270,373 @@ class _ReciclarView extends StatelessWidget {
     );
   }
 
-  // ── PASO 1: Esperando que la IA clasifique ──────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASO 1: Esperando que la IA clasifique
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildWaitingIAStep() {
     return Center(
       key: const ValueKey('waiting_ia'),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Banner de basurero conectado
+            // Banner basurero conectado
+            _buildConnectedBanner(),
+            const SizedBox(height: 48),
+
+            // Lottie placeholder (usando el widget de lottie con URL pública)
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 180,
+              height: 180,
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+                color: const Color(0xFF3B82F6).withOpacity(0.08),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: const Color(0xFF3B82F6).withOpacity(0.25),
+                    width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF3B82F6).withOpacity(0.1),
+                    blurRadius: 30,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.psychology_rounded,
+                color: Color(0xFF3B82F6),
+                size: 64,
+              ),
+            )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scaleXY(begin: 1.0, end: 1.05, duration: 900.ms)
+                .then()
+                .scaleXY(begin: 1.05, end: 1.0, duration: 900.ms),
+            const SizedBox(height: 36),
+
+            Text(
+              'Analizando con IA...',
+              style: GoogleFonts.poppins(
+                color: _textDark,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'La cámara del basurero está clasificando\ntu residuo automáticamente',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: _textGray,
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Contador de intentos
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: _cardLight,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _borderLight),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 28),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '¡Basurero Conectado!',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          state._detectedBinId,
-                          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
-                        ),
-                      ],
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: const AlwaysStoppedAnimation(
+                          Color(0xFF3B82F6)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Intento ${state._pollingAttempts}/${_ReciclarScreenState._maxPollingAttempts}',
+                    style: GoogleFonts.poppins(
+                      color: _textGray,
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 48),
-
-            // Animación de escáner IA
-            Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withOpacity(0.1),
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
-              ),
-              child: const Icon(
-                Icons.psychology_rounded,
-                color: Color(0xFF3B82F6),
-                size: 56,
-              ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              'Analizando con IA...',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'La cámara del basurero está clasificando\ntu residuo automáticamente',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13, height: 1.5),
-            ),
-            const SizedBox(height: 32),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation(Color(0xFF3B82F6)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Intento ${state._pollingAttempts}/${_ReciclarScreenState._maxPollingAttempts}',
-                  style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
-                ),
-              ],
-            ),
           ],
         ),
       ),
     );
   }
 
-  // ── PASO 2: Confirmar Clasificación (IA o Manual) ────
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASO 2: Confirmar Clasificación (IA o Manual)
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildConfirmationStep() {
-    final bool tieneIA = state._clasificacionIA != null && !state._modoManual;
+    final bool tieneIA =
+        state._clasificacionIA != null && !state._modoManual;
 
     return SingleChildScrollView(
       key: const ValueKey('confirmation'),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Banner de basurero conectado
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withOpacity(0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 28),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '¡Basurero Conectado!',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        state._detectedBinId,
-                        style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildConnectedBanner(),
           const SizedBox(height: 24),
 
-          // ── Resultado de la IA ──
+          // ── Resultado IA ──
           if (tieneIA) ...[
             _buildIADetectionCard(),
-            const SizedBox(height: 12),
-            // Botones secundarios
+            const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: TextButton.icon(
-                    onPressed: state._switchToManualMode,
-                    icon: Icon(Icons.edit_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
-                    label: Text(
-                      'Cambiar manual',
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
-                    ),
+                  child: _ActionChip(
+                    icon: Icons.edit_rounded,
+                    label: 'Cambiar manual',
+                    onTap: state._switchToManualMode,
                   ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: TextButton.icon(
-                    onPressed: state._retryScan,
-                    icon: Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white.withOpacity(0.5)),
-                    label: Text(
-                      'Tomar otra foto',
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
-                    ),
+                  child: _ActionChip(
+                    icon: Icons.camera_alt_rounded,
+                    label: 'Tomar otra foto',
+                    onTap: state._retryScan,
                   ),
                 ),
               ],
             ),
           ] else ...[
-            // ── Modo manual (dropdown) ──
-            const Text(
+            // ── Modo Manual ──
+            Text(
               'Selección Manual',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.poppins(
+                color: _textDark,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'Selecciona el residuo que vas a depositar en el basurero',
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+              style: GoogleFonts.poppins(
+                color: _textGray,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 24),
             if (state._loadingTipos)
               const Center(
                 child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Color(0xFF10B981))),
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation(_emerald),
+                  ),
                 ),
               )
             else ...[
-              const Text(
+              Text(
                 'Material:',
-                style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14),
+                style: GoogleFonts.poppins(
+                  color: _textGray,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int>(
                 value: state._tipoSeleccionado,
-                dropdownColor: const Color(0xFF1E293B),
-                style: const TextStyle(color: Colors.white),
+                dropdownColor: _cardLight,
+                style: GoogleFonts.poppins(
+                    color: _textDark, fontSize: 14),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.05),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-                  ),
+                  fillColor: _cardLight,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                    borderSide: BorderSide(color: _borderLight),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Color(0xFF10B981)),
+                    borderSide: const BorderSide(color: _emerald, width: 1.5),
                   ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
-                items: state._tiposReciclaje.map<DropdownMenuItem<int>>((t) {
+                items: state._tiposReciclaje
+                    .map<DropdownMenuItem<int>>((t) {
                   return DropdownMenuItem<int>(
                     value: t['id'] as int,
                     child: Text(
-                      '${t['nombre']} — ${t['puntosPorUnidad']} pts/ud',
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                        '${t['nombre']} — ${t['puntosPorUnidad']} pts/ud'),
                   );
                 }).toList(),
-                onChanged: (v) => state.setState(() => state._tipoSeleccionado = v),
+                onChanged: (v) =>
+                    state.setState(() => state._tipoSeleccionado = v),
               ),
             ],
           ],
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
 
-          // Selector de Cantidad
-          const Text(
-            'Cantidad de unidades:',
-            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  if (state._cantidad > 1) {
-                    state.setState(() => state._cantidad--);
-                  }
-                },
-                icon: const Icon(Icons.remove_circle_outline_rounded, color: Color(0xFF10B981), size: 28),
-              ),
-              Container(
-                width: 60,
-                alignment: Alignment.center,
-                child: Text(
-                  '${state._cantidad}',
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          // ── Selector de Cantidad ──
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _cardLight,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _borderLight),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-              IconButton(
-                onPressed: () {
-                  state.setState(() => state._cantidad++);
-                },
-                icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF10B981), size: 28),
-              ),
-            ],
-          ),
-          const SizedBox(height: 40),
-
-          // Botón para Confirmar Depósito
-          ElevatedButton.icon(
-            onPressed: state._submitReciclaje,
-            icon: const Icon(Icons.eco_rounded),
-            label: Text(tieneIA ? 'Confirmar Clasificación IA' : 'Confirmar Depósito'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ],
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cantidad de unidades',
+                  style: GoogleFonts.poppins(
+                    color: _textGray,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _QuantityButton(
+                      icon: Icons.remove_rounded,
+                      onTap: () {
+                        if (state._cantidad > 1) {
+                          state.setState(() => state._cantidad--);
+                        }
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        '${state._cantidad}',
+                        style: GoogleFonts.poppins(
+                          color: _textDark,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    _QuantityButton(
+                      icon: Icons.add_rounded,
+                      onTap: () =>
+                          state.setState(() => state._cantidad++),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // ── Botón Confirmar ──
+          _GradientButton(
+            label:
+                tieneIA ? 'Confirmar Clasificación IA' : 'Confirmar Depósito',
+            icon: Icons.eco_rounded,
+            onTap: state._submitReciclaje,
           ),
         ],
       ),
     );
   }
 
-  /// Card grande que muestra el resultado de la IA
+  /// Banner de basurero conectado reutilizable
+  Widget _buildConnectedBanner() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardLight,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _emerald.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.check_circle_rounded,
+                color: _emerald, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '¡Basurero Conectado!',
+                  style: GoogleFonts.poppins(
+                    color: _textDark,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  state._detectedBinId,
+                  style: GoogleFonts.poppins(
+                    color: _textGray,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: _emerald,
+              shape: BoxShape.circle,
+            ),
+          )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .fadeOut(duration: 800.ms),
+        ],
+      ),
+    );
+  }
+
+  /// Card de resultado de la IA
   Widget _buildIADetectionCard() {
     final clasificacion = state._clasificacionIA!;
-    final tipoDetectado = clasificacion['tipoDetectado'] as String? ?? 'trash';
-    final confianza = (clasificacion['confianza'] as num?)?.toDouble() ?? 0.0;
+    final tipoDetectado =
+        clasificacion['tipoDetectado'] as String? ?? 'trash';
+    final confianza =
+        (clasificacion['confianza'] as num?)?.toDouble() ?? 0.0;
     final nombreTipo = clasificacion['nombreTipo'] as String? ??
         _tipoNombreES[tipoDetectado] ?? 'Desconocido';
 
@@ -493,7 +645,8 @@ class _ReciclarView extends StatelessWidget {
     final icon = visual['icon'] as IconData;
     final confianzaPct = (confianza * 100).toStringAsFixed(1);
 
-    final String? imagenBase64Full = clasificacion['imagenBase64'] as String?;
+    final String? imagenBase64Full =
+        clasificacion['imagenBase64'] as String?;
     String? base64Str;
     if (imagenBase64Full != null && imagenBase64Full.contains(',')) {
       base64Str = imagenBase64Full.split(',').last;
@@ -502,16 +655,21 @@ class _ReciclarView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withOpacity(0.15),
-            color.withOpacity(0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
+        color: _cardLight,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -520,7 +678,7 @@ class _ReciclarView extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 300),
+                constraints: const BoxConstraints(maxHeight: 280),
                 child: Image.memory(
                   base64Decode(base64Str),
                   width: double.infinity,
@@ -528,9 +686,13 @@ class _ReciclarView extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: double.infinity,
-                      height: 180,
-                      color: Colors.black26,
-                      child: const Icon(Icons.broken_image_rounded, color: Colors.white54, size: 48),
+                      height: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.broken_image_rounded,
+                          color: Colors.white54, size: 44),
                     );
                   },
                 ),
@@ -539,30 +701,33 @@ class _ReciclarView extends StatelessWidget {
             const SizedBox(height: 20),
           ],
 
-          // Icono del tipo con badge de IA
+          // Icono del tipo con badge IA
           Stack(
             alignment: Alignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.15),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                      color: color.withOpacity(0.3), width: 1),
                 ),
                 child: Icon(icon, color: color, size: 48),
               ),
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: color, width: 2),
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: _cardLight,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color, width: 2),
+                    ),
+                    child: Icon(Icons.smart_toy_rounded,
+                        color: color, size: 15),
                   ),
-                  child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 16),
-                ),
               ),
             ],
           ),
@@ -570,49 +735,59 @@ class _ReciclarView extends StatelessWidget {
 
           // Label "IA detectó"
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text(
+            child: Text(
               '🤖 Detectado por IA',
-              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+              style: GoogleFonts.poppins(
+                color: _textGray,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           // Nombre del tipo
           Text(
             nombreTipo,
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               color: color,
-              fontSize: 28,
+              fontSize: 30,
               fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
+              letterSpacing: 0.3,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
-          // Barra de confianza
+          // Confianza texto
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Confianza: ',
-                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                style: GoogleFonts.poppins(
+                  color: _textGray,
+                  fontSize: 13,
+                ),
               ),
               Text(
                 '$confianzaPct%',
-                style: TextStyle(
-                  color: confianza >= 0.7 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                style: GoogleFonts.poppins(
+                  color: confianza >= 0.7
+                      ? _emerald
+                      : const Color(0xFFD97706),
                   fontSize: 15,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           // Barra visual de confianza
           ClipRRect(
@@ -620,9 +795,11 @@ class _ReciclarView extends StatelessWidget {
             child: LinearProgressIndicator(
               value: confianza,
               minHeight: 6,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: _borderLight,
               valueColor: AlwaysStoppedAnimation(
-                confianza >= 0.7 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                confianza >= 0.7
+                    ? _emerald
+                    : const Color(0xFFD97706),
               ),
             ),
           ),
@@ -631,82 +808,176 @@ class _ReciclarView extends StatelessWidget {
     );
   }
 
-  // ── PASO 3: Enviando registro... ─────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASO 3: Enviando registro
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildSubmittingStep() {
     return Center(
       key: const ValueKey('submitting'),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
-          ),
-          const SizedBox(height: 24),
-          const Text(
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: _emerald.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(_emerald),
+              ),
+            ),
+          )
+              .animate(onPlay: (c) => c.repeat())
+              .scaleXY(begin: 1.0, end: 1.08, duration: 700.ms)
+              .then()
+              .scaleXY(begin: 1.08, end: 1.0, duration: 700.ms),
+          const SizedBox(height: 28),
+          Text(
             'Registrando reciclaje...',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(
+              color: _textDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Enviando confirmación a la base de datos',
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+            style: GoogleFonts.poppins(
+              color: _textGray,
+              fontSize: 13,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── PASO 4: Éxito y Acumulación ──────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASO 4: Éxito y Acumulación de Puntos
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildSuccessStep(BuildContext context) {
     return Center(
       key: const ValueKey('success'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Animación de éxito (Lottie placeholder)
             Container(
-              padding: const EdgeInsets.all(24),
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withOpacity(0.15),
+                gradient: RadialGradient(
+                  colors: [
+                    _emerald.withOpacity(0.25),
+                    _emerald.withOpacity(0.0),
+                  ],
+                ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFF10B981),
-                size: 72,
+              child: Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: _emerald.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: _emerald.withOpacity(0.4), width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: _emerald,
+                    size: 52,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
+            )
+                .animate()
+                .scale(
+                    begin: const Offset(0.3, 0.3),
+                    end: const Offset(1.0, 1.0),
+                    duration: 600.ms,
+                    curve: Curves.elasticOut)
+                .fadeIn(duration: 400.ms),
+            const SizedBox(height: 36),
+
+            Text(
               '¡Reciclaje Completado!',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-            ),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: _textDark,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ).animate().fadeIn(delay: 300.ms, duration: 500.ms),
             const SizedBox(height: 12),
             Text(
               'Has acumulado con éxito:',
-              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '+${state._puntosGanados} EcoPuntos 🌱',
-              style: const TextStyle(
-                color: Color(0xFF10B981),
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
+              style: GoogleFonts.poppins(
+                color: _textGray,
+                fontSize: 14,
               ),
-            ),
-            const SizedBox(height: 48),
+            ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
+            const SizedBox(height: 16),
+
+            // Puntos ganados
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF10B981), Color(0xFF059669)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: _emerald.withOpacity(0.35),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.eco_rounded,
+                      color: Colors.white, size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    '+${state._puntosGanados} EcoPuntos',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            )
+                .animate()
+                .fadeIn(delay: 500.ms, duration: 600.ms)
+                .slideY(begin: 0.3, end: 0, delay: 500.ms),
+            const SizedBox(height: 56),
+
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final isModal = ModalRoute.of(context)?.settings.name == '/puntos/reciclar';
+              child: _GradientButton(
+                label: 'Volver al Panel',
+                icon: Icons.home_rounded,
+                onTap: () {
+                  final isModal = ModalRoute.of(context)?.settings.name ==
+                      '/puntos/reciclar';
                   if (isModal) {
                     Navigator.pop(context);
                   } else {
-                    // Si estamos embebidos en el ProfileScreen (tab), forzamos
-                    // el reemplazo al ProfileScreen para que actualice la info y cambie a la pestaña 0
                     state.setState(() {
                       state._step = 0;
                       state._puntosGanados = 0;
@@ -714,17 +985,208 @@ class _ReciclarView extends StatelessWidget {
                     Navigator.pushReplacementNamed(context, '/profile');
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.white.withOpacity(0.1)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
                 ),
-                child: const Text('Volver al Panel', style: TextStyle(fontWeight: FontWeight.bold)),
+                borderColor: Colors.white.withOpacity(0.1),
               ),
-            ),
+            ).animate().fadeIn(delay: 700.ms, duration: 500.ms),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// COMPONENTES DE SOPORTE PARA RECICLAR
+// =============================================================================
+
+/// Botón de cantidad con hover
+class _QuantityButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _QuantityButton({required this.icon, required this.onTap});
+
+  @override
+  State<_QuantityButton> createState() => _QuantityButtonState();
+}
+
+class _QuantityButtonState extends State<_QuantityButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _hovered
+                ? const Color(0xFF10B981).withOpacity(0.2)
+                : const Color(0xFF10B981).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFF10B981)
+                  .withOpacity(_hovered ? 0.5 : 0.25),
+              width: 1.5,
+            ),
+          ),
+          child: Icon(widget.icon,
+              color: const Color(0xFF10B981), size: 22),
+        ),
+      ),
+    );
+  }
+}
+
+/// Chip de acción secundaria (Cambiar manual / Tomar otra foto)
+class _ActionChip extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionChip(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  State<_ActionChip> createState() => _ActionChipState();
+}
+
+class _ActionChipState extends State<_ActionChip> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: _hovered
+                ? const Color(0xFFE2E8F0)
+                : const Color(0xFFFFFFFF),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _hovered
+                  ? const Color(0xFF10B981).withOpacity(0.3)
+                  : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.icon,
+                  size: 14,
+                  color: const Color(0xFF475569)),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  widget.label,
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFF475569),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botón de gradiente premium reutilizable
+class _GradientButton extends StatefulWidget {
+  final String label;
+  final IconData? icon;
+  final VoidCallback onTap;
+  final Gradient? gradient;
+  final Color? borderColor;
+
+  const _GradientButton({
+    required this.label,
+    required this.onTap,
+    this.icon,
+    this.gradient,
+    this.borderColor,
+  });
+
+  @override
+  State<_GradientButton> createState() => _GradientButtonState();
+}
+
+class _GradientButtonState extends State<_GradientButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: Matrix4.identity()
+            ..translate(0.0, _hovered ? -2.0 : 0.0),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 28, vertical: 17),
+          decoration: BoxDecoration(
+            gradient: widget.gradient ??
+                LinearGradient(
+                  colors: _hovered
+                      ? [const Color(0xFF34D399), const Color(0xFF10B981)]
+                      : [const Color(0xFF10B981), const Color(0xFF059669)],
+                ),
+            borderRadius: BorderRadius.circular(18),
+            border: widget.borderColor != null
+                ? Border.all(color: widget.borderColor!)
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF10B981)
+                    .withOpacity(widget.gradient == null
+                        ? (_hovered ? 0.4 : 0.2)
+                        : 0.0),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.icon != null) ...[
+                Icon(widget.icon, color: Colors.white, size: 18),
+                const SizedBox(width: 10),
+              ],
+              Text(
+                widget.label,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

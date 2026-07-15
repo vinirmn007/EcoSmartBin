@@ -8,20 +8,20 @@ class _CanjesHistorialView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0F172A)),
                 onPressed: () => Navigator.pop(context),
               )
             : null,
         title: const Text(
           'Historial de Canjes',
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -42,7 +42,7 @@ class _CanjesHistorialView extends StatelessWidget {
             )
           : RefreshIndicator(
               color: const Color(0xFF10B981),
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: Colors.white,
               onRefresh: state._loadHistorial,
               child: state._historial.isEmpty
                   ? Center(
@@ -52,13 +52,13 @@ class _CanjesHistorialView extends StatelessWidget {
                           Icon(
                             Icons.shopping_bag_outlined,
                             size: 70,
-                            color: Colors.white.withOpacity(0.15),
+                            color: const Color(0xFF475569).withOpacity(0.15),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'No tienes canjes registrados aún.',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: const Color(0xFF475569).withOpacity(0.6),
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -67,7 +67,7 @@ class _CanjesHistorialView extends StatelessWidget {
                           const Text(
                             '¡Canjea tus puntos por recompensas increíbles!',
                             style: TextStyle(
-                              color: Colors.white30,
+                              color: Color(0xFF94A3B8),
                               fontSize: 13,
                             ),
                           ),
@@ -89,16 +89,23 @@ class _CanjesHistorialView extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withOpacity(0.05)),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.redAccent.withOpacity(0.15),
+                                  color: Colors.redAccent.withOpacity(0.12),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -115,7 +122,7 @@ class _CanjesHistorialView extends StatelessWidget {
                                     Text(
                                       recompensaNombre,
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: Color(0xFF0F172A),
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -123,8 +130,8 @@ class _CanjesHistorialView extends StatelessWidget {
                                     const SizedBox(height: 4),
                                     Text(
                                       state._formatFecha(fecha),
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.4),
+                                      style: const TextStyle(
+                                        color: Color(0xFF64748B),
                                         fontSize: 12,
                                       ),
                                     ),
@@ -132,7 +139,7 @@ class _CanjesHistorialView extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: state._getEstadoColor(htmlEstado).withOpacity(0.15),
+                                        color: state._getEstadoColor(htmlEstado).withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(

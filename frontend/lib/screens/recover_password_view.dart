@@ -12,20 +12,11 @@ class _RecoverPasswordView extends StatelessWidget {
     final isDesktop = size.width > 600;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A), // Slate 900
-              Color(0xFF1E293B), // Slate 800
-              Color(0xFF0F172A), // Slate 900
-            ],
-          ),
-        ),
+        color: const Color(0xFFF8FAFC),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -36,17 +27,17 @@ class _RecoverPasswordView extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: const Color(0xFFE2E8F0),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.02),
                       blurRadius: 20,
-                      offset: const Offset(0, 10),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),

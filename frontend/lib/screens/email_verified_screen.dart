@@ -10,20 +10,11 @@ class EmailVerifiedScreen extends StatelessWidget {
     final isDesktop = size.width > 600;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A), // Slate 900
-              Color(0xFF1E293B), // Slate 800
-              Color(0xFF0F172A), // Slate 900
-            ],
-          ),
-        ),
+        color: const Color(0xFFF8FAFC),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -34,17 +25,17 @@ class EmailVerifiedScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: const Color(0xFFE2E8F0),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.02),
                       blurRadius: 20,
-                      offset: const Offset(0, 10),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -65,7 +56,7 @@ class EmailVerifiedScreen extends StatelessWidget {
                         Text(
                           'EcoSmartBin',
                           style: theme.textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
+                            color: const Color(0xFF0F172A),
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
                           ),
@@ -85,17 +76,17 @@ class EmailVerifiedScreen extends StatelessWidget {
                       '¡Correo Verificado!',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF0F172A),
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Text(
+                    const Text(
                       'Tu correo electrónico ha sido verificado con éxito y tu cuenta ya está completamente activa en EcoSmartBin.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Color(0xFF475569),
                         fontSize: 14,
                         height: 1.5,
                       ),
