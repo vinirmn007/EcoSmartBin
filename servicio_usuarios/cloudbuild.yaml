@@ -40,6 +40,10 @@ steps:
 images:
   - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
 
+# Opciones adicionales de build
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 
 # Variables por defecto para parametrización
 substitutions:
