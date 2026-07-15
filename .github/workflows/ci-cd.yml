@@ -60,6 +60,9 @@ jobs:
     needs: backend-ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/version1'
+    env:
+      ECR_REGISTRY: ${{ secrets.ECR_REGISTRY || '203320211653.dkr.ecr.us-east-1.amazonaws.com' }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'ecosmartbin-backend' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,10 +81,10 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'ecosmartbin-backend' }}
           IMAGE_TAG: latest
         run: |
+          # Intentar crear el repositorio de ECR si no existe
+          aws ecr create-repository --repository-name $ECR_REPOSITORY || true
           cd Backend
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -95,14 +98,14 @@ jobs:
           envs: ECR_REGISTRY, ECR_REPOSITORY
           script: |
             # Autenticar Docker con Amazon ECR en la máquina EC2
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION || 'us-east-1' }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION || 'us-east-1' }} | docker login --username AWS --password-stdin $ECR_REGISTRY
             
             # Detener el contenedor anterior si está corriendo
             docker stop ecosmartbin-backend || true
             docker rm ecosmartbin-backend || true
             
             # Descargar la última imagen
-            docker pull ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY || 'ecosmartbin-backend' }}:latest
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
             
             # Ejecutar el nuevo contenedor con las variables de entorno de base de datos
             docker run -d \
@@ -114,7 +117,7 @@ jobs:
               -e SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI="${{ secrets.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}" \
               -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
               -e SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
-              ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY || 'ecosmartbin-backend' }}:latest
+              $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
   frontend-cd:
     name: Frontend CD (Deploy to Amazon S3)
