@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
+part 'reset_password_view.dart';
+
 class ResetPasswordScreen extends StatefulWidget {
   final String? token;
   final String? refreshToken;
 
-  const ResetPasswordScreen({
-    super.key,
-    this.token,
-    this.refreshToken,
-  });
+  const ResetPasswordScreen({super.key, this.token, this.refreshToken});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -19,7 +17,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _success = false;
   bool _obscurePassword = true;
@@ -47,11 +45,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   Future<void> _handleReset() async {
     if (_token == null) {
-      setState(() => _errorMessage = 'No se encontró un token válido. Solicita un nuevo enlace.');
+      setState(
+        () => _errorMessage =
+            'No se encontró un token válido. Solicita un nuevo enlace.',
+      );
       return;
     }
     if (_refreshToken == null) {
-      setState(() => _errorMessage = 'No se encontró el refresh token. Solicita un nuevo enlace de recuperación.');
+      setState(
+        () => _errorMessage =
+            'No se encontró el refresh token. Solicita un nuevo enlace de recuperación.',
+      );
       return;
     }
     if (!_formKey.currentState!.validate()) return;
@@ -62,11 +66,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     });
 
     final newPassword = _passwordController.text;
-    final result = await ApiService.resetPassword(
-      newPassword,
-      _token!,
-      _refreshToken!,
-    );
+    final result = await ApiService.resetPassword(newPassword, _token!);
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -80,51 +80,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 600;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: const Color(0xFFF8FAFC),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: isDesktop ? 450 : double.infinity,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: const Color(0xFFE2E8F0),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: _success 
-                    ? _buildSuccessWidget(theme) 
-                    : (_token == null 
-                        ? _buildMissingTokenWidget(theme) 
-                        : _buildFormWidget(theme)),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    return _ResetPasswordView(state: this);
   }
 
   Widget _buildFormWidget(ThemeData theme) {
@@ -187,12 +143,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.redAccent,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -208,12 +171,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             style: const TextStyle(color: Color(0xFF0F172A)),
             decoration: InputDecoration(
               labelText: 'Nueva Contraseña',
-              labelStyle: const TextStyle(color: Color(0xFF64748B)),
-              prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF64748B)),
+              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+              prefixIcon: Icon(
+                Icons.lock_outlined,
+                color: Colors.white.withOpacity(0.6),
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: const Color(0xFF64748B),
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.white.withOpacity(0.6),
                 ),
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
@@ -227,7 +195,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF10B981),
+                  width: 1.5,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -235,7 +206,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+                borderSide: const BorderSide(
+                  color: Colors.redAccent,
+                  width: 1.5,
+                ),
               ),
             ),
             validator: (value) {
@@ -257,15 +231,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             style: const TextStyle(color: Color(0xFF0F172A)),
             decoration: InputDecoration(
               labelText: 'Confirmar Contraseña',
-              labelStyle: const TextStyle(color: Color(0xFF64748B)),
-              prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF64748B)),
+              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+              prefixIcon: Icon(
+                Icons.lock_outlined,
+                color: Colors.white.withOpacity(0.6),
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: const Color(0xFF64748B),
+                  _obscureConfirmPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.white.withOpacity(0.6),
                 ),
                 onPressed: () {
-                  setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                  setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  );
                 },
               ),
               filled: true,
@@ -276,7 +257,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF10B981),
+                  width: 1.5,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -284,7 +268,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+                borderSide: const BorderSide(
+                  color: Colors.redAccent,
+                  width: 1.5,
+                ),
               ),
             ),
             validator: (value) {
@@ -365,7 +352,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/login',
+              (route) => false,
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF10B981),
@@ -418,7 +409,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         const SizedBox(height: 32),
         ElevatedButton(
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/login',
+              (route) => false,
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF10B981),

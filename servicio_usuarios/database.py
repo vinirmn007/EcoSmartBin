@@ -1,13 +1,19 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import NullPool
 from settings import settings
 
 DATABASE_URL = settings.DATABASE_URL
 
+# NullPool es ideal para entornos serverless (Cloud Run):
+# - No mantiene conexiones abiertas entre peticiones
+# - Evita agotar el pool de Supabase (límite de 15 en session mode)
+# - Funciona perfecto con el pooler en modo transacción (puerto 6543)
 engine = create_engine(
     DATABASE_URL,
-    # El pool_pre_ping ayuda a reconectar automáticamente si Supabase cierra la conexión por inactividad
-    pool_pre_ping=True 
+    poolclass=NullPool,
+    # pool_pre_ping detecta conexiones caídas antes de usarlas
+    pool_pre_ping=True,
 )
 
 # 2. Creamos la fábrica de sesiones para interactuar con las tablas
