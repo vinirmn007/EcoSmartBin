@@ -5,7 +5,7 @@ services:
   # 1. Servicio de Usuarios
   - name: user-service
     protocol: https
-    host: ecosmartbin-229724129072.southamerica-west1.run.app
+    host: servicio-usuarios-229724129072.southamerica-west1.run.app
     port: 443
     routes:
       - name: user-routes
