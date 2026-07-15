@@ -14,13 +14,13 @@ import 'screens/canjear_screen.dart';
 import 'screens/reciclar_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
 import 'services/api_service.dart';
-import 'dart:html' as html;
+import 'utils/url_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Extraemos los tokens de la URL cruda ANTES de que Flutter limpie la URL
-  final hash = html.window.location.hash;
+  final hash = getWindowHash();
   print('RAW HASH: $hash');
   
   String? extractedToken;

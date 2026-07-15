@@ -254,8 +254,9 @@ class _LoginView extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // Go to Register
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             '¿No tienes una cuenta? ',
