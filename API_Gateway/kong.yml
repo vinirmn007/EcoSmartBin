@@ -15,13 +15,24 @@ services:
 
   # 2. Servicio de Basureros
   - name: bin-service
-    protocol: http
-    host: localhost
-    port: 8082
+    protocol: https
+    host: servicio-basureros-229724129072.us-central1.run.app
+    port: 443
     routes:
       - name: bin-routes
         paths:
           - /bins
+        strip_path: false
+
+  # 3. Servicio de Puntos
+  - name: points-service
+    protocol: https
+    host: servicio-puntos-229724129072.southamerica-west1.run.app
+    port: 443
+    routes:
+      - name: points-routes
+        paths:
+          - /points
         strip_path: false
 plugins:
   - name: cors
