@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
 
 part 'canjear_view.dart';
@@ -47,20 +49,24 @@ class _CanjearScreenState extends State<CanjearScreen> {
       return;
     }
 
-    final confirm = await showDialog<bool>(
+      final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text('Confirmar Canje'),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: const Text('Confirmar Canje',
+          style: TextStyle(color: Color(0xFF0F172A)),
+        ),
         content: Text(
           '¿Estás seguro de que deseas canjear "$nombre" por $costo EcoPuntos?',
+          style: const TextStyle(color: Color(0xFF475569)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: Color(0xFF475569)),
             ),
           ),
           ElevatedButton(

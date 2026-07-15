@@ -73,7 +73,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
               Text(
                 'EcoSmartBin',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
+                  color: const Color(0xFF0F172A),
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
                 ),
@@ -81,21 +81,21 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'Recuperar Contraseña',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Color(0xFF0F172A),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Color(0xFF475569),
               fontSize: 13,
               height: 1.5,
             ),
@@ -130,17 +130,17 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
           // Email Input
           TextFormField(
             controller: _emailController,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFF0F172A)),
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: 'Correo Electrónico',
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-              prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.6)),
+              labelStyle: const TextStyle(color: Color(0xFF64748B)),
+              prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF64748B)),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.03),
+              fillColor: Colors.white,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -239,7 +239,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
           '¡Correo Enviado!',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -248,8 +248,8 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
         Text(
           'Hemos enviado un correo a ${_emailController.text.trim()} con un enlace para restablecer tu contraseña. Por favor revisa tu bandeja de entrada y spam.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+          style: const TextStyle(
+            color: Color(0xFF475569),
             fontSize: 14,
             height: 1.5,
           ),

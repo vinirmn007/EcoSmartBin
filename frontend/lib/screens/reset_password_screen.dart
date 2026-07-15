@@ -103,7 +103,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               Text(
                 'EcoSmartBin',
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
+                  color: const Color(0xFF0F172A),
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
                 ),
@@ -111,21 +111,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'Nueva Contraseña',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Color(0xFF0F172A),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Ingresa tu nueva contraseña para recuperar el acceso a tu cuenta.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Color(0xFF475569),
               fontSize: 13,
               height: 1.5,
             ),
@@ -168,7 +168,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFF0F172A)),
             decoration: InputDecoration(
               labelText: 'Nueva Contraseña',
               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
@@ -188,10 +188,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 },
               ),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.03),
+              fillColor: Colors.white,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -228,7 +228,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFF0F172A)),
             decoration: InputDecoration(
               labelText: 'Confirmar Contraseña',
               labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
@@ -250,10 +250,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 },
               ),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.03),
+              fillColor: Colors.white,
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -334,17 +334,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           '¡Contraseña Cambiada!',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
-        Text(
+        const Text(
           'Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tus nuevas credenciales.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Color(0xFF475569),
             fontSize: 14,
             height: 1.5,
           ),
@@ -391,17 +391,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           'Enlace de Recuperación Inválido',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF0F172A),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
-        Text(
+        const Text(
           'No pudimos detectar un token de recuperación válido en la dirección URL. Por favor, asegúrate de haber copiado el enlace completo o solicita uno nuevo.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Color(0xFF475569),
             fontSize: 14,
             height: 1.5,
           ),

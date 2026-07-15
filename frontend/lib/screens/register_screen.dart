@@ -79,13 +79,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   InputDecoration _buildInputDecoration(String labelText, IconData icon) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
-      prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.6)),
+      labelStyle: const TextStyle(color: Color(0xFF475569), fontSize: 14),
+      prefixIcon: Icon(icon, color: const Color(0xFF475569)),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.03),
+      fillColor: const Color(0xFFF1F5F9),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
