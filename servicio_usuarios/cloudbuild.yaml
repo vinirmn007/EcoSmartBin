@@ -1,6 +1,7 @@
 steps:
   # 0. Validación y Pruebas
   - name: 'python:3.12-slim'
+    dir: 'servicio_usuarios'
     entrypoint: /bin/sh
     args:
       - '-c'
@@ -11,6 +12,7 @@ steps:
 
   # 1. Construir la imagen Docker usando el Dockerfile y apuntando a Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
+    dir: 'servicio_usuarios'
     args:
       - 'build'
       - '-t'
@@ -19,12 +21,14 @@ steps:
 
   # 2. Subir la imagen al repositorio de Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
+    dir: 'servicio_usuarios'
     args:
       - 'push'
       - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
 
   # 3. Desplegar la imagen en Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    dir: 'servicio_usuarios'
     entrypoint: gcloud
     args:
       - 'run'
