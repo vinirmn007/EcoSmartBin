@@ -93,14 +93,30 @@ sudo apt-get install awscli -y
 
 ## 3. Configurar Secrets en el Repositorio de GitHub
 
+Al utilizar una **cuenta personal de AWS** (con créditos educativos), tienes la gran ventaja de que puedes crear **credenciales permanentes** que no expiran. No tendrás que estar actualizando los tokens constantemente.
+
+### A. Crear un Usuario IAM en AWS (Para obtener credenciales fijos)
+1. Ve a la consola de AWS y busca **IAM** (Identity and Access Management).
+2. Ve a **Users** y haz clic en **Create user**.
+3. Nombre: `github-actions-deployer`.
+4. En permisos (Permissions), selecciona **Attach policies directly** y añade las siguientes políticas (para simplificar la entrega de mañana, puedes darle acceso administrativo o las específicas):
+   - `AmazonEC2ContainerRegistryFullAccess` (Para subir la imagen docker a ECR).
+   - `AmazonS3FullAccess` (Para subir la web al bucket S3).
+5. Crea el usuario.
+6. Entra al usuario creado, ve a la pestaña **Security credentials** (Credenciales de seguridad).
+7. Haz clic en **Create access key**, selecciona **Command Line Interface (CLI)**, acepta la advertencia y crea la clave.
+8. **Copia y guarda:**
+   - **Access Key ID**
+   - **Secret Access Key**
+*(¡Nunca compartas estas claves públicamente!)*
+
+### B. Configurar los Secrets en GitHub
 Ve a tu repositorio de GitHub, ve a **Settings** (Configuración) > **Secrets and variables** > **Actions** > **New repository secret** y agrega las siguientes variables:
 
-### Credenciales Temporales de AWS (Desde tu AWS Academy console)
-> [!IMPORTANT]
-> Estas tres credenciales cambian cada vez que reinicias tu sesión de AWS Academy / Learner Lab. Recuerda actualizarlas en GitHub si expiran.
-- `AWS_ACCESS_KEY_ID`: Tu access key de AWS Academy.
-- `AWS_SECRET_ACCESS_KEY`: Tu secret access key de AWS Academy.
-- `AWS_SESSION_TOKEN`: Tu session token temporal.
+### Credenciales de AWS (Permanentes)
+- `AWS_ACCESS_KEY_ID`: El ID de clave de acceso generado en el paso anterior.
+- `AWS_SECRET_ACCESS_KEY`: La clave de acceso secreta generada en el paso anterior.
+- `AWS_SESSION_TOKEN`: **Déjalo vacío o no lo crees** (no es necesario para cuentas personales con claves permanentes).
 - `AWS_REGION`: La región de tu cuenta (ej. `us-east-1`).
 
 ### Configuración de ECR y EC2 (Fijos)
