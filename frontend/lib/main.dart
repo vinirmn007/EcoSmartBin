@@ -19,13 +19,13 @@ import 'screens/admin/admin_basureros_screen.dart';
 import 'screens/admin/admin_usuarios_screen.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
-import 'dart:html' as html;
+import 'utils/url_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Extraemos los tokens de la URL cruda ANTES de que Flutter limpie la URL
-  final hash = html.window.location.hash;
+  final hash = getHash();
   print('RAW HASH: $hash');
   
   String? extractedToken;
