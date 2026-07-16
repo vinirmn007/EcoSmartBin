@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../services/api_service.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/background_gradient.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/premium_button.dart';
+import '../../widgets/premium_text_field.dart';
 
 part 'register_view.dart';
 

@@ -6,6 +6,13 @@ import '../puntos/canjear_screen.dart';
 import '../puntos/reciclaje_historial_screen.dart';
 import '../puntos/canjes_historial_screen.dart';
 
+import '../../theme/app_colors.dart';
+import '../../widgets/background_gradient.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/premium_button.dart';
+import '../../widgets/metric_card.dart';
+import '../../widgets/progress_gauge.dart';
+
 part 'profile_view.dart';
 
 class ProfileScreen extends StatefulWidget {

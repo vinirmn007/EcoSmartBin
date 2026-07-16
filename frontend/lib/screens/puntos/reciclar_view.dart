@@ -24,19 +24,19 @@ class _ReciclarView extends StatelessWidget {
     'trash': 'Basura General',
   };
 
-  static const Color _emerald = Color(0xFF10B981);
-  static const Color _bgLight = Color(0xFFF8FAFC);
-  static const Color _cardLight = Color(0xFFFFFFFF);
-  static const Color _textDark = Color(0xFF0F172A);
-  static const Color _textGray = Color(0xFF475569);
-  static const Color _borderLight = Color(0xFFE2E8F0);
+  static const Color _emerald = AppColors.emeraldGlow;
+  static const Color _bgLight = AppColors.background;
+  static const Color _cardLight = AppColors.glassSurface;
+  static const Color _textDark = AppColors.textPrimary;
+  static const Color _textGray = AppColors.textSecondary;
+  static const Color _borderLight = AppColors.glassBorder;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _bgLight,
       appBar: AppBar(
-        backgroundColor: _cardLight,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: (Navigator.canPop(context) &&
@@ -47,33 +47,46 @@ class _ReciclarView extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
               )
             : null,
-        title: Text(
-          'Reciclar y Acumular',
-          style: GoogleFonts.poppins(
-            color: _textDark,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+        title: Row(
+          children: [
+            if (!Navigator.canPop(context) ||
+                ModalRoute.of(context)?.settings.name != '/puntos/reciclar') ...
+              const [
+                Icon(Icons.sensors_rounded, color: _emerald, size: 20),
+                SizedBox(width: 8),
+              ],
+            Text(
+              'EcoSmartBin',
+              style: GoogleFonts.poppins(
+                color: _emerald,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ],
         ),
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.0, 0.06),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              )),
-              child: child,
-            ),
-          );
-        },
-        child: _buildBodyForStep(context),
+      body: BackgroundGradient(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.0, 0.06),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
+              ),
+            );
+          },
+          child: _buildBodyForStep(context),
+        ),
       ),
     );
   }

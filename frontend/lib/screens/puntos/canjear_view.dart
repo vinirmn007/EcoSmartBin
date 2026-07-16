@@ -5,13 +5,13 @@ class _CanjearView extends StatelessWidget {
 
   const _CanjearView({required this.state});
 
-  static const Color _emerald = Color(0xFF10B981);
+  static const Color _emerald = AppColors.emeraldGlow;
   static const Color _emeraldLight = Color(0xFF34D399);
-  static const Color _bgLight = Color(0xFFF8FAFC);
-  static const Color _cardLight = Color(0xFFFFFFFF);
-  static const Color _textDark = Color(0xFF0F172A);
-  static const Color _textGray = Color(0xFF475569);
-  static const Color _borderLight = Color(0xFFE2E8F0);
+  static const Color _bgLight = AppColors.background;
+  static const Color _cardLight = AppColors.glassSurface;
+  static const Color _textDark = AppColors.textPrimary;
+  static const Color _textGray = AppColors.textSecondary;
+  static const Color _borderLight = AppColors.glassBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class _CanjearView extends StatelessWidget {
     return Scaffold(
       backgroundColor: _bgLight,
       appBar: AppBar(
-        backgroundColor: _cardLight,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: Navigator.canPop(context)
@@ -40,8 +40,9 @@ class _CanjearView extends StatelessWidget {
           ),
         ),
       ),
-      body: state._loading
-          ? Center(
+      body: BackgroundGradient(
+        child: state._loading
+            ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -132,6 +133,7 @@ class _CanjearView extends StatelessWidget {
                   ),
               ],
             ),
+      ),
     );
   }
 
@@ -259,38 +261,41 @@ class _CanjearView extends StatelessWidget {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // LISTA MÓVIL (vertical)
+  // LISTA MÓVIL (Grid de 2 columnas al estilo Stitch Movie Poster)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildMobileList(BuildContext context) {
-    return ListView.builder(
+    return GridView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 2 / 3.1, // Aspecto para Movie Poster
+      ),
       itemCount: state._recompensas.length,
       itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _RecompensaCard(
-            recompensa: state._recompensas[index],
-            userPoints: state._userPoints,
-            onCanjear: state._handleCanje,
-            delay: (index * 60).ms,
-            isDesktop: false,
-          ),
+        return _RecompensaCard(
+          recompensa: state._recompensas[index],
+          userPoints: state._userPoints,
+          onCanjear: state._handleCanje,
+          delay: (index * 60).ms,
+          isDesktop: false,
         );
       },
     );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // GRID DESKTOP (2 columnas)
+  // GRID DESKTOP (4 columnas al estilo Stitch Movie Poster)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildDesktopGrid(BuildContext context) {
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(32, 4, 32, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+        crossAxisCount: 4,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
-        childAspectRatio: 1.6,
+        childAspectRatio: 2 / 3.1, // Aspecto para Movie Poster
       ),
       itemCount: state._recompensas.length,
       itemBuilder: (context, index) {
@@ -307,7 +312,7 @@ class _CanjearView extends StatelessWidget {
 }
 
 // =============================================================================
-// TARJETA DE RECOMPENSA con Hover y Glassmorphism
+// TARJETA DE RECOMPENSA (Estilo Movie Poster de Stitch)
 // =============================================================================
 class _RecompensaCard extends StatefulWidget {
   final Map<String, dynamic> recompensa;
@@ -332,12 +337,10 @@ class _RecompensaCard extends StatefulWidget {
 class _RecompensaCardState extends State<_RecompensaCard> {
   bool _hovered = false;
 
-  static const Color _emerald = Color(0xFF10B981);
-  static const Color _bgLight = Color(0xFFF8FAFC);
-  static const Color _cardLight = Color(0xFFFFFFFF);
-  static const Color _textDark = Color(0xFF0F172A);
-  static const Color _textGray = Color(0xFF475569);
-  static const Color _borderLight = Color(0xFFE2E8F0);
+  static const Color _emerald = AppColors.emeraldGlow;
+  static const Color _cardLight = AppColors.glassSurface;
+  static const Color _textGray = AppColors.textSecondary;
+  static const Color _borderLight = AppColors.glassBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -348,271 +351,231 @@ class _RecompensaCardState extends State<_RecompensaCard> {
     final stock = widget.recompensa['stock'] as int? ?? 0;
     final imagenUrl = widget.recompensa['imagenUrl'] as String? ?? '';
     final canRedeem = widget.userPoints >= costo && stock > 0;
-    final hasImage =
-        imagenUrl.isNotEmpty && imagenUrl.startsWith('http');
+    final hasImage = imagenUrl.isNotEmpty && imagenUrl.startsWith('http');
 
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: canRedeem ? SystemMouseCursors.click : SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
-        transform: Matrix4.identity()
-          ..translate(0.0, _hovered ? -8.0 : 0.0),
+        transform: Matrix4.identity()..translate(0.0, _hovered ? -6.0 : 0.0),
         decoration: BoxDecoration(
-          color: _cardLight,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: _hovered
-                ? _emerald.withOpacity(0.4)
-                : _borderLight,
-            width: 1.5,
+            color: _hovered ? _emerald.withOpacity(0.5) : _borderLight,
+            width: _hovered ? 2.0 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 12,
+              color: Colors.black.withOpacity(_hovered ? 0.4 : 0.2),
+              blurRadius: _hovered ? 20 : 10,
               offset: const Offset(0, 4),
             ),
-            if (_hovered)
-              BoxShadow(
-                color: _emerald.withOpacity(0.1),
-                blurRadius: 28,
-                offset: const Offset(0, 10),
-              ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Imagen del premio ──
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                height: widget.isDesktop ? 120 : 150,
-                decoration: BoxDecoration(
-                  color: hasImage
-                      ? null
-                      : _emerald.withOpacity(0.06),
-                  image: hasImage
-                      ? DecorationImage(
-                          image: NetworkImage(imagenUrl),
-                          fit: BoxFit.cover,
-                          colorFilter: _hovered
-                              ? null
-                              : ColorFilter.mode(
-                                  Colors.black.withOpacity(0.15),
-                                  BlendMode.darken),
-                        )
-                      : null,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // 1. Imagen o fondo decorativo
+              hasImage
+                  ? Image.network(
+                      imagenUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, o, s) => Container(
+                        color: _emerald.withOpacity(0.05),
+                        child: const Icon(Icons.broken_image_rounded, color: _emerald, size: 32),
+                      ),
+                    )
+                  : Container(
+                      color: _emerald.withOpacity(0.05),
+                      child: Center(
+                        child: Icon(
+                          Icons.card_giftcard_rounded,
+                          size: 36,
+                          color: _emerald.withOpacity(0.4),
+                        ),
+                      ),
+                    ),
+
+              // 2. Cinematic Gradient (Capa de sombra de cine para legibilidad)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.35),
+                        Colors.black.withOpacity(0.92),
+                      ],
+                      stops: const [0.0, 0.45, 1.0],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
                 ),
-                child: hasImage
-                    ? null
-                    : Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: _emerald.withOpacity(
-                                _hovered ? 0.2 : 0.1),
-                            shape: BoxShape.circle,
+              ),
+
+              // 3. Badges Superiores (Puntos y Stock)
+              Positioned(
+                top: 12,
+                left: 12,
+                right: 12,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Badge de costo en Ecopuntos
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.65),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      ),
+                      child: Text(
+                        '$costo PTS',
+                        style: GoogleFonts.poppins(
+                          color: _emerald,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 10,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+
+                    // Badge de alerta de stock
+                    if (stock <= 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.red.withOpacity(0.35)),
+                        ),
+                        child: Text(
+                          'AGOTADO',
+                          style: GoogleFonts.poppins(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 8,
                           ),
-                          child: Icon(
-                            Icons.card_giftcard_rounded,
-                            size: 44,
-                            color:
-                                _emerald.withOpacity(_hovered ? 0.8 : 0.5),
+                        ),
+                      )
+                    else if (stock < 5)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.warning.withOpacity(0.35)),
+                        ),
+                        child: Text(
+                          'ÚLTIMOS',
+                          style: GoogleFonts.poppins(
+                            color: AppColors.warning,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 8,
                           ),
                         ),
                       ),
+                  ],
+                ),
               ),
-            ),
 
-            // ── Info del premio ──
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
+              // 4. Contenido e Información Inferior
+              Positioned(
+                bottom: 12,
+                left: 12,
+                right: 12,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                nombre,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.poppins(
-                                    color: _textDark,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Badge de costo
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _emerald.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: _emerald.withOpacity(0.25)),
-                              ),
-                              child: Text(
-                                '$costo pts',
-                                style: GoogleFonts.poppins(
-                                  color: _emerald,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          desc,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            color: _textGray,
-                            fontSize: 12,
-                            height: 1.5,
+                    Text(
+                      nombre.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      desc,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        color: _textGray.withOpacity(0.85),
+                        fontSize: 9.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Botón de Canje Integrado a lo ancho
+                    SizedBox(
+                      height: 34,
+                      child: ElevatedButton(
+                        onPressed: canRedeem
+                            ? () => widget.onCanjear(id, nombre, costo)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          disabledBackgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: canRedeem
+                                ? BorderSide.none
+                                : BorderSide(color: Colors.white.withOpacity(0.08)),
                           ),
                         ),
-                      ],
-                    ),
-
-                    // ── Footer de la tarjeta ──
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Stock indicator
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.inventory_2_outlined,
-                              size: 12,
-                              color: stock > 0
-                                  ? _textGray.withOpacity(0.5)
-                                  : Colors.redAccent,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              stock > 0
-                                  ? 'Stock: $stock'
-                                  : 'Sin stock',
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: canRedeem
+                                ? const LinearGradient(
+                                    colors: [Color(0xFF10B981), Color(0xFF059669)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
+                            color: canRedeem ? null : Colors.white.withOpacity(0.04),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              canRedeem
+                                  ? 'CANJEAR'
+                                  : (stock <= 0 ? 'SIN STOCK' : 'INSUFICIENTE'),
                               style: GoogleFonts.poppins(
-                                color: stock > 0
-                                    ? _textGray.withOpacity(0.5)
-                                    : Colors.redAccent,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                                color: canRedeem ? AppColors.deepObsidian : Colors.white.withOpacity(0.25),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 9.5,
+                                letterSpacing: 0.8,
                               ),
                             ),
-                          ],
+                          ),
                         ),
-
-                        // Botón Canjear
-                        _CanjearButton(
-                          canRedeem: canRedeem,
-                          onTap: canRedeem
-                              ? () => widget.onCanjear(id, nombre, costo)
-                              : null,
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     )
         .animate()
         .fadeIn(delay: widget.delay, duration: 500.ms)
-        .slideY(begin: 0.15, end: 0, delay: widget.delay);
+        .scale(begin: const Offset(0.97, 0.97), end: const Offset(1, 1), delay: widget.delay, curve: Curves.easeOutBack);
   }
 }
 
-/// Botón de canjear con micro-animación de color
-class _CanjearButton extends StatefulWidget {
-  final bool canRedeem;
-  final VoidCallback? onTap;
-
-  const _CanjearButton({required this.canRedeem, this.onTap});
-
-  @override
-  State<_CanjearButton> createState() => _CanjearButtonState();
-}
-
-class _CanjearButtonState extends State<_CanjearButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: widget.canRedeem
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.forbidden,
-      onEnter: (_) =>
-          widget.canRedeem ? setState(() => _hovered = true) : null,
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
-          decoration: BoxDecoration(
-            gradient: widget.canRedeem
-                ? LinearGradient(
-                    colors: _hovered
-                        ? [const Color(0xFF34D399), const Color(0xFF10B981)]
-                        : [
-                            const Color(0xFF10B981),
-                            const Color(0xFF059669)
-                          ],
-                  )
-                : null,
-            color: widget.canRedeem
-                ? null
-                : Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: widget.canRedeem && _hovered
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF10B981).withOpacity(0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [],
-          ),
-          transform: Matrix4.identity()
-            ..translate(0.0, widget.canRedeem && _hovered ? -1.5 : 0.0),
-          child: Text(
-            'Canjear',
-            style: GoogleFonts.poppins(
-              color: widget.canRedeem
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.2),
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

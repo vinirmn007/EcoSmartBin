@@ -7,98 +7,128 @@ class _LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 600;
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacementNamed(context, '/');
+            }
+          },
+        ),
+      ),
+      body: BackgroundGradient(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: isDesktop ? 450 : double.infinity,
+                maxWidth: isDesktop ? 420 : double.infinity,
               ),
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: const Color(0xFFE2E8F0),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+              child: GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
                 child: Form(
                   key: state._formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Header / Logo
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.recycling_rounded,
-                            color: Color(0xFF10B981),
-                            size: 40,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'EcoSmartBin',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              color: const Color(0xFF0F172A),
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
+                      // 1. Branding (Logo, Título y Versión)
+                      Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: AppColors.emeraldGlow,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.emeraldGlow.withOpacity(0.35),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.sensors_rounded,
+                                color: AppColors.deepObsidian,
+                                size: 36,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Accede a tu cuenta ecológica',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: const Color(0xFF475569),
-                          fontSize: 14,
+                            const SizedBox(height: 16),
+                            Text(
+                              'EcoSmartBin',
+                              style: GoogleFonts.poppins(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 26,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Versión 2.0 • Future Ready',
+                              style: GoogleFonts.poppins(
+                                color: AppColors.textSecondary.withOpacity(0.7),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 28),
 
-                      // Mensaje de Error
+                      // 2. Mensajes de Bienvenida
+                      Text(
+                        'Bienvenido a EcoSmartBin',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Inicia sesión para continuar reciclando y acumulando EcoPuntos.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.textSecondary,
+                          fontSize: 12.5,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Mensaje de Error si existe
                       if (state._errorMessage != null) ...[
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                            color: AppColors.error.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.error.withOpacity(0.25)),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
+                              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   state._errorMessage!,
-                                  style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                                  style: const TextStyle(color: AppColors.error, fontSize: 13),
                                 ),
                               ),
                             ],
@@ -108,33 +138,11 @@ class _LoginView extends StatelessWidget {
                       ],
 
                       // Email Input
-                      TextFormField(
+                      PremiumTextField(
                         controller: state._emailController,
-                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        hintText: 'Correo electrónico',
+                        prefixIcon: Icons.mail_outline_rounded,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Correo Electrónico',
-                          labelStyle: const TextStyle(color: Color(0xFF475569)),
-                          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF475569)),
-                          filled: true,
-                          fillColor: const Color(0xFFF1F5F9),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Colors.redAccent),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Por favor ingresa tu correo';
@@ -146,44 +154,25 @@ class _LoginView extends StatelessWidget {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       // Password Input
-                      TextFormField(
+                      PremiumTextField(
                         controller: state._passwordController,
+                        hintText: 'Contraseña',
+                        prefixIcon: Icons.lock_outline_rounded,
                         obscureText: state._obscurePassword,
-                        style: const TextStyle(color: Color(0xFF0F172A)),
-                        decoration: InputDecoration(
-                          labelText: 'Contraseña',
-                          labelStyle: const TextStyle(color: Color(0xFF475569)),
-                          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF475569)),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              state._obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                              color: const Color(0xFF475569),
-                            ),
-                            onPressed: () {
-                              state.setState(() => state._obscurePassword = !state._obscurePassword);
-                            },
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            state._obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: AppColors.textSecondary,
+                            size: 20,
                           ),
-                          filled: true,
-                          fillColor: const Color(0xFFF1F5F9),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Color(0xFF10B981), width: 1.5),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Colors.redAccent),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-                          ),
+                          onPressed: () {
+                            state.setState(() => state._obscurePassword = !state._obscurePassword);
+                          },
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -202,48 +191,27 @@ class _LoginView extends StatelessWidget {
                             Navigator.pushNamed(context, '/recover-password');
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFF10B981),
+                            foregroundColor: AppColors.textSecondary,
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text(
+                          child: Text(
                             '¿Olvidaste tu contraseña?',
-                            style: TextStyle(
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              fontSize: 13,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
 
                       // Login Button
-                      ElevatedButton(
-                        onPressed: state._isLoading ? null : state._handleLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF10B981),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: const Color(0xFF10B981).withOpacity(0.5),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: state._isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Text(
-                                'Iniciar Sesión',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
+                      PremiumButton(
+                        text: 'Iniciar Sesión',
+                        isLoading: state._isLoading,
+                        onPressed: state._handleLogin,
                       ),
                       const SizedBox(height: 24),
 
@@ -253,14 +221,14 @@ class _LoginView extends StatelessWidget {
                         children: [
                           const Text(
                             '¿No tienes una cuenta? ',
-                            style: TextStyle(color: Color(0xFF475569), fontSize: 13),
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, '/register');
+                              Navigator.pushReplacementNamed(context, '/register');
                             },
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF10B981),
+                              foregroundColor: AppColors.emeraldGlow,
                               padding: EdgeInsets.zero,
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,

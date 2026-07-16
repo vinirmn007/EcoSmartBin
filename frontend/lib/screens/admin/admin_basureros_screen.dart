@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../services/api_service.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/background_gradient.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/status_badge.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 part 'admin_basureros_view.dart';
 
@@ -108,26 +114,42 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
         return Container(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            top: 24,
+            top: 12,
             left: 24,
             right: 24,
           ),
           decoration: const BoxDecoration(
-            color: Color(0xFF1E293B),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border(
+              top: BorderSide(color: AppColors.glassBorder, width: 1.5),
+            ),
           ),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  // Pull handle indicator
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Text(
                     'Nuevo Basurero Inteligente',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
+                    style: GoogleFonts.poppins(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -135,7 +157,7 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _idController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('ID Público (ej: EcoSmartBin-01)'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'El ID es requerido' : null,
@@ -143,7 +165,7 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _nombreController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Nombre del basurero (ej: Piso 1)'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'El nombre es requerido' : null,
@@ -151,7 +173,7 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _locController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Ubicación Física (Opcional)'),
                   ),
                   const SizedBox(height: 16),
@@ -161,8 +183,8 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                         child: TextFormField(
                           controller: _latController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(color: Colors.white),
-                          decoration: _inputDecoration('Latitud (Opcional)'),
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          decoration: _inputDecoration('Latitud (Opc.)'),
                           validator: (val) {
                             if (val != null && val.isNotEmpty) {
                               if (double.tryParse(val) == null) return 'Inválido';
@@ -176,8 +198,8 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                         child: TextFormField(
                           controller: _lngController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(color: Colors.white),
-                          decoration: _inputDecoration('Longitud (Opcional)'),
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          decoration: _inputDecoration('Longitud (Opc.)'),
                           validator: (val) {
                             if (val != null && val.isNotEmpty) {
                               if (double.tryParse(val) == null) return 'Inválido';
@@ -191,8 +213,8 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _estado,
-                    dropdownColor: const Color(0xFF0F172A),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: AppColors.surface,
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Estado Operativo'),
                     items: const [
                       DropdownMenuItem(value: 'activo', child: Text('Activo')),
@@ -207,17 +229,26 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
                       }
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   ElevatedButton(
                     onPressed: _crearBasurero,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
+                      backgroundColor: AppColors.emeraldGlow,
+                      foregroundColor: AppColors.deepObsidian,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'REGISTRAR BASURERO',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    child: const Text('Registrar Basurero', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ],
               ),
@@ -231,17 +262,18 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+      labelStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7), fontSize: 13),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.glassBorder),
+        borderRadius: BorderRadius.circular(16),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFF10B981)),
-        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.emeraldGlow, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
       ),
       filled: true,
-      fillColor: const Color(0xFF0F172A),
+      fillColor: Colors.white.withOpacity(0.02),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 

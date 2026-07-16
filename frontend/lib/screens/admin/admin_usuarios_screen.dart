@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../services/api_service.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/background_gradient.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/status_badge.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 part 'admin_usuarios_view.dart';
 
@@ -91,21 +97,31 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text('¿Eliminar Usuario?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Esta acción es permanente y eliminará al usuario tanto del panel como de la autenticación de Supabase.',
-          style: TextStyle(color: Colors.white70),
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(
+          '¿Eliminar Usuario?',
+          style: GoogleFonts.poppins(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
         ),
+        content: Text(
+          'Esta acción es permanente y eliminará al usuario tanto del panel como de la autenticación de Supabase.',
+          style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 13, height: 1.45),
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white55)),
+            child: Text('Cancelar', style: GoogleFonts.poppins(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text('Eliminar', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error.withOpacity(0.12),
+              foregroundColor: AppColors.error,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Eliminar', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -163,26 +179,42 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
         return Container(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            top: 24,
+            top: 12,
             left: 24,
             right: 24,
           ),
           decoration: const BoxDecoration(
-            color: Color(0xFF1E293B),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border(
+              top: BorderSide(color: AppColors.glassBorder, width: 1.5),
+            ),
           ),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  // Pull handle indicator
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Text(
                     'Editar Usuario',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
+                    style: GoogleFonts.poppins(
+                      color: AppColors.textPrimary,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -190,7 +222,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _nombresController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Nombres'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'Los nombres son requeridos' : null,
@@ -198,7 +230,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _apellidosController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Apellidos'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'Los apellidos son requeridos' : null,
@@ -206,7 +238,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Correo Electrónico'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'El correo es requerido' : null,
@@ -214,7 +246,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _cedulaController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Cédula'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'La cédula es requerida' : null,
@@ -222,14 +254,14 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _facultadController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Facultad (Opcional)'),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: _role,
-                    dropdownColor: const Color(0xFF0F172A),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: AppColors.surface,
+                    style: const TextStyle(color: AppColors.textPrimary),
                     decoration: _inputDecoration('Rol del Usuario'),
                     items: const [
                       DropdownMenuItem(value: 'user', child: Text('Usuario Común')),
@@ -245,30 +277,40 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('Usuario Activo', style: TextStyle(color: Colors.white)),
-                    subtitle: const Text(
+                    title: Text('Usuario Activo', style: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+                    subtitle: Text(
                       'Si se desactiva, el usuario no podrá iniciar sesión.',
-                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                      style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 11),
                     ),
+                    contentPadding: EdgeInsets.zero,
                     value: _isActive,
-                    activeColor: const Color(0xFF10B981),
+                    activeColor: AppColors.emeraldGlow,
                     onChanged: (val) {
                       setModalState(() {
                         _isActive = val;
                       });
                     },
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   ElevatedButton(
                     onPressed: _actualizarUsuario,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
+                      backgroundColor: AppColors.emeraldGlow,
+                      foregroundColor: AppColors.deepObsidian,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'GUARDAR CAMBIOS',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    child: const Text('Guardar Cambios', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ],
               ),
@@ -282,17 +324,18 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+      labelStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.7), fontSize: 13),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.glassBorder),
+        borderRadius: BorderRadius.circular(16),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Color(0xFF10B981)),
-        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.emeraldGlow, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
       ),
       filled: true,
-      fillColor: const Color(0xFF0F172A),
+      fillColor: Colors.white.withOpacity(0.02),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 

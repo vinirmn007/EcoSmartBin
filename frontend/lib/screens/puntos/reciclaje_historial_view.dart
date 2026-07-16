@@ -5,12 +5,12 @@ class _ReciclajeHistorialView extends StatelessWidget {
 
   const _ReciclajeHistorialView({required this.state});
 
-  static const Color _emerald = Color(0xFF10B981);
-  static const Color _bgLight = Color(0xFFF8FAFC);
-  static const Color _cardLight = Color(0xFFFFFFFF);
-  static const Color _textDark = Color(0xFF0F172A);
-  static const Color _textGray = Color(0xFF475569);
-  static const Color _borderLight = Color(0xFFE2E8F0);
+  static const Color _emerald = AppColors.emeraldGlow;
+  static const Color _bgLight = AppColors.background;
+  static const Color _cardLight = AppColors.glassSurface;
+  static const Color _textDark = AppColors.textPrimary;
+  static const Color _textGray = AppColors.textSecondary;
+  static const Color _borderLight = AppColors.glassBorder;
 
   // ── Mapeo de categoría a icono y color por descripción ──────────────────
   static IconData _getIconForDesc(String desc) {
@@ -50,7 +50,7 @@ class _ReciclajeHistorialView extends StatelessWidget {
     return Scaffold(
       backgroundColor: _bgLight,
       appBar: AppBar(
-        backgroundColor: _cardLight,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: Navigator.canPop(context)
@@ -79,8 +79,9 @@ class _ReciclajeHistorialView extends StatelessWidget {
           ),
         ],
       ),
-      body: state._loading
-          ? Center(
+      body: BackgroundGradient(
+        child: state._loading
+            ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -118,6 +119,7 @@ class _ReciclajeHistorialView extends StatelessWidget {
                   ? _buildEmptyState()
                   : _buildContentWithKPIs(context),
             ),
+      ),
     );
   }
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/background_gradient.dart';
+import '../../widgets/glass_card.dart';
 
 part 'puntos_view.dart';
 

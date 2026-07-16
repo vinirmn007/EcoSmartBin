@@ -7,258 +7,392 @@ class _PuntosView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'EcoPuntos',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF10B981)),
-            onPressed: state._loadBalance,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: RefreshIndicator(
-        color: const Color(0xFF10B981),
-        backgroundColor: const Color(0xFF1E293B),
-        onRefresh: state._loadBalance,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Balance Card
-              _buildBalanceCard(),
-              const SizedBox(height: 28),
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width > 600;
 
-              // Sección Servicios
-              const Text(
-                'Servicios de EcoPuntos',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: BackgroundGradient(
+        child: SafeArea(
+          child: RefreshIndicator(
+            color: AppColors.emeraldGlow,
+            backgroundColor: AppColors.glassSurface,
+            onRefresh: state._loadBalance,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isDesktop ? 600 : double.infinity),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 20),
+
+                        // ── Header ──────────────────────────────────────────
+                        _buildHeader(),
+                        const SizedBox(height: 24),
+
+                        // ── EcoPoints Widget ────────────────────────────────
+                        _buildEcoPointsWidget(),
+                        const SizedBox(height: 20),
+
+                        // ── Quick Actions Grid ───────────────────────────────
+                        _buildQuickActions(context),
+                        const SizedBox(height: 20),
+
+                        // ── Stats Bento Grid ─────────────────────────────────
+                        _buildStatsBento(),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Grid de opciones
-              _buildDashboardOption(
-                title: 'Reciclar en Basurero',
-                description: 'Escanea el QR de un basurero para depositar y ganar puntos.',
-                icon: Icons.qr_code_scanner_rounded,
-                colors: [const Color(0xFF10B981), const Color(0xFF059669)],
-                onTap: () => Navigator.pushNamed(context, '/puntos/reciclar').then((_) => state._loadBalance()),
-              ),
-              const SizedBox(height: 14),
-
-              _buildDashboardOption(
-                title: 'Canjear Premios',
-                description: 'Usa tus EcoPuntos acumulados para canjear recompensas.',
-                icon: Icons.card_giftcard_rounded,
-                colors: [const Color(0xFF8B5CF6), const Color(0xFF7C3AED)],
-                onTap: () => Navigator.pushNamed(context, '/puntos/canjear').then((_) => state._loadBalance()),
-              ),
-              const SizedBox(height: 14),
-
-              _buildDashboardOption(
-                title: 'Historial de Reciclaje',
-                description: 'Consulta los puntos acumulados por tus depósitos anteriores.',
-                icon: Icons.history_rounded,
-                colors: [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
-                onTap: () => Navigator.pushNamed(context, '/puntos/historial-reciclaje'),
-              ),
-              const SizedBox(height: 14),
-
-              _buildDashboardOption(
-                title: 'Historial de Canjes',
-                description: 'Mira las recompensas que has reclamado.',
-                icon: Icons.shopping_bag_rounded,
-                colors: [const Color(0xFF0EA5E9), const Color(0xFF0284C7)],
-                onTap: () => Navigator.pushNamed(context, '/puntos/historial-canjes'),
-              ),
-              const SizedBox(height: 32),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Card de Balance
-  Widget _buildBalanceCard() {
-    final puntos = state._balance?['puntosEcologicos'] ?? 0;
+  Widget _buildHeader() {
     final nombre = state._balance?['nombres'] ?? '';
-
-    return Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF047857), Color(0xFF065F46)],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Panel de Control',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              nombre.isNotEmpty ? 'Hola, $nombre' : 'EcoSmartBin',
+              style: const TextStyle(
+                color: AppColors.emeraldGlow,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
         ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF10B981).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+        // Status Badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.glassSurface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.3)),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              const Icon(Icons.sensors_rounded, color: AppColors.emeraldGlow, size: 14),
+              const SizedBox(width: 6),
+              const Text(
+                'Conectado',
+                style: TextStyle(
+                  color: AppColors.emeraldGlow,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: AppColors.emeraldGlow,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.emeraldGlow.withOpacity(0.6),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEcoPointsWidget() {
+    final puntos = state._balance?['puntosEcologicos'] ?? 0;
+
+    return GlassCard(
+      padding: const EdgeInsets.all(28),
+      isActive: true,
       child: state._loadingBalance
           ? const Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
+                padding: EdgeInsets.symmetric(vertical: 24),
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                  valueColor: AlwaysStoppedAnimation(AppColors.emeraldGlow),
                   strokeWidth: 2,
                 ),
               ),
             )
-          : Row(
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.eco_rounded,
-                    color: Colors.white,
-                    size: 36,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'BALANCE TOTAL',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: AppColors.textSecondary,
+                      size: 20,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nombre.isNotEmpty ? 'Hola, $nombre 👋' : 'Mis EcoPuntos',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      '$puntos',
+                      style: TextStyle(
+                        color: AppColors.emeraldGlow,
+                        fontSize: 56,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -2,
+                        shadows: [
+                          Shadow(
+                            color: AppColors.emeraldGlow.withOpacity(0.4),
+                            blurRadius: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'EcoPuntos',
+                      style: TextStyle(
+                        color: AppColors.emeraldGlow.withOpacity(0.6),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Progress bar hacia siguiente nivel
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Próximo Nivel',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$puntos',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 52,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
+                        Text(
+                          '${(puntos / 2000 * 100).clamp(0, 100).toStringAsFixed(0)}%',
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: (puntos / 2000).clamp(0.0, 1.0),
+                        minHeight: 6,
+                        backgroundColor: Colors.white.withOpacity(0.08),
+                        valueColor: const AlwaysStoppedAnimation(AppColors.emeraldGlow),
                       ),
-                      const Text(
-                        'EcoPuntos acumulados',
-                        style: TextStyle(color: Colors.white60, fontSize: 12),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
     );
   }
 
-  // Widget para opciones del Dashboard
-  Widget _buildDashboardOption({
-    required String title,
-    required String description,
-    required IconData icon,
-    required List<Color> colors,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: colors.first.withOpacity(0.35),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+  Widget _buildQuickActions(BuildContext context) {
+    final actions = [
+      _QuickAction(
+        icon: Icons.qr_code_scanner_rounded,
+        label: 'Escanear',
+        onTap: () => Navigator.pushNamed(context, '/puntos/reciclar').then((_) => state._loadBalance()),
+      ),
+      _QuickAction(
+        icon: Icons.card_giftcard_rounded,
+        label: 'Canjear',
+        onTap: () => Navigator.pushNamed(context, '/puntos/canjear').then((_) => state._loadBalance()),
+      ),
+      _QuickAction(
+        icon: Icons.history_rounded,
+        label: 'Reciclaje',
+        onTap: () => Navigator.pushNamed(context, '/puntos/historial-reciclaje'),
+      ),
+      _QuickAction(
+        icon: Icons.shopping_bag_outlined,
+        label: 'Canjes',
+        onTap: () => Navigator.pushNamed(context, '/puntos/historial-canjes'),
+      ),
+    ];
+
+    return Row(
+      children: actions.map((action) {
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              right: action == actions.last ? 0 : 10,
+            ),
+            child: _buildActionButton(action),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildActionButton(_QuickAction action) {
+    return GestureDetector(
+      onTap: action.onTap,
+      child: Column(
+        children: [
+          GlassCard(
+            padding: EdgeInsets.zero,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Center(
+                child: Icon(
+                  action.icon,
+                  color: AppColors.emeraldGlow,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            action.label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
-                          fontSize: 12,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 26,
-                  ),
-                ),
-              ],
-            ),
+    );
+  }
+
+  Widget _buildStatsBento() {
+    final puntos = state._balance?['puntosEcologicos'] ?? 0;
+    // Estimates: 1 ecopunto ≈ 0.012 kg CO2
+    final co2 = (puntos * 0.012).toStringAsFixed(1);
+    // Estimates: 500 puntos ~ 1 árbol
+    final arboles = (puntos ~/ 500);
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.co2_rounded,
+            label: 'CO₂ Ahorrado',
+            value: '$co2 kg',
           ),
         ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _buildStatCard(
+            icon: Icons.park_rounded,
+            label: 'Árboles Plantados',
+            value: '$arboles',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return GlassCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.emeraldGlow.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.emeraldGlow, size: 22),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _QuickAction {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 }
