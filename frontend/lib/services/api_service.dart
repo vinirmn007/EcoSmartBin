@@ -575,6 +575,114 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
+  //  SESIONES DE BASURERO
+  // ══════════════════════════════════════════════════
+
+  /// Conecta al usuario autenticado con un basurero mediante su ID público.
+  static Future<Map<String, dynamic>> conectarBasurero(String publicId) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/bins/${publicId.toLowerCase().trim()}/connect'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {'success': true, 'data': decoded};
+      } else {
+        return {
+          'success': false,
+          'message': decoded['detail'] ?? 'El basurero está ocupado o no disponible.'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  /// Desconecta al usuario del basurero y libera el recurso.
+  static Future<Map<String, dynamic>> desconectarBasurero(String publicId) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/bins/${publicId.toLowerCase().trim()}/disconnect'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Desconectado exitosamente'};
+      } else {
+        final decoded = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': decoded['detail'] ?? 'Error al desconectarse'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  /// Extiende la sesión activa 5 minutos adicionales.
+  static Future<Map<String, dynamic>> extenderSesionBasurero(String publicId) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/bins/${publicId.toLowerCase().trim()}/extend'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': decoded};
+      } else {
+        return {
+          'success': false,
+          'message': decoded['detail'] ?? 'No se pudo extender la sesión'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  /// Consulta el estado actual del basurero y los segundos restantes de la sesión.
+  static Future<Map<String, dynamic>?> obtenerEstadoBasurero(String publicId) async {
+    final token = await getToken();
+    if (token == null) return null;
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/bins/${publicId.toLowerCase().trim()}/status'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      print('DEBUG: Error obtenerEstadoBasurero: $e');
+      return null;
+    }
+  }
+
+  // ══════════════════════════════════════════════════
   //  USUARIOS — via Gateway (Solo Admin)
   // ══════════════════════════════════════════════════
 

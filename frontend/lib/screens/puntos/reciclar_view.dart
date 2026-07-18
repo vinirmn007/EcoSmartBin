@@ -244,7 +244,7 @@ class _ReciclarView extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Buscando basurero cercano...',
+                    state._connecting ? 'Iniciando sesión con basurero...' : 'Buscando basurero cercano...',
                     style: GoogleFonts.poppins(
                       color: _emerald,
                       fontSize: 13,
@@ -290,79 +290,103 @@ class _ReciclarView extends StatelessWidget {
     return Center(
       key: const ValueKey('waiting_ia'),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Banner basurero conectado
             _buildConnectedBanner(),
-            const SizedBox(height: 48),
-
-            // Lottie placeholder (usando el widget de lottie con URL pública)
+            const SizedBox(height: 40),
             Container(
-              width: 180,
-              height: 180,
+              padding: const EdgeInsets.all(32),
+              constraints: const BoxConstraints(maxWidth: 400),
               decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withOpacity(0.08),
-                shape: BoxShape.circle,
+                color: _cardLight,
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                    color: const Color(0xFF3B82F6).withOpacity(0.25),
-                    width: 1.5),
+                  color: _emerald.withOpacity(0.3),
+                  width: 0.8,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF3B82F6).withOpacity(0.1),
-                    blurRadius: 30,
-                    spreadRadius: 4,
+                    color: _emerald.withOpacity(0.06),
+                    blurRadius: 32,
+                    spreadRadius: 2,
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.psychology_rounded,
-                color: Color(0xFF3B82F6),
-                size: 64,
-              ),
-            )
-                .animate(onPlay: (c) => c.repeat(reverse: true))
-                .scaleXY(begin: 1.0, end: 1.05, duration: 900.ms)
-                .then()
-                .scaleXY(begin: 1.05, end: 1.0, duration: 900.ms),
-            const SizedBox(height: 36),
-
-            Text(
-              'Analizando con IA...',
-              style: GoogleFonts.poppins(
-                color: _textDark,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'La cámara del basurero está clasificando\ntu residuo automáticamente',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: _textGray,
-                fontSize: 13,
-                height: 1.6,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.04),
+                            width: 5,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 4,
+                          valueColor: AlwaysStoppedAnimation<Color>(_emerald),
+                        )
+                            .animate(onPlay: (c) => c.repeat())
+                            .rotate(duration: 2000.ms),
+                      ),
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: _emerald.withOpacity(0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.insights_rounded,
+                          color: _emerald,
+                          size: 28,
+                        ),
+                      )
+                          .animate(onPlay: (c) => c.repeat(reverse: true))
+                          .scaleXY(begin: 0.95, end: 1.05, duration: 1200.ms),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Analizando con IA...',
+                    style: GoogleFonts.poppins(
+                      color: _textDark,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'La cámara del basurero está clasificando tu residuo...',
+                    style: GoogleFonts.poppins(
+                      color: _textGray,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 32),
-
-            // Contador de intentos
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: _cardLight,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _borderLight),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -372,8 +396,7 @@ class _ReciclarView extends StatelessWidget {
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF3B82F6)),
+                      valueColor: AlwaysStoppedAnimation(_emerald),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -579,6 +602,10 @@ class _ReciclarView extends StatelessWidget {
 
   /// Banner de basurero conectado reutilizable
   Widget _buildConnectedBanner() {
+    final minutes = (state._secondsRemaining / 60).floor();
+    final seconds = state._secondsRemaining % 60;
+    final timeStr = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -625,19 +652,39 @@ class _ReciclarView extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.timer_outlined, size: 12, color: state._secondsRemaining < 60 ? Colors.redAccent : _emerald),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Tiempo restante: $timeStr',
+                      style: GoogleFonts.poppins(
+                        color: state._secondsRemaining < 60 ? Colors.redAccent : _textGray,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: _emerald,
-              shape: BoxShape.circle,
-            ),
-          )
-              .animate(onPlay: (c) => c.repeat(reverse: true))
-              .fadeOut(duration: 800.ms),
+          IconButton(
+            icon: const Icon(Icons.add_alarm_rounded, color: _emerald, size: 20),
+            tooltip: 'Extender +5 min',
+            onPressed: state._extenderSesion,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          const SizedBox(width: 12),
+          IconButton(
+            icon: const Icon(Icons.power_settings_new_rounded, color: Colors.redAccent, size: 20),
+            tooltip: 'Desconectar basurero',
+            onPressed: state._desconectarManual,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
         ],
       ),
     );
@@ -827,46 +874,92 @@ class _ReciclarView extends StatelessWidget {
   Widget _buildSubmittingStep() {
     return Center(
       key: const ValueKey('submitting'),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: _emerald.withOpacity(0.1),
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(maxWidth: 400),
+          decoration: BoxDecoration(
+            color: _cardLight,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: _emerald.withOpacity(0.3),
+              width: 0.8,
             ),
-            child: const Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(_emerald),
+            boxShadow: [
+              BoxShadow(
+                color: _emerald.withOpacity(0.06),
+                blurRadius: 32,
+                spreadRadius: 2,
               ),
-            ),
-          )
-              .animate(onPlay: (c) => c.repeat())
-              .scaleXY(begin: 1.0, end: 1.08, duration: 700.ms)
-              .then()
-              .scaleXY(begin: 1.08, end: 1.0, duration: 700.ms),
-          const SizedBox(height: 28),
-          Text(
-            'Registrando reciclaje...',
-            style: GoogleFonts.poppins(
-              color: _textDark,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Enviando confirmación a la base de datos',
-            style: GoogleFonts.poppins(
-              color: _textGray,
-              fontSize: 13,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.04),
+                        width: 5,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 4,
+                      valueColor: AlwaysStoppedAnimation<Color>(_emerald),
+                    )
+                        .animate(onPlay: (c) => c.repeat())
+                        .rotate(duration: 2000.ms),
+                  ),
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: _emerald.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.backup_rounded,
+                      color: _emerald,
+                      size: 28,
+                    ),
+                  )
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .scaleXY(begin: 0.95, end: 1.05, duration: 1200.ms),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'Registrando reciclaje...',
+                style: GoogleFonts.poppins(
+                  color: _textDark,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Enviando confirmación y sincronizando puntos...',
+                style: GoogleFonts.poppins(
+                  color: _textGray,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

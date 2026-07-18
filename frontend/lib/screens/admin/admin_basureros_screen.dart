@@ -277,6 +277,98 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
     );
   }
 
+  void _mostrarQRBasurero(Map<String, dynamic> basurero) {
+    final publicId = basurero['public_id'];
+    // Enlace oficial que el usuario escaneará
+    final qrUrl = 'https://ecosmartbin2.web.app/puntos/reciclar?bin=$publicId';
+    // Endpoint de generación de imagen QR con API externa gratuita
+    final qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${Uri.encodeComponent(qrUrl)}';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          basurero['nombre'] ?? 'Código QR',
+          style: GoogleFonts.poppins(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Imprime o escanea esta etiqueta para vincular el basurero físico.',
+              style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Image.network(
+                qrImageUrl,
+                width: 200,
+                height: 200,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.emeraldGlow),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                      child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 48),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SelectableText(
+              'ID: $publicId',
+              style: GoogleFonts.poppins(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              qrUrl,
+              style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 10),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cerrar',
+              style: GoogleFonts.poppins(
+                color: AppColors.emeraldGlow,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _idController.dispose();

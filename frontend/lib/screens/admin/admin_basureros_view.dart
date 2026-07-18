@@ -56,8 +56,8 @@ class _AdminBasurerosView extends StatelessWidget {
                                     itemCount: state._basureros.length,
                                     itemBuilder: (context, index) {
                                       final b = state._basureros[index];
-                                      final isActive = b['is_active'] ?? true;
-                                      final status = b['status'] ?? 'libre';
+                                      final isActive = b['estado'] == 'activo';
+                                      final status = b['is_occupied'] == true ? 'ocupado' : 'libre';
                                       return _buildBasureroCard(b, isActive, status);
                                     },
                                   )
@@ -67,8 +67,8 @@ class _AdminBasurerosView extends StatelessWidget {
                                     itemCount: state._basureros.length,
                                     itemBuilder: (context, index) {
                                       final b = state._basureros[index];
-                                      final isActive = b['is_active'] ?? true;
-                                      final status = b['status'] ?? 'libre';
+                                      final isActive = b['estado'] == 'activo';
+                                      final status = b['is_occupied'] == true ? 'ocupado' : 'libre';
                                       return Padding(
                                         padding: const EdgeInsets.only(bottom: 12),
                                         child: _buildBasureroCard(b, isActive, status),
@@ -180,6 +180,11 @@ class _AdminBasurerosView extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.qr_code_rounded, color: AppColors.emeraldGlow),
+                tooltip: 'Ver Código QR',
+                onPressed: () => state._mostrarQRBasurero(b),
               ),
             ],
           ),
