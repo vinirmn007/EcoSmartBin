@@ -51,7 +51,15 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_
 # Esto se hace importando los modelos y modificando las columnas antes
 # de crear las tablas con create_all().
 from models.basurero_model import Basurero, SesionBasurero  # noqa: E402
-from sqlalchemy import inspect as sa_inspect, TypeDecorator, DateTime as _SADateTime
+from sqlalchemy import inspect as sa_inspect, TypeDecorator, DateTime as _SADateTime, Table, Column, String
+
+# Registrar una tabla ficticia 'perfiles' en la metadata de Base para que las FKs se resuelvan en los tests de SQLite
+if "perfiles" not in Base.metadata.tables:
+    Table(
+        "perfiles",
+        Base.metadata,
+        Column("id", String, primary_key=True)
+    )
 
 class TZDateTime(TypeDecorator):
     impl = _SADateTime
