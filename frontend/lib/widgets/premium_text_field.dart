@@ -9,6 +9,7 @@ class PremiumTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
+  final Iterable<String>? autofillHints;
 
   const PremiumTextField({
     super.key,
@@ -19,6 +20,7 @@ class PremiumTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.validator,
+    this.autofillHints,
   });
 
   @override
@@ -28,6 +30,7 @@ class PremiumTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       validator: validator,
+      autofillHints: autofillHints,
       style: const TextStyle(color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,

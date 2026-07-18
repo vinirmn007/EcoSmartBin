@@ -36,12 +36,13 @@ class _LoginView extends StatelessWidget {
               ),
               child: GlassCard(
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
-                child: Form(
-                  key: state._formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+                child: AutofillGroup(
+                  child: Form(
+                    key: state._formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       // 1. Branding (Logo, Título y Versión)
                       Center(
                         child: Column(
@@ -143,6 +144,7 @@ class _LoginView extends StatelessWidget {
                         hintText: 'Correo electrónico',
                         prefixIcon: Icons.mail_outline_rounded,
                         keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Por favor ingresa tu correo';
@@ -162,6 +164,7 @@ class _LoginView extends StatelessWidget {
                         hintText: 'Contraseña',
                         prefixIcon: Icons.lock_outline_rounded,
                         obscureText: state._obscurePassword,
+                        autofillHints: const [AutofillHints.password],
                         suffixIcon: IconButton(
                           icon: Icon(
                             state._obscurePassword
@@ -244,6 +247,7 @@ class _LoginView extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ),

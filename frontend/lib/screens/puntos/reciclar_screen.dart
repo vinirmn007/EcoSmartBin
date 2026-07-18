@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/background_gradient.dart';
@@ -32,6 +33,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
   Timer? _scanTimer;
   String _detectedBinId = 'EcoSmartBin-Q04';
   String _rawBinPublicId = 'EcoSmartBin-Q04';
+  final MobileScannerController _cameraController = MobileScannerController();
 
   // Control de conexión
   bool _connecting = false;
@@ -80,6 +82,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     _pollingTimer?.cancel();
     _countdownTimer?.cancel();
     _scannerController.dispose();
+    _cameraController.dispose();
     
     // Desconectar al salir para liberar el basurero si la sesión está activa y no se ha completado
     if (_step > 0 && _step < 4) {
@@ -94,22 +97,115 @@ class _ReciclarScreenState extends State<ReciclarScreen>
       final binFromUrl = uri.queryParameters['bin'];
       if (binFromUrl != null && binFromUrl.isNotEmpty) {
         // Conectar automáticamente si se escaneó externamente
-        _conectarABasureroReal(binFromUrl);
-      } else {
-        // Iniciar escaneo simulado automático (en dev se conecta a EcoSmartBin-Q04)
-        _startSimulatedScan();
+        _conectarABasureroReal(binFromUrl.toLowerCase().trim());
       }
-    } catch (e) {
-      _startSimulatedScan();
+    } catch (_) {
+      // no-op
     }
   }
 
-  void _startSimulatedScan() {
-    _scanTimer = Timer(const Duration(milliseconds: 2500), () {
-      if (mounted) {
-        _conectarABasureroReal('EcoSmartBin-Q04');
+  String _parseBinId(String rawValue) {
+    try {
+      final uri = Uri.parse(rawValue.trim());
+      final binParam = uri.queryParameters['bin'];
+      if (binParam != null && binParam.isNotEmpty) {
+        return binParam.toLowerCase().trim();
       }
-    });
+    } catch (_) {
+      // no-op
+    }
+    return rawValue.toLowerCase().trim();
+  }
+
+  void _mostrarInputManual() {
+    final TextEditingController textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF131313),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: const Color(0xFF10B981).withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          title: Text(
+            'Ingresar Código Manual',
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Ingresa el código identificador del basurero (ej. EcoSmartBin-Q04):',
+                style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: textController,
+                autofocus: true,
+                style: GoogleFonts.poppins(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Código del basurero',
+                  hintStyle: GoogleFonts.poppins(color: Colors.white38),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.05),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF10B981)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: GoogleFonts.poppins(color: Colors.white70),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                final code = textController.text.trim();
+                if (code.isNotEmpty) {
+                  Navigator.pop(context);
+                  _conectarABasureroReal(code.toLowerCase());
+                }
+              },
+              child: Text(
+                'Conectar',
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _conectarABasureroReal(String publicId) async {

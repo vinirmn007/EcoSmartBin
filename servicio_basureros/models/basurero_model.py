@@ -67,7 +67,7 @@ class SesionBasurero(Base):
     basurero_id = Column(String, ForeignKey("basureros.id", ondelete="CASCADE"), nullable=False)
     
     # ID del usuario (viene del JWT de Supabase Auth)
-    usuario_id = Column(String, nullable=False)
+    usuario_id = Column(String,ForeignKey("perfiles.id", ondelete="CASCADE"), nullable=False)
     
     # Token de sesión que identifica esta vinculación
     session_token = Column(String, unique=True, index=True, nullable=False,

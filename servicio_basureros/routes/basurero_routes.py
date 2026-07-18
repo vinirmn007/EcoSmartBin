@@ -41,16 +41,17 @@ def crear_basurero(
     admin: dict = Depends(require_admin)
 ):
     """Crea un nuevo basurero. Solo administradores."""
-    # Verificar que el public_id no exista
-    existente = db.query(Basurero).filter(Basurero.public_id == data.public_id).first()
+    # Verificar que el public_id no exista (insensible a mayúsculas)
+    public_id_clean = data.public_id.lower().strip()
+    existente = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if existente:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Ya existe un basurero con el ID público '{data.public_id}'."
+            detail=f"Ya existe un basurero con el ID público '{public_id_clean}'."
         )
 
     nuevo = Basurero(
-        public_id=data.public_id,
+        public_id=public_id_clean,
         nombre=data.nombre,
         ubicacion=data.ubicacion,
         latitud=data.latitud,
@@ -86,7 +87,8 @@ def obtener_basurero(
     current_user: dict = Depends(get_current_user)
 ):
     """Obtiene los detalles de un basurero por su ID público."""
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    public_id_clean = public_id.lower().strip()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -103,7 +105,8 @@ def actualizar_basurero(
     admin: dict = Depends(require_admin)
 ):
     """Actualiza un basurero existente. Solo administradores."""
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    public_id_clean = public_id.lower().strip()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -136,7 +139,8 @@ def eliminar_basurero(
     admin: dict = Depends(require_admin)
 ):
     """Desactiva un basurero (soft delete → estado 'inactivo'). Solo administradores."""
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    public_id_clean = public_id.lower().strip()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -178,6 +182,7 @@ def conectar_usuario(
     """
     Row level lock de la fila del basurero en la base de datos para evitar condiciones de carrera
     """
+    public_id = public_id.lower().strip()
     basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
     if not basurero:
         raise HTTPException(
@@ -266,7 +271,8 @@ def extender_sesion(
     Extiende la sesión activa del usuario con el basurero por 5 minutos más.
     Solo el usuario que tiene la sesión activa puede extenderla.
     """
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
+    public_id_clean = public_id.lower().strip()
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -328,7 +334,8 @@ def desconectar_usuario(
     Desconecta al usuario del basurero y libera el recurso.
     Solo el usuario con sesión activa puede desconectarse.
     """
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
+    public_id_clean = public_id.lower().strip()
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -371,7 +378,8 @@ def estado_basurero(
     Consulta el estado de un basurero: si está libre u ocupado,
     y si tiene sesión activa muestra el tiempo restante.
     """
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    public_id_clean = public_id.lower().strip()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -424,7 +432,8 @@ def verificar_sesion_activa(
     """
     Row level lock del basurero en la base de datos para evitar condiciones de carrera
     """
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == bin_public_id).first()
+    bin_public_id_clean = bin_public_id.lower().strip()
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == bin_public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -158,23 +158,47 @@ class _ReciclarView extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
+                    // Cámara en vivo con MobileScanner
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: MobileScanner(
+                          controller: state._cameraController,
+                          onDetect: (capture) {
+                            final List<Barcode> barcodes = capture.barcodes;
+                            for (final barcode in barcodes) {
+                              final String? rawValue = barcode.rawValue;
+                              if (rawValue != null && rawValue.isNotEmpty && !state._connecting && state._step == 0) {
+                                final parsedId = state._parseBinId(rawValue);
+                                state._conectarABasureroReal(parsedId);
+                                break;
+                              }
+                            }
+                          },
+                          errorBuilder: (context, error, child) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.videocam_off_rounded, color: Colors.redAccent.withOpacity(0.7), size: 48),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Cámara no disponible',
+                                    style: GoogleFonts.poppins(color: _textGray, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
                     // Esquinas del visor
                     _buildCorner(top: 12, left: 12, angle: 0),
                     _buildCorner(top: 12, right: 12, angle: 90),
                     _buildCorner(bottom: 12, left: 12, angle: 270),
                     _buildCorner(bottom: 12, right: 12, angle: 180),
-
-                    // QR simulado
-                    Center(
-                      child: Opacity(
-                        opacity: 0.1,
-                        child: Icon(
-                          Icons.qr_code_2_rounded,
-                          size: 180,
-                          color: _textDark,
-                        ),
-                      ),
-                    ),
 
                     // Línea láser animada
                     AnimatedBuilder(
@@ -213,7 +237,7 @@ class _ReciclarView extends StatelessWidget {
                 ),
               ),
             ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
-            const SizedBox(height: 48),
+            const SizedBox(height: 36),
 
             // Indicador de búsqueda
             Container(
@@ -254,6 +278,29 @@ class _ReciclarView extends StatelessWidget {
                 ],
               ),
             ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
+            const SizedBox(height: 16),
+
+            // Botón premium para ingreso manual
+            TextButton.icon(
+              onPressed: state._mostrarInputManual,
+              icon: const Icon(Icons.keyboard_rounded, color: _emerald, size: 20),
+              label: Text(
+                'Ingresar código manualmente',
+                style: GoogleFonts.poppins(
+                  color: _emerald,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  side: BorderSide(color: _emerald.withOpacity(0.2), width: 1.2),
+                ),
+                backgroundColor: _emerald.withOpacity(0.04),
+              ),
+            ).animate().fadeIn(delay: 500.ms, duration: 500.ms),
           ],
         ),
       ),
