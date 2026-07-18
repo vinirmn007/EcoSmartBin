@@ -13,7 +13,7 @@ class TestCrearBasurero:
         assert response.status_code == 201
 
         data = response.json()
-        assert data["public_id"] == basurero_data["public_id"]
+        assert data["public_id"] == basurero_data["public_id"].lower()
         assert data["nombre"] == basurero_data["nombre"]
         assert data["ubicacion"] == basurero_data["ubicacion"]
         assert data["estado"] == "activo"
