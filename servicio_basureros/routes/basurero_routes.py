@@ -175,7 +175,10 @@ def conectar_usuario(
     Crea una sesión temporal (por defecto 5 minutos).
     Si el basurero ya está en uso, retorna 409 Conflict.
     """
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    """
+    Row level lock de la fila del basurero en la base de datos para evitar condiciones de carrera
+    """
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -263,7 +266,7 @@ def extender_sesion(
     Extiende la sesión activa del usuario con el basurero por 5 minutos más.
     Solo el usuario que tiene la sesión activa puede extenderla.
     """
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -325,7 +328,7 @@ def desconectar_usuario(
     Desconecta al usuario del basurero y libera el recurso.
     Solo el usuario con sesión activa puede desconectarse.
     """
-    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -417,7 +420,11 @@ def verificar_sesion_activa(
     NO requiere autenticación JWT (es comunicación servicio-a-servicio).
     Retorna 404 si no hay sesión activa o si el basurero no existe.
     """
-    basurero = db.query(Basurero).filter(Basurero.public_id == bin_public_id).first()
+
+    """
+    Row level lock del basurero en la base de datos para evitar condiciones de carrera
+    """
+    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == bin_public_id).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -464,34 +471,26 @@ def verificar_sesion_activa(
 # ═══════════════════════════════════════════════
 
 def _limpiar_sesiones_expiradas(basurero_id: str, db: Session):
-    """
-    Marca como inactivas las sesiones que ya expiraron para un basurero dado.
-    También actualiza el flag is_occupied si ya no hay sesiones activas.
-    """
     ahora = datetime.now(timezone.utc)
-    sesiones_expiradas = db.query(SesionBasurero).filter(
+    
+    # Actualización masiva y atómica directa en SQL
+    filas_afectadas = db.query(SesionBasurero).filter(
         SesionBasurero.basurero_id == basurero_id,
         SesionBasurero.is_active == True,
         SesionBasurero.expires_at < ahora
-    ).all()
+    ).update({"is_active": False}, synchronize_session=False)
 
-    for sesion in sesiones_expiradas:
-        sesion.is_active = False
-
-    if sesiones_expiradas:
-        # Verificar si queda alguna sesión activa
+    # Si se expiró alguna sesión, verificamos si debemos liberar el basurero
+    if filas_afectadas > 0:
         activa = db.query(SesionBasurero).filter(
             SesionBasurero.basurero_id == basurero_id,
             SesionBasurero.is_active == True
         ).first()
 
         if not activa:
-            basurero = db.query(Basurero).filter(Basurero.id == basurero_id).first()
-            if basurero:
-                basurero.is_occupied = False
+            db.query(Basurero).filter(Basurero.id == basurero_id).update({"is_occupied": False})
 
-        db.commit()
-
+    db.commit()
 
 def _cerrar_sesiones_activas(basurero_id: str, db: Session):
     """Cierra todas las sesiones activas de un basurero."""
