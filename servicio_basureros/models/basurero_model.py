@@ -4,6 +4,15 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from database import Base
 import enum
+from sqlalchemy import Table
+
+# Registrar una tabla ficticia 'perfiles' en la metadata de Base para que las FKs se resuelvan en SQLAlchemy
+if "perfiles" not in Base.metadata.tables:
+    Table(
+        "perfiles",
+        Base.metadata,
+        Column("id", String, primary_key=True)
+    )
 
 
 class EstadoBasurero(str, enum.Enum):
