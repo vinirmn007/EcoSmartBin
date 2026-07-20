@@ -37,42 +37,170 @@ class _AdminUsuariosView extends StatelessWidget {
                   onRefresh: state._fetchUsuarios,
                   color: AppColors.emeraldGlow,
                   backgroundColor: AppColors.glassSurface,
-                  child: state._usuarios.isEmpty
-                      ? _buildEmptyState()
-                      : Center(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: isDesktop ? 800 : double.infinity,
+                  child: Column(
+                    children: [
+                      // Header controls: Search & Sort
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                        child: Column(
+                          children: [
+                            // Search input
+                            TextField(
+                              onChanged: (val) {
+                                state.setState(() {
+                                  state._searchQuery = val;
+                                  state._currentPage = 1;
+                                });
+                              },
+                              style: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 13),
+                              decoration: InputDecoration(
+                                hintText: 'Buscar por nombre, correo, cédula...',
+                                hintStyle: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 13),
+                                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.emeraldGlow, size: 20),
+                                suffixIcon: state._searchQuery.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondary, size: 18),
+                                        onPressed: () {
+                                          state.setState(() {
+                                            state._searchQuery = '';
+                                            state._currentPage = 1;
+                                          });
+                                        },
+                                      )
+                                    : null,
+                                filled: true,
+                                fillColor: AppColors.glassSurface,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: const BorderSide(color: AppColors.glassBorder),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: const BorderSide(color: AppColors.emeraldGlow),
+                                ),
+                              ),
                             ),
-                            child: isDesktop
-                                ? GridView.builder(
-                                    padding: const EdgeInsets.all(20),
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 16,
-                                      mainAxisSpacing: 16,
-                                      childAspectRatio: 1.45,
+                            const SizedBox(height: 10),
+
+                            // Row: Result count & Sort dropdown
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${state._usuariosFiltrados.length} usuarios',
+                                  style: GoogleFonts.poppins(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.glassSurface,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppColors.glassBorder),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: state._sortBy,
+                                      dropdownColor: AppColors.background,
+                                      icon: const Icon(Icons.sort_rounded, color: AppColors.emeraldGlow, size: 18),
+                                      style: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 12),
+                                      items: const [
+                                        DropdownMenuItem(value: 'fecha_desc', child: Text('Fecha (más reciente)')),
+                                        DropdownMenuItem(value: 'fecha_asc', child: Text('Fecha (más antiguo)')),
+                                        DropdownMenuItem(value: 'nombre_asc', child: Text('Nombre (A - Z)')),
+                                        DropdownMenuItem(value: 'nombre_desc', child: Text('Nombre (Z - A)')),
+                                      ],
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          state.setState(() {
+                                            state._sortBy = val;
+                                          });
+                                        }
+                                      },
                                     ),
-                                    itemCount: state._usuarios.length,
-                                    itemBuilder: (context, index) {
-                                      final u = state._usuarios[index];
-                                      return _buildUsuarioCard(context, u);
-                                    },
-                                  )
-                                : ListView.builder(
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // List View or Empty
+                      Expanded(
+                        child: state._usuariosPaginados.isEmpty
+                            ? _buildEmptyState()
+                            : Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: isDesktop ? 800 : double.infinity,
+                                  ),
+                                  child: ListView.builder(
                                     physics: const AlwaysScrollableScrollPhysics(),
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                    itemCount: state._usuarios.length,
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                    itemCount: state._usuariosPaginados.length,
                                     itemBuilder: (context, index) {
-                                      final u = state._usuarios[index];
+                                      final u = state._usuariosPaginados[index];
                                       return Padding(
                                         padding: const EdgeInsets.only(bottom: 12),
                                         child: _buildUsuarioCard(context, u),
                                       );
                                     },
                                   ),
+                                ),
+                              ),
+                      ),
+
+                      // Pagination Footer Controls
+                      if (state._totalPages > 1)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          decoration: const BoxDecoration(
+                            color: AppColors.glassSurface,
+                            border: Border(top: BorderSide(color: AppColors.glassBorder, width: 0.5)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton.icon(
+                                onPressed: state._currentPage > 1
+                                    ? () => state.setState(() => state._currentPage--)
+                                    : null,
+                                icon: const Icon(Icons.chevron_left_rounded, size: 18),
+                                label: const Text('Anterior'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.emeraldGlow,
+                                  disabledForegroundColor: AppColors.textSecondary.withOpacity(0.3),
+                                ),
+                              ),
+                              Text(
+                                'Página ${state._currentPage} de ${state._totalPages}',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: state._currentPage < state._totalPages
+                                    ? () => state.setState(() => state._currentPage++)
+                                    : null,
+                                icon: const Icon(Icons.chevron_right_rounded, size: 18),
+                                label: const Text('Siguiente'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.emeraldGlow,
+                                  disabledForegroundColor: AppColors.textSecondary.withOpacity(0.3),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                    ],
+                  ),
                 ),
         ),
       ),

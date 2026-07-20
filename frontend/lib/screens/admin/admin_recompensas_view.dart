@@ -201,20 +201,52 @@ class _AdminRecompensasView extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Section header
-                Text(
-                  'CATÁLOGO DE RECOMPENSAS',
-                  style: GoogleFonts.poppins(
-                    color: AppColors.textSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2.0,
-                  ),
+                // Section header & Sort
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'CATÁLOGO DE RECOMPENSAS',
+                      style: GoogleFonts.poppins(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.glassSurface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.glassBorder),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: state._recompensasSortBy,
+                          dropdownColor: AppColors.background,
+                          icon: const Icon(Icons.sort_rounded, color: AppColors.emeraldGlow, size: 18),
+                          style: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 12),
+                          items: const [
+                            DropdownMenuItem(value: 'nombre_asc', child: Text('Nombre (A - Z)')),
+                            DropdownMenuItem(value: 'nombre_desc', child: Text('Nombre (Z - A)')),
+                            DropdownMenuItem(value: 'costo_asc', child: Text('Menor Costo')),
+                            DropdownMenuItem(value: 'costo_desc', child: Text('Mayor Costo')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              state.setState(() => state._recompensasSortBy = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
 
                 // Recompensas list
-                ...state._recompensas.map((r) {
+                ...state._recompensasOrdenadas.map((r) {
                   final recompensa = r as Map<String, dynamic>;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -555,57 +587,124 @@ class _AdminRecompensasView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-                // Pending section (most important)
-                if (pendientes.isNotEmpty) ...[
-                  _buildSectionHeader(
-                    'PENDIENTES DE ENTREGA',
-                    Icons.hourglass_top_rounded,
-                    AppColors.warning,
-                    pendientes.length,
+                // Search Bar
+                TextField(
+                  onChanged: (val) {
+                    state.setState(() {
+                      state._canjesSearchQuery = val;
+                    });
+                  },
+                  style: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por usuario, correo o recompensa...',
+                    hintStyle: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 13),
+                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.emeraldGlow, size: 20),
+                    suffixIcon: state._canjesSearchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, color: AppColors.textSecondary, size: 18),
+                            onPressed: () {
+                              state.setState(() {
+                                state._canjesSearchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: AppColors.glassSurface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.glassBorder),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppColors.emeraldGlow),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  ...pendientes.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildCanjeCard(
-                            context, c as Map<String, dynamic>),
-                      )),
-                  const SizedBox(height: 20),
-                ],
+                ),
+                const SizedBox(height: 12),
 
-                // Delivered section
-                if (entregados.isNotEmpty) ...[
-                  _buildSectionHeader(
-                    'ENTREGADOS',
-                    Icons.check_circle_rounded,
-                    AppColors.emeraldGlow,
-                    entregados.length,
-                  ),
-                  const SizedBox(height: 12),
-                  ...entregados.map((c) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildCanjeCard(
-                            context, c as Map<String, dynamic>),
-                      )),
-                  const SizedBox(height: 20),
-                ],
+                // Row: Filter Status Chips & Sort Dropdown
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Status Filter Chips
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip('TODOS', 'Todos', state._canjesFilterEstado == 'TODOS', () {
+                              state.setState(() => state._canjesFilterEstado = 'TODOS');
+                            }),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('PENDIENTE', 'Pendientes', state._canjesFilterEstado == 'PENDIENTE', () {
+                              state.setState(() => state._canjesFilterEstado = 'PENDIENTE');
+                            }),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('ENTREGADO', 'Entregados', state._canjesFilterEstado == 'ENTREGADO', () {
+                              state.setState(() => state._canjesFilterEstado = 'ENTREGADO');
+                            }),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('CANCELADO', 'Cancelados', state._canjesFilterEstado == 'CANCELADO', () {
+                              state.setState(() => state._canjesFilterEstado = 'CANCELADO');
+                            }),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
 
-                // Cancelled section
-                if (cancelados.isNotEmpty) ...[
-                  _buildSectionHeader(
-                    'CANCELADOS',
-                    Icons.cancel_rounded,
-                    AppColors.error,
-                    cancelados.length,
-                  ),
-                  const SizedBox(height: 12),
-                  ...cancelados.map((c) => Padding(
+                    // Sort Dropdown
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.glassSurface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.glassBorder),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: state._canjesSortBy,
+                          dropdownColor: AppColors.background,
+                          icon: const Icon(Icons.sort_rounded, color: AppColors.emeraldGlow, size: 18),
+                          style: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 12),
+                          items: const [
+                            DropdownMenuItem(value: 'fecha_desc', child: Text('Fecha (más reciente)')),
+                            DropdownMenuItem(value: 'fecha_asc', child: Text('Fecha (más antiguo)')),
+                            DropdownMenuItem(value: 'nombre_asc', child: Text('Nombre (A - Z)')),
+                            DropdownMenuItem(value: 'nombre_desc', child: Text('Nombre (Z - A)')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              state.setState(() => state._canjesSortBy = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Render list
+                if (state._canjesFiltrados.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Text(
+                        'No hay canjes que coincidan con los filtros.',
+                        style: GoogleFonts.poppins(color: AppColors.textSecondary, fontSize: 13),
+                      ),
+                    ),
+                  )
+                else
+                  ...state._canjesFiltrados.map((c) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildCanjeCard(
-                            context, c as Map<String, dynamic>),
+                        child: _buildCanjeCard(context, c as Map<String, dynamic>),
                       )),
-                ],
               ],
             ),
           ),
@@ -840,5 +939,30 @@ class _AdminRecompensasView extends StatelessWidget {
   String _truncateId(String id) {
     if (id.length <= 12) return id;
     return '${id.substring(0, 8)}...${id.substring(id.length - 4)}';
+  }
+
+  Widget _buildFilterChip(String value, String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.emeraldGlow : AppColors.glassSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.emeraldGlow : AppColors.glassBorder,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: isSelected ? AppColors.deepObsidian : AppColors.textPrimary,
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
   }
 }

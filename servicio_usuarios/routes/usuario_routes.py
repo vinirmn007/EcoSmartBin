@@ -432,15 +432,13 @@ def delete_user_admin(
         if not perfil:
             raise HTTPException(status_code=404, detail="Usuario no encontrado.")
         
-        # 1. Eliminar perfil de 'perfiles'
-        db.delete(perfil)
-        db.commit()
+        # 1. Eliminar registros en cascada de tablas asociadas al usuario
+        db.execute(text("DELETE FROM canjes WHERE usuario_id = :uid"), {"uid": user_id})
+        db.execute(text("DELETE FROM transacciones WHERE usuario_id = :uid"), {"uid": user_id})
+        db.execute(text("DELETE FROM perfiles WHERE id = :uid"), {"uid": user_id})
 
-        # 2. Eliminar usuario de 'auth.users'
-        db.execute(
-            text("DELETE FROM auth.users WHERE id = :uid"),
-            {"uid": user_id}
-        )
+        # 2. Eliminar usuario de 'auth.users' de Supabase
+        db.execute(text("DELETE FROM auth.users WHERE id = :uid"), {"uid": user_id})
         db.commit()
 
         return {"message": "Usuario eliminado exitosamente."}

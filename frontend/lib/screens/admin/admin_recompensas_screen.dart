@@ -23,6 +23,91 @@ class _AdminRecompensasScreenState extends State<AdminRecompensasScreen>
   List<dynamic> _canjes = [];
   late TabController _tabController;
 
+  // Filtros, búsqueda y ordenamiento de Canjes
+  String _canjesFilterEstado = 'TODOS'; // 'TODOS', 'PENDIENTE', 'ENTREGADO', 'CANCELADO'
+  String _canjesSearchQuery = '';
+  String _canjesSortBy = 'fecha_desc'; // 'fecha_desc', 'fecha_asc', 'nombre_asc', 'nombre_desc'
+
+  // Ordenamiento de Recompensas
+  String _recompensasSortBy = 'nombre_asc'; // 'nombre_asc', 'nombre_desc', 'costo_asc', 'costo_desc'
+
+  List<dynamic> get _canjesFiltrados {
+    var list = _canjes.where((c) {
+      // 1. Filtro por estado
+      final estado = (c['estado'] ?? '').toString().toUpperCase();
+      if (_canjesFilterEstado != 'TODOS' && estado != _canjesFilterEstado) {
+        return false;
+      }
+
+      // 2. Búsqueda por texto (usuarioNombre, usuarioEmail, usuarioId, recompensaNombre)
+      if (_canjesSearchQuery.trim().isNotEmpty) {
+        final q = _canjesSearchQuery.trim().toLowerCase();
+        final userNombre = (c['usuarioNombre'] ?? '').toString().toLowerCase();
+        final userEmail = (c['usuarioEmail'] ?? '').toString().toLowerCase();
+        final userId = (c['usuarioId'] ?? '').toString().toLowerCase();
+        final recompensa = (c['recompensaNombre'] ?? '').toString().toLowerCase();
+        final match = userNombre.contains(q) ||
+            userEmail.contains(q) ||
+            userId.contains(q) ||
+            recompensa.contains(q);
+        if (!match) return false;
+      }
+
+      return true;
+    }).toList();
+
+    // 3. Ordenamiento
+    list.sort((a, b) {
+      switch (_canjesSortBy) {
+        case 'nombre_asc':
+          final nameA = (a['recompensaNombre'] ?? a['usuarioNombre'] ?? '').toString().toLowerCase();
+          final nameB = (b['recompensaNombre'] ?? b['usuarioNombre'] ?? '').toString().toLowerCase();
+          return nameA.compareTo(nameB);
+        case 'nombre_desc':
+          final nameA = (a['recompensaNombre'] ?? a['usuarioNombre'] ?? '').toString().toLowerCase();
+          final nameB = (b['recompensaNombre'] ?? b['usuarioNombre'] ?? '').toString().toLowerCase();
+          return nameB.compareTo(nameA);
+        case 'fecha_asc':
+          final dateA = a['fecha'] != null ? DateTime.tryParse(a['fecha'].toString()) ?? DateTime(1970) : DateTime(1970);
+          final dateB = b['fecha'] != null ? DateTime.tryParse(b['fecha'].toString()) ?? DateTime(1970) : DateTime(1970);
+          return dateA.compareTo(dateB);
+        case 'fecha_desc':
+        default:
+          final dateA = a['fecha'] != null ? DateTime.tryParse(a['fecha'].toString()) ?? DateTime(1970) : DateTime(1970);
+          final dateB = b['fecha'] != null ? DateTime.tryParse(b['fecha'].toString()) ?? DateTime(1970) : DateTime(1970);
+          return dateB.compareTo(dateA);
+      }
+    });
+
+    return list;
+  }
+
+  List<dynamic> get _recompensasOrdenadas {
+    var list = List<dynamic>.from(_recompensas);
+    list.sort((a, b) {
+      switch (_recompensasSortBy) {
+        case 'nombre_desc':
+          final nameA = (a['nombre'] ?? '').toString().toLowerCase();
+          final nameB = (b['nombre'] ?? '').toString().toLowerCase();
+          return nameB.compareTo(nameA);
+        case 'costo_asc':
+          final costoA = (a['costoPuntos'] ?? 0) as int;
+          final costoB = (b['costoPuntos'] ?? 0) as int;
+          return costoA.compareTo(costoB);
+        case 'costo_desc':
+          final costoA = (a['costoPuntos'] ?? 0) as int;
+          final costoB = (b['costoPuntos'] ?? 0) as int;
+          return costoB.compareTo(costoA);
+        case 'nombre_asc':
+        default:
+          final nameA = (a['nombre'] ?? '').toString().toLowerCase();
+          final nameB = (b['nombre'] ?? '').toString().toLowerCase();
+          return nameA.compareTo(nameB);
+      }
+    });
+    return list;
+  }
+
   // Formulario de recompensa
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();

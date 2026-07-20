@@ -20,6 +20,66 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
   bool _isLoading = true;
   List<dynamic> _usuarios = [];
 
+  String _searchQuery = '';
+  String _sortBy = 'fecha_desc'; // 'fecha_desc', 'fecha_asc', 'nombre_asc', 'nombre_desc'
+  int _currentPage = 1;
+  static const int _itemsPerPage = 10;
+
+  List<dynamic> get _usuariosFiltrados {
+    var list = _usuarios.where((u) {
+      if (_searchQuery.trim().isEmpty) return true;
+      final q = _searchQuery.trim().toLowerCase();
+      final nombres = (u['nombres'] ?? '').toString().toLowerCase();
+      final apellidos = (u['apellidos'] ?? '').toString().toLowerCase();
+      final email = (u['email'] ?? '').toString().toLowerCase();
+      final cedula = (u['cedula'] ?? '').toString().toLowerCase();
+      final telefono = (u['telefono'] ?? '').toString().toLowerCase();
+      return nombres.contains(q) ||
+          apellidos.contains(q) ||
+          email.contains(q) ||
+          cedula.contains(q) ||
+          telefono.contains(q);
+    }).toList();
+
+    list.sort((a, b) {
+      switch (_sortBy) {
+        case 'nombre_asc':
+          final nameA = '${a['nombres']} ${a['apellidos']}'.toLowerCase();
+          final nameB = '${b['nombres']} ${b['apellidos']}'.toLowerCase();
+          return nameA.compareTo(nameB);
+        case 'nombre_desc':
+          final nameA = '${a['nombres']} ${a['apellidos']}'.toLowerCase();
+          final nameB = '${b['nombres']} ${b['apellidos']}'.toLowerCase();
+          return nameB.compareTo(nameA);
+        case 'fecha_asc':
+          final dateA = a['created_at'] != null ? DateTime.tryParse(a['created_at'].toString()) ?? DateTime(1970) : DateTime(1970);
+          final dateB = b['created_at'] != null ? DateTime.tryParse(b['created_at'].toString()) ?? DateTime(1970) : DateTime(1970);
+          return dateA.compareTo(dateB);
+        case 'fecha_desc':
+        default:
+          final dateA = a['created_at'] != null ? DateTime.tryParse(a['created_at'].toString()) ?? DateTime(1970) : DateTime(1970);
+          final dateB = b['created_at'] != null ? DateTime.tryParse(b['created_at'].toString()) ?? DateTime(1970) : DateTime(1970);
+          return dateB.compareTo(dateA);
+      }
+    });
+
+    return list;
+  }
+
+  int get _totalPages {
+    final count = _usuariosFiltrados.length;
+    if (count == 0) return 1;
+    return (count / _itemsPerPage).ceil();
+  }
+
+  List<dynamic> get _usuariosPaginados {
+    final filtered = _usuariosFiltrados;
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    if (startIndex >= filtered.length) return [];
+    final endIndex = (startIndex + _itemsPerPage).clamp(0, filtered.length);
+    return filtered.sublist(startIndex, endIndex);
+  }
+
   // Controladores del formulario de edición
   final _formKey = GlobalKey<FormState>();
   final _nombresController = TextEditingController();
