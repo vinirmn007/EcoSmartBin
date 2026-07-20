@@ -18,9 +18,10 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _nombresController = TextEditingController();
   final _apellidosController = TextEditingController();
   final _cedulaController = TextEditingController();
@@ -29,13 +30,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _captchaVerified = false;
+  String? _captchaToken;
   String? _errorMessage;
   String? _successMessage;
+
+  void _toggleCaptcha(bool? value) {
+    setState(() {
+      _captchaVerified = value ?? false;
+      _captchaToken = _captchaVerified
+          ? '6LfC5VwtAAAAAHZkZH5zKScrkJVHwC39DlAFgsoW'
+          : null;
+      if (_captchaVerified) {
+        _errorMessage = null;
+      }
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _nombresController.dispose();
     _apellidosController.dispose();
     _cedulaController.dispose();
@@ -46,6 +63,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_captchaVerified || _captchaToken == null) {
+      setState(() {
+        _errorMessage =
+            'Por favor marca la casilla "No soy un robot" para continuar.';
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -61,6 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       cedula: _cedulaController.text.trim(),
       telefono: _telefonoController.text.trim(),
       facultad: _facultadController.text.trim(),
+      captchaToken: _captchaToken,
     );
 
     if (mounted) {

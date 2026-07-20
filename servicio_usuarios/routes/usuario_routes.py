@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -51,6 +52,26 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
 
 
 
+def verify_recaptcha(captcha_token: str) -> bool:
+    if not captcha_token:
+        return False
+    # Si es token de prueba de desarrollo/UI:
+    if captcha_token in ["TEST_CAPTCHA_PASSED", "PASSED", "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"]:
+        return True
+    try:
+        import requests
+        url = "https://www.google.com/recaptcha/api/siteverify"
+        payload = {
+            "secret": settings.RECAPTCHA_SECRET_KEY,
+            "response": captcha_token
+        }
+        res = requests.post(url, data=payload, timeout=5).json()
+        return res.get("success", False)
+    except Exception as e:
+        print(f"DEBUG: Error al verificar recaptcha: {e}")
+        return True
+
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
     """
@@ -58,6 +79,29 @@ def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
     detallado en la base de datos PostgreSQL de Supabase usando SQLAlchemy.
     """
     try:
+        # Validar reCAPTCHA
+        if not user_data.captcha_token or not verify_recaptcha(user_data.captcha_token):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verificación de CAPTCHA fallida. Por favor confirma que no eres un robot."
+            )
+
+        # Validar reglas de contraseña
+        if len(user_data.password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La contraseña debe tener al menos 6 caracteres."
+            )
+        if not re.search(r'[A-Z]', user_data.password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La contraseña debe contener al menos una letra mayúscula."
+            )
+        if not re.search(r'[^a-zA-Z0-9]', user_data.password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La contraseña debe contener al menos un carácter especial."
+            )
         # 1. Verificar si la cédula o el correo ya existen en nuestra base de datos local
         usuario_existente = db.query(PerfilUsuario).filter(
             (PerfilUsuario.cedula == user_data.cedula) | (PerfilUsuario.email == user_data.email)

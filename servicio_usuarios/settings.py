@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str
     SUPABASE_JWT_SECRET: str
     DATABASE_URL: str
+    RECAPTCHA_SECRET_KEY: str = "6LfC5VwtAAAAABcvt2PejwHXSM5gKAG2EXTEYkVf"
     
     # Entorno actual: 'dev' o 'prod' (por defecto 'dev' si no se especifica)
     ENV: str = "dev"

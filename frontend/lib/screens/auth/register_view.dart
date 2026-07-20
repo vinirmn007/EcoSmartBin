@@ -234,7 +234,7 @@ class _RegisterView extends StatelessWidget {
                           // Password
                           PremiumTextField(
                             controller: state._passwordController,
-                            hintText: 'Contraseña (mín. 6 caracteres)',
+                            hintText: 'Contraseña',
                             prefixIcon: Icons.lock_outline_rounded,
                             obscureText: state._obscurePassword,
                             suffixIcon: IconButton(
@@ -251,9 +251,107 @@ class _RegisterView extends StatelessWidget {
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Ingresa una contraseña';
-                              if (v.length < 6) return 'Debe tener al menos 6 caracteres';
+                              if (v.length < 6) return 'Mínimo 6 caracteres';
+                              if (!RegExp(r'[A-Z]').hasMatch(v)) {
+                                return 'Debe contener al menos una mayúscula (A-Z)';
+                              }
+                              if (!RegExp(r'[^a-zA-Z0-9]').hasMatch(v)) {
+                                return 'Debe contener al menos un carácter especial (!@#\$...)';
+                              }
                               return null;
                             },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Confirm Password
+                          PremiumTextField(
+                            controller: state._confirmPasswordController,
+                            hintText: 'Confirmar contraseña',
+                            prefixIcon: Icons.lock_clock_outlined,
+                            obscureText: state._obscureConfirmPassword,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                state._obscureConfirmPassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                state.setState(() => state._obscureConfirmPassword = !state._obscureConfirmPassword);
+                              },
+                            ),
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Confirma tu contraseña';
+                              if (v != state._passwordController.text) {
+                                return 'Las contraseñas no coinciden';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Widget Box reCAPTCHA
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: state._captchaVerified
+                                    ? AppColors.emeraldGlow
+                                    : AppColors.glassBorder,
+                                width: state._captchaVerified ? 1.5 : 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Checkbox(
+                                  value: state._captchaVerified,
+                                  onChanged: state._toggleCaptcha,
+                                  activeColor: AppColors.emeraldGlow,
+                                  checkColor: AppColors.deepObsidian,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'No soy un robot',
+                                    style: GoogleFonts.poppins(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Image.network(
+                                      'https://www.gstatic.com/recaptcha/api2/logo_48.png',
+                                      width: 24,
+                                      height: 24,
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.security_rounded,
+                                        color: AppColors.textSecondary,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'reCAPTCHA',
+                                      style: GoogleFonts.poppins(
+                                        color: AppColors.textSecondary.withOpacity(0.7),
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 24),
 

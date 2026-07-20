@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../../models/user_profile.dart';
 import '../../services/api_service.dart';
@@ -49,10 +51,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _isLoading = false;
         });
       } else {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-        });
+        // Si no hay sesión válida o falla la obtención del perfil:
+        // Redirigir a Landing Page en Web, y a Login en Android.
+        final bool isAndroid = !kIsWeb && Platform.isAndroid;
+        final String unauthRoute = isAndroid ? '/login' : '/';
+        Navigator.pushNamedAndRemoveUntil(context, unauthRoute, (route) => false);
       }
     }
   }
@@ -60,7 +63,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleLogout() async {
     await ApiService.logout();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
+      final bool isAndroid = !kIsWeb && Platform.isAndroid;
+      final String unauthRoute = isAndroid ? '/login' : '/';
+      Navigator.pushNamedAndRemoveUntil(context, unauthRoute, (route) => false);
     }
   }
 

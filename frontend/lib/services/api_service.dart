@@ -32,6 +32,7 @@ class ApiService {
     required String cedula,
     String? telefono,
     String? facultad,
+    String? captchaToken,
   }) async {
     final url = Uri.parse('$gatewayUrl/auth/register');
 
@@ -49,6 +50,10 @@ class ApiService {
 
     if (facultad != null && facultad.isNotEmpty) {
       body['facultad'] = facultad;
+    }
+
+    if (captchaToken != null && captchaToken.isNotEmpty) {
+      body['captcha_token'] = captchaToken;
     }
 
     try {

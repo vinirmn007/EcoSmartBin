@@ -7,6 +7,19 @@ class _ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (state._isLoading || state._profile == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: BackgroundGradient(
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.emeraldGlow),
+            ),
+          ),
+        ),
+      );
+    }
+
     final List<Widget> _tabs = [
       _buildProfileTab(context),
       const ReciclarScreen(),
