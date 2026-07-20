@@ -229,13 +229,31 @@ public class RecompensaService {
     }
 
     private CanjeResponse toCanjeResponse(Canje c) {
+        String usuarioNombre = null;
+        String usuarioEmail = null;
+        String usuarioTelefono = null;
+
+        if (c.getUsuarioId() != null) {
+            PerfilUsuario perfil = perfilRepository.findById(c.getUsuarioId()).orElse(null);
+            if (perfil != null) {
+                usuarioNombre = ((perfil.getNombres() != null ? perfil.getNombres() : "") + 
+                                " " + 
+                                (perfil.getApellidos() != null ? perfil.getApellidos() : "")).trim();
+                usuarioEmail = perfil.getEmail();
+                usuarioTelefono = perfil.getTelefono();
+            }
+        }
+
         return CanjeResponse.builder()
                 .id(c.getId())
                 .usuarioId(c.getUsuarioId())
-                .recompensaNombre(c.getRecompensa().getNombre())
+                .usuarioNombre(usuarioNombre)
+                .usuarioEmail(usuarioEmail)
+                .usuarioTelefono(usuarioTelefono)
+                .recompensaNombre(c.getRecompensa() != null ? c.getRecompensa().getNombre() : null)
                 .puntosGastados(c.getPuntosGastados())
                 .fecha(c.getFecha())
-                .estado(c.getEstado().name())
+                .estado(c.getEstado() != null ? c.getEstado().name() : null)
                 .build();
     }
 }

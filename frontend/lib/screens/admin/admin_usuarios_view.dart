@@ -155,7 +155,9 @@ class _AdminUsuariosView extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      email,
+                      u['telefono'] != null && (u['telefono'] as String).isNotEmpty
+                          ? '$email • ${u['telefono']}'
+                          : email,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(

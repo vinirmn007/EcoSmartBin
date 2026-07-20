@@ -12,6 +12,7 @@ class PerfilUsuario(Base):
     nombres = Column(String, nullable=False)
     apellidos = Column(String, nullable=False)
     cedula = Column(String, unique=True, index=True, nullable=False) 
+    telefono = Column(String, nullable=True)
     
     facultad = Column(String, nullable=True) 
     

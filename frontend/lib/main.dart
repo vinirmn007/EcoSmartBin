@@ -22,6 +22,9 @@ import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/url_helper.dart';
 
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -60,9 +63,17 @@ void main() async {
   
   // Verificar si ya existe una sesión activa al arrancar
   final bool loggedIn = await ApiService.hasSession();
+  final bool isAndroid = !kIsWeb && Platform.isAndroid;
+
+  String defaultStartRoute = '/';
+  if (isAndroid) {
+    defaultStartRoute = loggedIn ? '/profile' : '/login';
+  } else {
+    defaultStartRoute = loggedIn ? '/profile' : '/';
+  }
 
   runApp(MyApp(
-    startRoute: initialRouteOverride ?? (loggedIn ? '/profile' : '/'),
+    startRoute: initialRouteOverride ?? defaultStartRoute,
     initialToken: extractedToken,
     initialRefreshToken: extractedRefreshToken,
   ));

@@ -96,6 +96,7 @@ def register_user(user_data: UserRegisterSchema, db: Session = Depends(get_db)):
             nombres=user_data.nombres,
             apellidos=user_data.apellidos,
             cedula=user_data.cedula,
+            telefono=user_data.telefono,
             facultad=user_data.facultad,
             role="user"
         )
@@ -182,6 +183,7 @@ def get_my_profile(current_user: dict = Depends(get_current_user), db: Session =
             "nombres": perfil.nombres,
             "apellidos": perfil.apellidos,
             "cedula": perfil.cedula,
+            "telefono": perfil.telefono,
             "facultad": perfil.facultad,
             "role": perfil.role,
             "puntos_ecologicos": perfil.puntos_ecologicos,
@@ -280,6 +282,7 @@ def list_users(
                 "nombres": u.nombres,
                 "apellidos": u.apellidos,
                 "cedula": u.cedula,
+                "telefono": u.telefono,
                 "facultad": u.facultad,
                 "role": u.role,
                 "puntos_ecologicos": u.puntos_ecologicos,
@@ -315,6 +318,7 @@ def update_user_admin(
         nombres = data.get("nombres")
         apellidos = data.get("apellidos")
         cedula = data.get("cedula")
+        telefono = data.get("telefono")
         facultad = data.get("facultad")
         role = data.get("role")
         is_active = data.get("is_active")
@@ -328,6 +332,8 @@ def update_user_admin(
             perfil.apellidos = apellidos
         if cedula is not None:
             perfil.cedula = cedula
+        if telefono is not None:
+            perfil.telefono = telefono
         if facultad is not None:
             perfil.facultad = facultad
         if role is not None:

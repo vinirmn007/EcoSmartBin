@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../services/api_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/background_gradient.dart';
 import '../../widgets/glass_card.dart';
@@ -29,6 +32,16 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
         setState(() => _navScrolled = scrolled);
       }
     });
+
+    // En Android no mostrar la landing page. Redirigir a login o perfil.
+    if (!kIsWeb && Platform.isAndroid) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final loggedIn = await ApiService.hasSession();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, loggedIn ? '/profile' : '/login');
+        }
+      });
+    }
   }
 
   @override

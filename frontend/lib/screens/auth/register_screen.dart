@@ -24,6 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nombresController = TextEditingController();
   final _apellidosController = TextEditingController();
   final _cedulaController = TextEditingController();
+  final _telefonoController = TextEditingController();
   final _facultadController = TextEditingController();
 
   bool _isLoading = false;
@@ -38,6 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nombresController.dispose();
     _apellidosController.dispose();
     _cedulaController.dispose();
+    _telefonoController.dispose();
     _facultadController.dispose();
     super.dispose();
   }
@@ -57,6 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       nombres: _nombresController.text.trim(),
       apellidos: _apellidosController.text.trim(),
       cedula: _cedulaController.text.trim(),
+      telefono: _telefonoController.text.trim(),
       facultad: _facultadController.text.trim(),
     );
 

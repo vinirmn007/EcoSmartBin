@@ -26,6 +26,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
   final _apellidosController = TextEditingController();
   final _emailController = TextEditingController();
   final _cedulaController = TextEditingController();
+  final _telefonoController = TextEditingController();
   final _facultadController = TextEditingController();
   String _role = 'user';
   bool _isActive = true;
@@ -57,6 +58,9 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
       'apellidos': _apellidosController.text.trim(),
       'email': _emailController.text.trim(),
       'cedula': _cedulaController.text.trim(),
+      'telefono': _telefonoController.text.trim().isNotEmpty 
+          ? _telefonoController.text.trim() 
+          : null,
       'facultad': _facultadController.text.trim().isNotEmpty 
           ? _facultadController.text.trim() 
           : null,
@@ -161,6 +165,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
     _apellidosController.text = user['apellidos'] ?? '';
     _emailController.text = user['email'] ?? '';
     _cedulaController.text = user['cedula'] ?? '';
+    _telefonoController.text = user['telefono'] ?? '';
     _facultadController.text = user['facultad'] ?? '';
     _role = user['role'] ?? 'user';
     _isActive = user['is_active'] ?? true;
@@ -250,6 +255,12 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
                     decoration: _inputDecoration('Cédula'),
                     validator: (val) =>
                         val == null || val.isEmpty ? 'La cédula es requerida' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _telefonoController,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: _inputDecoration('Teléfono (Opcional)'),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -345,6 +356,7 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
     _apellidosController.dispose();
     _emailController.dispose();
     _cedulaController.dispose();
+    _telefonoController.dispose();
     _facultadController.dispose();
     super.dispose();
   }

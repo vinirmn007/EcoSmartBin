@@ -33,6 +33,8 @@ public class PerfilUsuario {
     @Column(unique = true, nullable = false)
     private String cedula;
 
+    private String telefono;
+
     private String facultad;
 
     @Column(nullable = false)

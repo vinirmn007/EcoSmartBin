@@ -6,6 +6,7 @@ class UserRegisterSchema(BaseModel):
     nombres: str
     apellidos: str
     cedula: str
+    telefono: str = None
     facultad: str = None              # Opcional, puede ser None
 
 

@@ -683,6 +683,13 @@ class _AdminRecompensasView extends StatelessWidget {
       }
     }
 
+    final String? nombreUsuarioRaw = canje['usuarioNombre'];
+    final String usuarioNombre = (nombreUsuarioRaw != null && nombreUsuarioRaw.trim().isNotEmpty)
+        ? nombreUsuarioRaw.trim()
+        : 'Usuario: ${_truncateId(canje['usuarioId'] ?? '')}';
+    final String? usuarioEmail = canje['usuarioEmail'];
+    final String? usuarioTelefono = canje['usuarioTelefono'];
+
     return GlassCard(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -728,13 +735,16 @@ class _AdminRecompensasView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Info chips
+          // Info chips: Nombre, Correo, Teléfono, Puntos, Fecha
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildInfoChip(Icons.person_outline_rounded,
-                  'Usuario: ${_truncateId(canje['usuarioId'] ?? '')}'),
+              _buildInfoChip(Icons.person_outline_rounded, usuarioNombre),
+              if (usuarioEmail != null && usuarioEmail.trim().isNotEmpty)
+                _buildInfoChip(Icons.email_outlined, usuarioEmail.trim()),
+              if (usuarioTelefono != null && usuarioTelefono.trim().isNotEmpty)
+                _buildInfoChip(Icons.phone_outlined, usuarioTelefono.trim()),
               _buildInfoChip(Icons.eco_rounded,
                   '${canje['puntosGastados'] ?? 0} pts'),
               if (fechaStr.isNotEmpty)

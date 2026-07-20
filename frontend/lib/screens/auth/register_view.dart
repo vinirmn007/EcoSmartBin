@@ -21,7 +21,7 @@ class _RegisterView extends StatelessWidget {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             } else {
-              Navigator.pushReplacementNamed(context, '/');
+              Navigator.pushReplacementNamed(context, '/login');
             }
           },
         ),
@@ -200,6 +200,19 @@ class _RegisterView extends StatelessWidget {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Teléfono
+                          PremiumTextField(
+                            controller: state._telefonoController,
+                            hintText: 'Número de teléfono',
+                            prefixIcon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) return 'Por favor ingresa tu teléfono';
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 16),
 

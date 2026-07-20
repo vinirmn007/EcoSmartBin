@@ -15,13 +15,23 @@ class _ProfileView extends StatelessWidget {
       const CanjesHistorialScreen(),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: state._currentIndex,
-        children: _tabs,
+    return PopScope(
+      canPop: state._currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && state._currentIndex != 0) {
+          state.setState(() {
+            state._currentIndex = 0;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: IndexedStack(
+          index: state._currentIndex,
+          children: _tabs,
+        ),
+        bottomNavigationBar: _buildPremiumNavBar(context),
       ),
-      bottomNavigationBar: _buildPremiumNavBar(context),
     );
   }
 

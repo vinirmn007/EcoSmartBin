@@ -30,6 +30,7 @@ class ApiService {
     required String nombres,
     required String apellidos,
     required String cedula,
+    String? telefono,
     String? facultad,
   }) async {
     final url = Uri.parse('$gatewayUrl/auth/register');
@@ -41,6 +42,10 @@ class ApiService {
       'apellidos': apellidos,
       'cedula': cedula,
     };
+
+    if (telefono != null && telefono.isNotEmpty) {
+      body['telefono'] = telefono;
+    }
 
     if (facultad != null && facultad.isNotEmpty) {
       body['facultad'] = facultad;
