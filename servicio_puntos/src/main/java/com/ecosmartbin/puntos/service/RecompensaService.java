@@ -43,6 +43,15 @@ public class RecompensaService {
     }
 
     /**
+     * Lista todas las recompensas (activas e inactivas) — solo admin.
+     */
+    public List<RecompensaResponse> listarTodas() {
+        return recompensaRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Obtiene el detalle de una recompensa por ID.
      */
     public RecompensaResponse obtenerPorId(Long id) {
@@ -153,6 +162,15 @@ public class RecompensaService {
      */
     public List<CanjeResponse> misCanjes(String usuarioId) {
         return canjeRepository.findByUsuarioIdOrderByFechaDesc(usuarioId).stream()
+                .map(this::toCanjeResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Lista todos los canjes de todos los usuarios — solo admin.
+     */
+    public List<CanjeResponse> todosLosCanjes() {
+        return canjeRepository.findAllByOrderByFechaDesc().stream()
                 .map(this::toCanjeResponse)
                 .collect(Collectors.toList());
     }

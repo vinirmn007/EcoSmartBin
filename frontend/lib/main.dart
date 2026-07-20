@@ -17,6 +17,7 @@ import 'screens/puntos/reciclar_screen.dart';
 import 'screens/admin/admin_screen.dart';
 import 'screens/admin/admin_basureros_screen.dart';
 import 'screens/admin/admin_usuarios_screen.dart';
+import 'screens/admin/admin_recompensas_screen.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/url_helper.dart';
@@ -109,6 +110,7 @@ class MyApp extends StatelessWidget {
         '/admin': (context) => const AdminScreen(),
         '/admin/basureros': (context) => const AdminBasurerosScreen(),
         '/admin/usuarios': (context) => const AdminUsuariosScreen(),
+        '/admin/recompensas': (context) => const AdminRecompensasScreen(),
       },
     );
   }

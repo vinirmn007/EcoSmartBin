@@ -38,6 +38,15 @@ public class RecompensaController {
     }
 
     /**
+     * GET /api/recompensas/todas
+     * Lista todas las recompensas, activas e inactivas (solo admin).
+     */
+    @GetMapping("/recompensas/todas")
+    public ResponseEntity<List<RecompensaResponse>> listarTodasRecompensas() {
+        return ResponseEntity.ok(recompensaService.listarTodas());
+    }
+
+    /**
      * GET /api/recompensas/{id}
      * Detalle de una recompensa (público).
      */
@@ -103,6 +112,15 @@ public class RecompensaController {
         // TODO-DEV: userId desde token; en pruebas puede ser nulo si no hay autenticación
         String userId = (authentication != null) ? authentication.getName() : "test-user-id";
         return ResponseEntity.ok(recompensaService.misCanjes(userId));
+    }
+
+    /**
+     * GET /api/canjes/todos
+     * Lista todos los canjes de todos los usuarios (solo admin).
+     */
+    @GetMapping("/canjes/todos")
+    public ResponseEntity<List<CanjeResponse>> todosLosCanjes() {
+        return ResponseEntity.ok(recompensaService.todosLosCanjes());
     }
 
     /**

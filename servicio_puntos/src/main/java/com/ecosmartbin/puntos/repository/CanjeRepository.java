@@ -10,4 +10,6 @@ import java.util.List;
 public interface CanjeRepository extends JpaRepository<Canje, Long> {
 
     List<Canje> findByUsuarioIdOrderByFechaDesc(String usuarioId);
+
+    List<Canje> findAllByOrderByFechaDesc();
 }

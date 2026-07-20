@@ -130,6 +130,7 @@ Thumbs.db
 **/android/app/debug/
 **/android/app/profile/
 **/android/app/release/
+**/GeneratedPluginRegistrant.*
 
 # Firebase
 .firebase/

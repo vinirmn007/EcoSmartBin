@@ -155,6 +155,23 @@ class _AdminView extends StatelessWidget {
                                   onTap: () => Navigator.pushNamed(context, '/admin/usuarios'),
                                 ),
                               ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildAdminOptionCard(
+                                  title: 'Gestión de\nRecompensas',
+                                  badgeText: 'CANJES',
+                                  badgeColor: const Color(0xFFF59E0B),
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      const Color(0xFFF59E0B).withOpacity(0.12),
+                                      Colors.transparent,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                  onTap: () => Navigator.pushNamed(context, '/admin/recompensas'),
+                                ),
+                              ),
                             ],
                           )
                         : Column(
@@ -187,6 +204,21 @@ class _AdminView extends StatelessWidget {
                                   end: Alignment.bottomCenter,
                                 ),
                                 onTap: () => Navigator.pushNamed(context, '/admin/usuarios'),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildAdminOptionCard(
+                                title: 'Gestión de\nRecompensas',
+                                badgeText: 'CANJES',
+                                badgeColor: const Color(0xFFF59E0B),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFFF59E0B).withOpacity(0.12),
+                                    Colors.transparent,
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                onTap: () => Navigator.pushNamed(context, '/admin/recompensas'),
                               ),
                             ],
                           ),

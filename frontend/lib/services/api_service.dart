@@ -761,4 +761,169 @@ class ApiService {
       return {'success': false, 'message': 'Sin conexión al servidor: $e'};
     }
   }
+
+  // ══════════════════════════════════════════════════
+  //  RECOMPENSAS — Admin CRUD
+  // ══════════════════════════════════════════════════
+
+  /// Lista todas las recompensas (activas e inactivas) — solo admin.
+  static Future<List<dynamic>> getTodasRecompensas() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/recompensas/todas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getTodasRecompensas: $e');
+      return [];
+    }
+  }
+
+  /// Crea una nueva recompensa — solo admin.
+  static Future<Map<String, dynamic>> crearRecompensa(
+    Map<String, dynamic> data,
+  ) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.post(
+        Uri.parse('$gatewayUrl/points/recompensas'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['message'] ?? 'Error al crear recompensa',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  /// Actualiza una recompensa existente — solo admin.
+  static Future<Map<String, dynamic>> actualizarRecompensa(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.put(
+        Uri.parse('$gatewayUrl/points/recompensas/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['message'] ?? 'Error al actualizar recompensa',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  /// Desactiva una recompensa (soft delete) — solo admin.
+  static Future<Map<String, dynamic>> desactivarRecompensa(int id) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$gatewayUrl/points/recompensas/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Recompensa desactivada'};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['message'] ?? 'Error al desactivar recompensa',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
+
+  /// Lista todos los canjes de todos los usuarios — solo admin.
+  static Future<List<dynamic>> getTodosCanjes() async {
+    final token = await getToken();
+    if (token == null) return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$gatewayUrl/points/canjes/todos'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print('DEBUG: Error getTodosCanjes: $e');
+      return [];
+    }
+  }
+
+  /// Cambia el estado de un canje — solo admin.
+  static Future<Map<String, dynamic>> cambiarEstadoCanje(
+    int canjeId,
+    String nuevoEstado,
+  ) async {
+    final token = await getToken();
+    if (token == null) return {'success': false, 'message': 'No autenticado'};
+
+    try {
+      final response = await http.put(
+        Uri.parse('$gatewayUrl/points/canjes/$canjeId/estado'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'estado': nuevoEstado}),
+      );
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': jsonDecode(response.body)};
+      }
+      final err = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': err['message'] ?? 'Error al cambiar estado del canje',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Sin conexión al servidor: $e'};
+    }
+  }
 }
