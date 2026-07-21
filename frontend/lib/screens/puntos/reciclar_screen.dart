@@ -232,7 +232,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
         _loadTiposReciclaje();
         
         if (expiresAtStr != null) {
-          final expiresAt = DateTime.tryParse(expiresAtStr.toString());
+          final expiresAt = _parseUtcDate(expiresAtStr);
           if (expiresAt != null) {
             _startSessionCountdown(expiresAt);
           } else {
@@ -252,10 +252,24 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     }
   }
 
+  DateTime? _parseUtcDate(dynamic rawStr) {
+    if (rawStr == null) return null;
+    String str = rawStr.toString().trim();
+    if (!str.endsWith('Z') && !str.contains('+')) {
+      str += 'Z';
+    }
+    return DateTime.tryParse(str);
+  }
+
   void _startSessionCountdown(DateTime expiresAt) {
     _countdownTimer?.cancel();
-    final diff = expiresAt.toUtc().difference(DateTime.now().toUtc());
+    final nowUtc = DateTime.now().toUtc();
+    final expUtc = expiresAt.toUtc();
+    final diff = expUtc.difference(nowUtc);
     _secondsRemaining = diff.inSeconds;
+    if (_secondsRemaining > 300) {
+      _secondsRemaining = 300;
+    }
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
@@ -287,7 +301,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     if (res['success'] == true && mounted) {
       final expiresAtStr = res['data']['expires_at'];
       if (expiresAtStr != null) {
-        final expiresAt = DateTime.tryParse(expiresAtStr.toString());
+        final expiresAt = _parseUtcDate(expiresAtStr);
         if (expiresAt != null) {
           _startSessionCountdown(expiresAt);
         }

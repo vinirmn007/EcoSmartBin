@@ -40,9 +40,13 @@
 // CONFIGURACIÓN - EDITAR AQUÍ
 // ===========================
 
-// WiFi
-const char* ssid     = "Marco_Omar";
-const char* password = "1720500Mm.";
+// WiFi Principal
+const char* ssid             = "Marco_Omar";
+const char* password         = "1720500Mm.";
+
+// WiFi de Respaldo (Fallback)
+const char* fallbackSsid     = "Internet_UNL";
+const char* fallbackPassword = "UNL1859WiFi";
 
 // URL del servicio de IA
 const char* serverUrl = "http://136.68.254.51/predict";
@@ -272,23 +276,41 @@ void initCamera() {
 // ===========================
 
 void connectWiFi() {
-  Serial.printf("Conectando a WiFi: %s", ssid);
+  Serial.printf("Conectando a WiFi principal: %s", ssid);
   WiFi.mode(WIFI_STA);
   WiFi.setTxPower(WIFI_POWER_8_5dBm);
   WiFi.begin(ssid, password);
   WiFi.setSleep(false);
 
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 30) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 25) {
     delay(500);
     Serial.print(".");
     attempts++;
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.printf("\n✅ WiFi conectado. IP: %s\n", WiFi.localIP().toString().c_str());
+    Serial.printf("\n✅ WiFi principal conectado. IP: %s\n", WiFi.localIP().toString().c_str());
+    return;
+  }
+
+  // ─── Intento con Red de Respaldo (Fallback) ───
+  Serial.printf("\n⚠️ No se pudo conectar a '%s'. Intentando red de respaldo: %s", ssid, fallbackSsid);
+  WiFi.disconnect();
+  delay(500);
+  WiFi.begin(fallbackSsid, fallbackPassword);
+
+  attempts = 0;
+  while (WiFi.status() != WL_CONNECTED && attempts < 25) {
+    delay(500);
+    Serial.print(".");
+    attempts++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.printf("\n✅ WiFi de respaldo conectado ('%s'). IP: %s\n", fallbackSsid, WiFi.localIP().toString().c_str());
   } else {
-    Serial.println("\n❌ No se pudo conectar a WiFi. Reiniciando...");
+    Serial.println("\n❌ No se pudo conectar a ninguna red WiFi. Reiniciando...");
     ESP.restart();
   }
 }
@@ -299,6 +321,12 @@ void connectWiFi() {
 
 void captureAndClassify() {
   Serial.println("\n📸 Botón presionado. Capturando foto...");
+
+  // Descartar frame antiguo almacenado en el buffer de la cámara
+  camera_fb_t *fb_stale = esp_camera_fb_get();
+  if (fb_stale) {
+    esp_camera_fb_return(fb_stale);
+  }
 
   // Encender flash brevemente
   digitalWrite(FLASH_LED_PIN, HIGH);

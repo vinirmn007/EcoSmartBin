@@ -183,7 +183,7 @@ def conectar_usuario(
     Row level lock de la fila del basurero en la base de datos para evitar condiciones de carrera
     """
     public_id = public_id.lower().strip()
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id).first()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -272,7 +272,7 @@ def extender_sesion(
     Solo el usuario que tiene la sesión activa puede extenderla.
     """
     public_id_clean = public_id.lower().strip()
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id_clean).first()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -335,7 +335,7 @@ def desconectar_usuario(
     Solo el usuario con sesión activa puede desconectarse.
     """
     public_id_clean = public_id.lower().strip()
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == public_id_clean).first()
+    basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
