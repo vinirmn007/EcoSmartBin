@@ -73,7 +73,7 @@ class ApiService {
       if (response.statusCode == 201) {
         return {
           'success': true,
-          'message': decodedData['message'] ?? 'Registro exitoso',
+          'message': '¡Registro exitoso! Por favor verifica tu cuenta con el correo enviado a tu dirección de correo electrónico.',
         };
       } else {
         return {
@@ -123,9 +123,23 @@ class ApiService {
 
         return {'success': true, 'token': token};
       } else {
+        final rawDetail = (decodedData['detail'] ?? 'Credenciales incorrectas').toString();
+        String errorMessage = rawDetail;
+        final lowerDetail = rawDetail.toLowerCase();
+
+        if (lowerDetail.contains('email not confirmed') ||
+            lowerDetail.contains('not verified') ||
+            lowerDetail.contains('unconfirmed') ||
+            lowerDetail.contains('verific') ||
+            lowerDetail.contains('confirm')) {
+          errorMessage = 'Debes verificar tu cuenta con el correo enviado antes de iniciar sesión.';
+        } else if (response.statusCode == 400 && lowerDetail.contains('invalid login credentials')) {
+          errorMessage = 'Credenciales incorrectas o cuenta pendiente de verificación de correo.';
+        }
+
         return {
           'success': false,
-          'message': decodedData['detail'] ?? 'Credenciales incorrectas',
+          'message': errorMessage,
         };
       }
     } catch (e) {

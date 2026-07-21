@@ -24,13 +24,11 @@ class _CanjearView extends StatelessWidget {
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: _textDark),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: _textDark),
+          onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false),
+        ),
         title: Text(
           'Canjear EcoPuntos',
           style: GoogleFonts.poppins(

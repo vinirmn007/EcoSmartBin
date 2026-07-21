@@ -432,6 +432,14 @@ class _ReciclarScreenState extends State<ReciclarScreen>
 
   @override
   Widget build(BuildContext context) {
-    return _ReciclarView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+        }
+      },
+      child: _ReciclarView(state: this),
+    );
   }
 }

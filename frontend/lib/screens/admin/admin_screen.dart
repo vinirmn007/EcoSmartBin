@@ -25,6 +25,14 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+        }
+      },
+      child: _AdminView(state: this),
+    );
   }
 }

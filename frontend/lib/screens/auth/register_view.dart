@@ -149,13 +149,13 @@ class _RegisterView extends StatelessWidget {
                                 border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.25)),
                               ),
                               child: Row(
-                                children: const [
-                                  Icon(Icons.check_circle_outline_rounded, color: AppColors.emeraldGlow, size: 20),
-                                  SizedBox(width: 10),
+                                children: [
+                                  const Icon(Icons.check_circle_outline_rounded, color: AppColors.emeraldGlow, size: 20),
+                                  const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      '¡Registro exitoso! Redirigiendo...',
-                                      style: TextStyle(color: AppColors.emeraldGlow, fontSize: 13, fontWeight: FontWeight.bold),
+                                      state._successMessage!,
+                                      style: const TextStyle(color: AppColors.emeraldGlow, fontSize: 13, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],

@@ -36,6 +36,14 @@ class _PuntosScreenState extends State<PuntosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _PuntosView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+        }
+      },
+      child: _PuntosView(state: this),
+    );
   }
 }
