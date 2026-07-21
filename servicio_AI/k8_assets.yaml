@@ -16,19 +16,25 @@ spec:
     spec:
       containers:
       - name: classifier-api
-        image: southamerica-west1-docker.pkg.dev/project-9cfd392e-d349-480a-bf9/assignment-repo/garbage-classifier:v1
+        image: southamerica-west1-docker.pkg.dev/project-9cfd392e-d349-480a-bf9/assignment-repo/garbage-classifier:v2
         ports:
         - containerPort: 8080
         env:
         - name: PORT
           value: "8080"
+        - name: MODEL_TYPE
+          value: "yolo"
+        - name: ALLOWED_CLASSES
+          value: "paper,plastic,glass"
+        - name: YOLO_CONFIDENCE_THRESHOLD
+          value: "0.40"
         resources:
           requests:
             cpu: "500m"
-            memory: "1Gi"
+            memory: "1500Mi"
           limits:
             cpu: "1500m"
-            memory: "2Gi"
+            memory: "2500Mi"
 ---
 apiVersion: v1
 kind: Service
