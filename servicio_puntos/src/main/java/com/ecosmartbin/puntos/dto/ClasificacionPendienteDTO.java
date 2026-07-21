@@ -31,6 +31,9 @@ public class ClasificacionPendienteDTO {
     /** Imagen capturada en base64 para mostrarla en el frontend */
     private String imagenBase64;
 
+    /** ID del usuario que tiene la sesión activa en el basurero */
+    private String usuarioId;
+
     /** Timestamp de cuándo se realizó la clasificación */
     private Long timestamp;
 }

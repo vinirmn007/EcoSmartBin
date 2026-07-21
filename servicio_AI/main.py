@@ -79,10 +79,14 @@ app = FastAPI(
 )
 
 @app.post("/predict")
-async def predict_garbage(file: UploadFile = File(...), bin_id: str = None):
+async def predict_garbage(
+    file: UploadFile = File(...),
+    bin_id: str = None,
+    x_bin_id: str = Header(None, alias="X-Bin-Id")
+):
     """
     Procesa la imagen proveniente del ESP32-CAM o frontend, ejecuta inferencia
-    manual y retorna las predicciones estructuradas.
+    manual y retorna las predicciones estructuradas con la imagen base64.
     
     Antes de clasificar, valida que el basurero tenga una sesión activa
     consultando al servicio de basureros. Si no la tiene, rechaza la petición.
@@ -90,8 +94,9 @@ async def predict_garbage(file: UploadFile = File(...), bin_id: str = None):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Provided file payload is not an image.")
 
-    # Determinar el ID del basurero (parámetro explícito o variable de entorno)
-    effective_bin_id = bin_id or BIN_ID
+    # Determinar el ID del basurero (Cabecera X-Bin-Id > Parámetro > Variable de entorno)
+    raw_bin_id = x_bin_id or bin_id or BIN_ID
+    effective_bin_id = raw_bin_id.lower().strip()
 
     # ── Validar sesión activa con servicio_basureros ──
     session_user_id = None
@@ -112,6 +117,13 @@ async def predict_garbage(file: UploadFile = File(...), bin_id: str = None):
                     detail=f"No hay usuario conectado al basurero '{effective_bin_id}'. "
                            f"El usuario debe escanear el QR del basurero primero. Detalle: {error_detail}"
                 )
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            raise HTTPException(
+                status_code=403,
+                detail=f"No hay usuario conectado al basurero '{effective_bin_id}'. Escanee el QR primero."
+            )
+        raise HTTPException(status_code=500, detail=f"Error al verificar la sesión del basurero: {str(e)}")
     except httpx.RequestError as e:
         print(f"⚠️ No se pudo contactar al servicio de basureros: {e}")
         raise HTTPException(
@@ -160,15 +172,18 @@ async def predict_garbage(file: UploadFile = File(...), bin_id: str = None):
             for i in top_indices
         ]
 
+        # Convertir imagen a base64 para devolverla y reenviarla
+        image_base64 = base64.b64encode(contents).decode('utf-8')
+        image_data_url = f"data:{file.content_type};base64,{image_base64}"
+
         result = {
             "success": True,
             "class": label,
             "confidence": round(score, 4),
-            "top_predictions": top_predictions
+            "top_predictions": top_predictions,
+            "imagen_base64": image_data_url,
+            "usuario_id": session_user_id
         }
-
-        # Convertir imagen a base64 para enviarla al frontend
-        image_base64 = base64.b64encode(contents).decode('utf-8')
 
         # ── Reenviar clasificación al servicio de puntos (fire-and-forget) ──
         try:
@@ -177,7 +192,7 @@ async def predict_garbage(file: UploadFile = File(...), bin_id: str = None):
                     "binId": effective_bin_id,
                     "tipoDetectado": label,
                     "confianza": round(score, 4),
-                    "imagenBase64": f"data:{file.content_type};base64,{image_base64}",
+                    "imagenBase64": image_data_url,
                     "usuarioId": session_user_id
                 }
                 resp = await client.post(

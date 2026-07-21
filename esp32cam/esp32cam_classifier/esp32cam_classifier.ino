@@ -29,6 +29,9 @@ const char* password = "1720500Mm.";
 // NUBE  (Cloud Run):        "https://servicio-ia-XXXXX.run.app/predict"
 const char* serverUrl = "http://192.168.110.127:8080/predict";
 
+// ID público de este basurero
+const char* binId     = "ecosmartbin-q04";
+
 // Pin del botón para disparar captura (GPIO 13 — seguro en ESP32-CAM)
 #define BUTTON_PIN    13
 // LED Flash integrado del ESP32-CAM
@@ -174,6 +177,7 @@ String captureAndClassify() {
 
   http.addHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
   http.addHeader("Content-Length", String(totalLen));
+  http.addHeader("X-Bin-Id", binId);
 
   // Crear buffer completo
   uint8_t *payload = (uint8_t *)malloc(totalLen);
@@ -189,7 +193,7 @@ String captureAndClassify() {
   memcpy(payload + head.length(), fb->buf, fb->len);
   memcpy(payload + head.length() + fb->len, tail.c_str(), tail.length());
 
-  Serial.printf("📤 Enviando %d bytes a %s ...\n", totalLen, serverUrl);
+  Serial.printf("📤 Enviando %d bytes (binId: %s) a %s ...\n", totalLen, binId, serverUrl);
 
   int httpCode = http.POST(payload, totalLen);
 
@@ -199,13 +203,34 @@ String captureAndClassify() {
 
   String response = "";
 
-  if (httpCode > 0) {
+  if (httpCode == 200) {
     response = http.getString();
-    Serial.printf("✅ Respuesta del servidor (HTTP %d):\n", httpCode);
-    Serial.println(response);
+    Serial.printf("✅ Clasificación exitosa (HTTP 200):\n%s\n", response.c_str());
+    // Parpadeo de éxito (2 destellos cortos)
+    for (int i = 0; i < 2; i++) {
+      digitalWrite(FLASH_LED_PIN, HIGH);
+      delay(100);
+      digitalWrite(FLASH_LED_PIN, LOW);
+      delay(100);
+    }
+  } else if (httpCode == 403) {
+    response = http.getString();
+    Serial.printf("⚠️ Sin sesión activa para bin '%s' (HTTP 403):\n%s\n", binId, response.c_str());
+    Serial.println("👉 Escanee el código QR en la aplicación móvil antes de presionar el botón.");
+    // Parpadeo de advertencia de sesión bloqueada (4 destellos rápidos)
+    for (int i = 0; i < 4; i++) {
+      digitalWrite(FLASH_LED_PIN, HIGH);
+      delay(50);
+      digitalWrite(FLASH_LED_PIN, LOW);
+      delay(50);
+    }
   } else {
-    response = "{\"error\": \"http_error\", \"code\": " + String(httpCode) + "}";
-    Serial.printf("❌ Error HTTP: %s\n", http.errorToString(httpCode).c_str());
+    response = httpCode > 0 ? http.getString() : "{\"error\": \"http_error\"}";
+    Serial.printf("❌ Error HTTP (%d): %s\n", httpCode, response.c_str());
+    // Destello de error de servidor/red (1 encendido largo)
+    digitalWrite(FLASH_LED_PIN, HIGH);
+    delay(1000);
+    digitalWrite(FLASH_LED_PIN, LOW);
   }
 
   http.end();

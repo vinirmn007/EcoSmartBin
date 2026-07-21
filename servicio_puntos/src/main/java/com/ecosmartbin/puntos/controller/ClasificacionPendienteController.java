@@ -80,12 +80,14 @@ public class ClasificacionPendienteController {
 
         request.setTimestamp(System.currentTimeMillis());
 
-        // Guardar en memoria (sobreescribe si ya existía para ese binId)
-        String binId = request.getBinId() != null ? request.getBinId() : "default-bin";
+        request.setTimestamp(System.currentTimeMillis());
+
+        // Guardar en memoria (normalizado a minúsculas para coincidencia insensible)
+        String binId = request.getBinId() != null ? request.getBinId().toLowerCase().trim() : "default-bin";
         pendientes.put(binId, request);
 
         System.out.println("📥 Clasificación pendiente recibida: " + request.getTipoDetectado()
-                + " → " + request.getNombreTipo() + " (bin: " + binId + ")");
+                + " → " + request.getNombreTipo() + " (bin: " + binId + ", usuario: " + request.getUsuarioId() + ")");
 
         return ResponseEntity.ok(request);
     }
@@ -98,7 +100,8 @@ public class ClasificacionPendienteController {
     public ResponseEntity<ClasificacionPendienteDTO> obtenerClasificacion(
             @PathVariable String binId) {
 
-        ClasificacionPendienteDTO pendiente = pendientes.get(binId);
+        String key = binId != null ? binId.toLowerCase().trim() : "";
+        ClasificacionPendienteDTO pendiente = pendientes.get(key);
 
         if (pendiente == null) {
             return ResponseEntity.noContent().build(); // 204: no hay clasificación pendiente
@@ -113,8 +116,9 @@ public class ClasificacionPendienteController {
      */
     @DeleteMapping("/{binId}")
     public ResponseEntity<Void> limpiarClasificacion(@PathVariable String binId) {
-        pendientes.remove(binId);
-        System.out.println("🗑️ Clasificación pendiente limpiada para bin: " + binId);
+        String key = binId != null ? binId.toLowerCase().trim() : "";
+        pendientes.remove(key);
+        System.out.println("🗑️ Clasificación pendiente limpiada para bin: " + key);
         return ResponseEntity.ok().build();
     }
 }
