@@ -51,9 +51,19 @@ class _ReciclarView extends StatelessWidget {
           children: [
             if (!Navigator.canPop(context) ||
                 ModalRoute.of(context)?.settings.name != '/puntos/reciclar') ...
-              const [
-                Icon(Icons.sensors_rounded, color: _emerald, size: 20),
-                SizedBox(width: 8),
+              [
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 22,
+                  height: 22,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.sensors_rounded,
+                    color: _emerald,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
               ],
             Text(
               'EcoSmartBin',

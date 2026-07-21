@@ -31,7 +31,6 @@ class _LandingView extends StatelessWidget {
                     children: [
                       state._buildHeroSection(context, isDesktop, isTablet),
                       state._buildEcoDashboard(context, isDesktop),
-                      state._buildFeaturesSection(context, isDesktop, isTablet),
                       state._buildHowItWorksSection(context, isDesktop),
                       state._buildCTASection(context),
                       state._buildFooter(),

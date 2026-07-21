@@ -47,20 +47,33 @@ class _LoginView extends StatelessWidget {
                               width: 64,
                               height: 64,
                               decoration: BoxDecoration(
-                                color: AppColors.emeraldGlow,
+                                color: AppColors.emeraldGlow.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: AppColors.emeraldGlow.withOpacity(0.25),
+                                  width: 1.2,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.emeraldGlow.withOpacity(0.35),
+                                    color: AppColors.emeraldGlow.withOpacity(0.15),
                                     blurRadius: 24,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.sensors_rounded,
-                                color: AppColors.deepObsidian,
-                                size: 36,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image.asset(
+                                  'assets/images/logo.png',
+                                  width: 44,
+                                  height: 44,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(
+                                    Icons.sensors_rounded,
+                                    color: AppColors.deepObsidian,
+                                    size: 36,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),

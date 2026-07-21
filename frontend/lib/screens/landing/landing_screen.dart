@@ -83,16 +83,22 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.emeraldGlow.withOpacity(0.15),
+                  color: AppColors.emeraldGlow.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.25), width: 1.2),
                 ),
-                child: const Icon(
-                  Icons.recycling_rounded,
-                  color: AppColors.emeraldGlow,
-                  size: 22,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.recycling_rounded,
+                    color: AppColors.emeraldGlow,
+                    size: 22,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -263,61 +269,81 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
               ),
             ),
 
-            // Smart Bin Hologram Card Look
+            // Smart Bin Hero Image Container
             Positioned(
-              top: 40,
+              top: 20,
               child: GlassCard(
                 padding: EdgeInsets.zero,
                 child: Container(
-                  width: 200,
-                  height: 280,
+                  width: 280,
+                  height: 320,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.emeraldGlow.withOpacity(0.06),
-                        Colors.transparent,
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+                    border: Border.all(
+                      color: AppColors.emeraldGlow.withOpacity(0.3),
+                      width: 1.5,
                     ),
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.sensors_rounded,
-                          color: AppColors.emeraldGlow,
-                          size: 64,
-                          shadows: [
-                            Shadow(
-                              color: AppColors.emeraldGlow.withOpacity(0.4),
-                              blurRadius: 16,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/images/hero_smart_bin.png',
+                      width: 280,
+                      height: 320,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Placeholder visual en caso de que no cargue la imagen
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.emeraldGlow.withOpacity(0.06),
+                                Colors.transparent,
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'EcoSmartBin',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18,
-                            letterSpacing: -0.5,
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'AI-POWERED',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.emeraldGlow,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 10,
-                            letterSpacing: 1.5,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.sensors_rounded,
+                                  color: AppColors.emeraldGlow,
+                                  size: 64,
+                                  shadows: [
+                                    Shadow(
+                                      color: AppColors.emeraldGlow.withOpacity(0.4),
+                                      blurRadius: 16,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'EcoSmartBin',
+                                  style: GoogleFonts.poppins(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 18,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'AI-POWERED',
+                                  style: GoogleFonts.poppins(
+                                    color: AppColors.emeraldGlow,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 10,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -463,17 +489,26 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
           padding: EdgeInsets.zero,
           child: AspectRatio(
             aspectRatio: 16 / 9,
-            child: Center(
-              child: Icon(
-                Icons.eco_rounded,
-                color: AppColors.emeraldGlow,
-                size: 56,
-                shadows: [
-                  Shadow(
-                    color: AppColors.emeraldGlow.withOpacity(0.4),
-                    blurRadius: 20,
-                  ),
-                ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                'assets/images/vision_eco_dashboard.png',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Center(
+                    child: Icon(
+                      Icons.eco_rounded,
+                      color: AppColors.emeraldGlow,
+                      size: 56,
+                      shadows: [
+                        Shadow(
+                          color: AppColors.emeraldGlow.withOpacity(0.4),
+                          blurRadius: 20,
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -533,174 +568,7 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // FEATURES (Bento Grid)
-  // ─────────────────────────────────────────────────────────────────────────
-  Widget _buildFeaturesSection(BuildContext context, bool isDesktop, bool isTablet) {
-    final double padding = isDesktop ? 80.0 : 24.0;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 60),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ── PARTE 1: EL DESAFÍO GLOBAL ──
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 60),
-            child: Column(
-              children: [
-                Text(
-                  'EL DESAFÍO GLOBAL',
-                  style: GoogleFonts.poppins(
-                    color: AppColors.error,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2.0,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '2.1 BILLONES DE TONELADAS',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white.withOpacity(0.06),
-                    fontSize: isDesktop ? 44 : 26,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.0,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Text(
-                      'Residuos anuales que el mundo no sabe cómo procesar. El sistema actual es invisible, ineficiente y obsoleto.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textPrimary,
-                        fontSize: 15,
-                        height: 1.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
-
-          // ── PARTE 2: SOLUCIÓN IA (BENTO GRID) ──
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  'CEREBRO DIGITAL,\nALMA VERDE',
-                  style: GoogleFonts.poppins(
-                    color: AppColors.textPrimary,
-                    fontSize: isDesktop ? 28 : 22,
-                    fontWeight: FontWeight.w900,
-                    height: 1.15,
-                  ),
-                ),
-              ),
-              if (isDesktop)
-                Expanded(
-                  child: Text(
-                    'Nuestros algoritmos clasifican materiales en milisegundos, optimizando rutas de recolección y pureza de reciclaje.',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 32),
-
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: isDesktop ? 2 : 1,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: isDesktop ? 1.7 : 1.35,
-            children: [
-              _buildBentoFeatureCard(
-                icon: Icons.sensors_rounded,
-                title: 'Sensores de Espectro',
-                description: 'Identificación molecular de polímeros para una separación perfecta desde el origen.',
-              ),
-              _buildBentoFeatureCard(
-                icon: Icons.psychology_rounded,
-                title: 'Redes Neuronales',
-                description: 'Aprendizaje continuo para nuevos tipos de envases biodegradables.',
-              ),
-              _buildBentoFeatureCard(
-                icon: Icons.compress_rounded,
-                title: 'Compresión Dinámica',
-                description: 'Reduce el volumen de residuos en un 60%, disminuyendo las emisiones por transporte logístico.',
-              ),
-              _buildBentoFeatureCard(
-                icon: Icons.cloud_sync_rounded,
-                title: 'Sync Global',
-                description: 'Panel de control en tiempo real para ciudades inteligentes.',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBentoFeatureCard({
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    return GlassCard(
-      padding: const EdgeInsets.all(28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.emeraldGlow.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: AppColors.emeraldGlow, size: 24),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                description,
-                style: GoogleFonts.poppins(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  height: 1.45,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // HOW IT WORKS (Recompensas)
@@ -709,54 +577,58 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
     final double padding = isDesktop ? 80.0 : 24.0;
 
     final rewardsIllustration = Center(
-      child: Container(
-        width: 300,
-        height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: LinearGradient(
-            colors: [
-              AppColors.emeraldGlow.withOpacity(0.2),
-              Colors.transparent,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: GlassCard(
+        padding: EdgeInsets.zero,
+        child: Container(
+          width: 320,
+          height: 220,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: AppColors.emeraldGlow.withOpacity(0.3),
+              width: 1.5,
+            ),
           ),
-          border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.emeraldGlow.withOpacity(0.1),
-              blurRadius: 40,
-              spreadRadius: -4,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Image.asset(
+              'assets/images/eco_rewards_ticket.png',
+              width: 320,
+              height: 220,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.confirmation_number_rounded,
+                        color: AppColors.emeraldGlow,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        'RECOMPENSAS',
+                        style: GoogleFonts.poppins(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      Text(
+                        'EcoSmartBin Ticket',
+                        style: GoogleFonts.poppins(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.confirmation_number_rounded,
-              color: AppColors.emeraldGlow,
-              size: 48,
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'RECOMPENSAS',
-              style: GoogleFonts.poppins(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-                letterSpacing: 1.0,
-              ),
-            ),
-            Text(
-              'EcoSmartBin Ticket',
-              style: GoogleFonts.poppins(
-                color: AppColors.textSecondary,
-                fontSize: 11,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -877,9 +749,38 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildCTASection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 24),
       child: Column(
         children: [
+          Container(
+            width: 130,
+            height: 130,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.emeraldGlow.withOpacity(0.2),
+                  blurRadius: 40,
+                  spreadRadius: 8,
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(65),
+              child: Image.asset(
+                'assets/images/eco_planet_minimal.png',
+                width: 130,
+                height: 130,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.public_rounded,
+                  color: AppColors.emeraldGlow,
+                  size: 64,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
           Text(
             '¿LISTO PARA LIDERAR EL CAMBIO?',
             textAlign: TextAlign.center,

@@ -45,20 +45,33 @@ class _RegisterView extends StatelessWidget {
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: AppColors.emeraldGlow,
+                          color: AppColors.emeraldGlow.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.emeraldGlow.withOpacity(0.25),
+                            width: 1.2,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.emeraldGlow.withOpacity(0.35),
+                              color: AppColors.emeraldGlow.withOpacity(0.15),
                               blurRadius: 18,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.sensors_rounded,
-                          color: AppColors.deepObsidian,
-                          size: 24,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.sensors_rounded,
+                              color: AppColors.deepObsidian,
+                              size: 24,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
