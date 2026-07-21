@@ -33,30 +33,7 @@ class _ReciclarScreenState extends State<ReciclarScreen>
   Timer? _scanTimer;
   String _detectedBinId = 'EcoSmartBin-Q04';
   String _rawBinPublicId = 'EcoSmartBin-Q04';
-  final MobileScannerController _cameraController = MobileScannerController(autoStart: false);
-  bool _cameraActive = false;
-
-  Future<void> _startCamera() async {
-    setState(() {
-      _cameraActive = true;
-    });
-    try {
-      await _cameraController.start();
-    } catch (e) {
-      print('DEBUG Error starting camera: $e');
-    }
-  }
-
-  Future<void> _stopCamera() async {
-    try {
-      await _cameraController.stop();
-    } catch (_) {}
-    if (mounted) {
-      setState(() {
-        _cameraActive = false;
-      });
-    }
-  }
+  final MobileScannerController _cameraController = MobileScannerController();
 
   // Control de conexión
   bool _connecting = false;
@@ -245,7 +222,6 @@ class _ReciclarScreenState extends State<ReciclarScreen>
       });
 
       if (res['success'] == true) {
-        _stopCamera();
         final expiresAtStr = res['data']['expires_at'];
         
         setState(() {

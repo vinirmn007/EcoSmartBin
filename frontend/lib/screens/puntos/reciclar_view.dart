@@ -158,86 +158,41 @@ class _ReciclarView extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Cámara en vivo con MobileScanner (solo si la cámara está activa)
-                    if (state._cameraActive)
-                      Positioned.fill(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: MobileScanner(
-                            controller: state._cameraController,
-                            onDetect: (capture) {
-                              final List<Barcode> barcodes = capture.barcodes;
-                              for (final barcode in barcodes) {
-                                final String? rawValue = barcode.rawValue;
-                                if (rawValue != null && rawValue.isNotEmpty && !state._connecting && state._step == 0) {
-                                  final parsedId = state._parseBinId(rawValue);
-                                  state._conectarABasureroReal(parsedId);
-                                  break;
-                                }
+                    // Cámara en vivo con MobileScanner
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: MobileScanner(
+                          controller: state._cameraController,
+                          onDetect: (capture) {
+                            final List<Barcode> barcodes = capture.barcodes;
+                            for (final barcode in barcodes) {
+                              final String? rawValue = barcode.rawValue;
+                              if (rawValue != null && rawValue.isNotEmpty && !state._connecting && state._step == 0) {
+                                final parsedId = state._parseBinId(rawValue);
+                                state._conectarABasureroReal(parsedId);
+                                break;
                               }
-                            },
-                            errorBuilder: (context, error, child) {
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.videocam_off_rounded, color: Colors.redAccent.withOpacity(0.7), size: 48),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Cámara no disponible',
-                                      style: GoogleFonts.poppins(color: _textGray, fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      )
-                    else
-                      Positioned.fill(
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: _emerald.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: _emerald.withOpacity(0.3)),
+                            }
+                          },
+                          errorBuilder: (context, error, child) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.videocam_off_rounded, color: Colors.redAccent.withOpacity(0.7), size: 48),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Cámara no disponible',
+                                    style: GoogleFonts.poppins(color: _textGray, fontSize: 12),
                                   ),
-                                  child: const Icon(
-                                    Icons.camera_alt_rounded,
-                                    color: _emerald,
-                                    size: 36,
-                                  ),
-                                ),
-                                const SizedBox(height: 14),
-                                Text(
-                                  'Cámara Inactiva',
-                                  style: GoogleFonts.poppins(
-                                    color: _textDark,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Toca "Activar Cámara" para escanear el QR',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    color: _textGray,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ),
+                    ),
 
                     // Esquinas del visor
                     _buildCorner(top: 12, left: 12, angle: 0),
@@ -245,92 +200,44 @@ class _ReciclarView extends StatelessWidget {
                     _buildCorner(bottom: 12, left: 12, angle: 270),
                     _buildCorner(bottom: 12, right: 12, angle: 180),
 
-                    // Línea láser animada (solo si la cámara está activa)
-                    if (state._cameraActive)
-                      AnimatedBuilder(
-                        animation: state._scannerAnimation,
-                        builder: (context, child) {
-                          final topOffset =
-                              state._scannerAnimation.value * 246 + 16;
-                          return Positioned(
-                            top: topOffset,
-                            left: 20,
-                            right: 20,
-                            child: Container(
-                              height: 2.5,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    _emerald.withOpacity(0),
-                                    _emerald,
-                                    _emerald.withOpacity(0),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: _emerald.withOpacity(0.9),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
-                                  ),
+                    // Línea láser animada
+                    AnimatedBuilder(
+                      animation: state._scannerAnimation,
+                      builder: (context, child) {
+                        final topOffset =
+                            state._scannerAnimation.value * 246 + 16;
+                        return Positioned(
+                          top: topOffset,
+                          left: 20,
+                          right: 20,
+                          child: Container(
+                            height: 2.5,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  _emerald.withOpacity(0),
+                                  _emerald,
+                                  _emerald.withOpacity(0),
                                 ],
                               ),
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _emerald.withOpacity(0.9),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
             ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
-            const SizedBox(height: 24),
-
-            // Botón para activar/pausar la cámara
-            if (!state._cameraActive)
-              ElevatedButton.icon(
-                onPressed: state._startCamera,
-                icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
-                label: Text(
-                  'ACTIVAR CÁMARA PARA ESCANEAR',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _emerald,
-                  foregroundColor: AppColors.deepObsidian,
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 4,
-                  shadowColor: _emerald.withOpacity(0.4),
-                ),
-              )
-            else
-              OutlinedButton.icon(
-                onPressed: state._stopCamera,
-                icon: const Icon(Icons.pause_circle_outline_rounded, size: 18),
-                label: Text(
-                  'Pausar Cámara',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _textGray,
-                  side: BorderSide(color: _borderLight),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
-              ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 36),
 
             // Indicador de búsqueda
             Container(
