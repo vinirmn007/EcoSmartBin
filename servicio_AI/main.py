@@ -6,7 +6,7 @@ import numpy as np
 import onnxruntime as ort
 import httpx
 from PIL import Image
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header
 from contextlib import asynccontextmanager
 
 # URL del servicio de puntos (configurable via variable de entorno)
@@ -110,7 +110,11 @@ async def predict_garbage(
                 session_user_id = session_data.get("usuario_id")
                 print(f"✅ Sesión activa encontrada para bin '{effective_bin_id}' → usuario: {session_user_id}")
             else:
-                error_detail = session_resp.json().get("detail", "Sin sesión activa")
+                try:
+                    error_detail = session_resp.json().get("detail", "Sin sesión activa")
+                except Exception:
+                    error_detail = session_resp.text or "Sin sesión activa (Error HTTP)"
+                
                 print(f"❌ No hay sesión activa para bin '{effective_bin_id}': {error_detail}")
                 raise HTTPException(
                     status_code=403,

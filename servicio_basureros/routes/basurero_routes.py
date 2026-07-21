@@ -433,7 +433,7 @@ def verificar_sesion_activa(
     Row level lock del basurero en la base de datos para evitar condiciones de carrera
     """
     bin_public_id_clean = bin_public_id.lower().strip()
-    basurero = db.query(Basurero).with_for_update().filter(Basurero.public_id == bin_public_id_clean).first()
+    basurero = db.query(Basurero).filter(Basurero.public_id == bin_public_id_clean).first()
     if not basurero:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
