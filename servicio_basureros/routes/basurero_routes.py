@@ -443,20 +443,31 @@ def verificar_sesion_activa(
     # Limpiar expiradas
     _limpiar_sesiones_expiradas(basurero.id, db)
 
-    sesion = db.query(SesionBasurero).filter(
+    # Buscar cualquier sesión activa para el basurero
+    sesiones_activas = db.query(SesionBasurero).filter(
         SesionBasurero.basurero_id == basurero.id,
         SesionBasurero.is_active == True
-    ).first()
+    ).all()
 
-    if not sesion:
+    print(f"🔍 [VERIFY_SESSION] Bin '{bin_public_id_clean}' (id={basurero.id}). Sesiones activas encontradas en DB: {len(sesiones_activas)}")
+    for s in sesiones_activas:
+        print(f"   -> Sesión: token={s.session_token}, user={s.usuario_id}, is_active={s.is_active}, expires_at={s.expires_at}")
+
+    if not sesiones_activas:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No hay sesión activa para el basurero '{bin_public_id}'. El usuario debe escanear el QR primero."
         )
 
-    # Verificar que no haya expirado
+    sesion = sesiones_activas[0]
+
+    # Verificar expiración manejando zonas horarias naive vs tz-aware
     ahora = datetime.now(timezone.utc)
-    if sesion.expires_at < ahora:
+    expira = sesion.expires_at
+    if expira.tzinfo is None:
+        expira = expira.replace(tzinfo=timezone.utc)
+
+    if expira < ahora:
         sesion.is_active = False
         basurero.is_occupied = False
         db.commit()
@@ -481,25 +492,30 @@ def verificar_sesion_activa(
 
 def _limpiar_sesiones_expiradas(basurero_id: str, db: Session):
     ahora = datetime.now(timezone.utc)
-    
-    # Actualización masiva y atómica directa en SQL
-    filas_afectadas = db.query(SesionBasurero).filter(
+    sesiones_activas = db.query(SesionBasurero).filter(
         SesionBasurero.basurero_id == basurero_id,
-        SesionBasurero.is_active == True,
-        SesionBasurero.expires_at < ahora
-    ).update({"is_active": False}, synchronize_session=False)
+        SesionBasurero.is_active == True
+    ).all()
 
-    # Si se expiró alguna sesión, verificamos si debemos liberar el basurero
-    if filas_afectadas > 0:
-        activa = db.query(SesionBasurero).filter(
+    desactivadas = 0
+    for sesion in sesiones_activas:
+        expira = sesion.expires_at
+        if expira.tzinfo is None:
+            expira = expira.replace(tzinfo=timezone.utc)
+        if expira < ahora:
+            sesion.is_active = False
+            desactivadas += 1
+
+    if desactivadas > 0:
+        db.commit()
+        # Verificar si quedan sesiones activas
+        quedan = db.query(SesionBasurero).filter(
             SesionBasurero.basurero_id == basurero_id,
             SesionBasurero.is_active == True
         ).first()
-
-        if not activa:
+        if not quedan:
             db.query(Basurero).filter(Basurero.id == basurero_id).update({"is_occupied": False})
-
-    db.commit()
+            db.commit()
 
 def _cerrar_sesiones_activas(basurero_id: str, db: Session):
     """Cierra todas las sesiones activas de un basurero."""
