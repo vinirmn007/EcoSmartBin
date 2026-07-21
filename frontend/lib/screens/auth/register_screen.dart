@@ -93,11 +93,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _isLoading = false);
 
       if (result['success']) {
-        setState(() => _successMessage = result['message']);
-        // Esperar 2 segundos y redirigir al login
-        Future.delayed(const Duration(seconds: 2), () {
+        final msg = result['message'] ?? '¡Registro exitoso! Por favor verifica tu cuenta con el correo enviado a tu dirección de correo electrónico.';
+        setState(() => _successMessage = msg);
+        // Esperar 4.5 segundos para dar tiempo a leer el mensaje de verificación
+        Future.delayed(const Duration(milliseconds: 4500), () {
           if (mounted) {
-            Navigator.pop(context);
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacementNamed(context, '/login');
+            }
           }
         });
       } else {

@@ -61,6 +61,14 @@ class _CanjesHistorialScreenState extends State<CanjesHistorialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _CanjesHistorialView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+        }
+      },
+      child: _CanjesHistorialView(state: this),
+    );
   }
 }

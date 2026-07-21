@@ -39,14 +39,10 @@ class _ReciclarView extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        leading: (Navigator.canPop(context) &&
-                ModalRoute.of(context)?.settings.name == '/puntos/reciclar')
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: _textDark),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: _textDark),
+          onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false),
+        ),
         title: Row(
           children: [
             if (!Navigator.canPop(context) ||

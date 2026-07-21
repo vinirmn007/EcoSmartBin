@@ -29,7 +29,7 @@ class _ProfileView extends StatelessWidget {
     ];
 
     return PopScope(
-      canPop: state._currentIndex == 0,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && state._currentIndex != 0) {
           state.setState(() {

@@ -113,6 +113,14 @@ class _CanjearScreenState extends State<CanjearScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _CanjearView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+        }
+      },
+      child: _CanjearView(state: this),
+    );
   }
 }

@@ -17,7 +17,7 @@ class _AdminView extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false),
         ),
         centerTitle: true,
         title: Text(

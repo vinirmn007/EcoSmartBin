@@ -56,4 +56,3 @@ spec:
       name: garbage-classifier-service
       port:
         number: 8080
-EOF

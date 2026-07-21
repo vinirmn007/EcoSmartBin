@@ -381,6 +381,18 @@ class _AdminBasurerosScreenState extends State<AdminBasurerosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminBasurerosView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pushReplacementNamed(context, '/admin');
+          }
+        }
+      },
+      child: _AdminBasurerosView(state: this),
+    );
   }
 }

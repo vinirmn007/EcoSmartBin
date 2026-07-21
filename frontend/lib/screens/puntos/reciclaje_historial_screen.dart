@@ -50,6 +50,14 @@ class _ReciclajeHistorialScreenState extends State<ReciclajeHistorialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _ReciclajeHistorialView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+        }
+      },
+      child: _ReciclajeHistorialView(state: this),
+    );
   }
 }

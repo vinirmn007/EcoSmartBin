@@ -645,6 +645,18 @@ class _AdminRecompensasScreenState extends State<AdminRecompensasScreen>
 
   @override
   Widget build(BuildContext context) {
-    return _AdminRecompensasView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pushReplacementNamed(context, '/admin');
+          }
+        }
+      },
+      child: _AdminRecompensasView(state: this),
+    );
   }
 }

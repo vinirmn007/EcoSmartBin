@@ -423,6 +423,18 @@ class _AdminUsuariosScreenState extends State<AdminUsuariosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _AdminUsuariosView(state: this);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pushReplacementNamed(context, '/admin');
+          }
+        }
+      },
+      child: _AdminUsuariosView(state: this),
+    );
   }
 }

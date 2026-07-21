@@ -31,7 +31,7 @@ class _PuntosView extends StatelessWidget {
                         const SizedBox(height: 20),
 
                         // ── Header ──────────────────────────────────────────
-                        _buildHeader(),
+                        _buildHeader(context),
                         const SizedBox(height: 24),
 
                         // ── EcoPoints Widget ────────────────────────────────
@@ -57,32 +57,41 @@ class _PuntosView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     final nombre = state._balance?['nombres'] ?? '';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
           children: [
-            Text(
-              'Panel de Control',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-              ),
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+              onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false),
             ),
-            const SizedBox(height: 2),
-            Text(
-              nombre.isNotEmpty ? 'Hola, $nombre' : 'EcoSmartBin',
-              style: const TextStyle(
-                color: AppColors.emeraldGlow,
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-              ),
+            const SizedBox(width: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Panel de Control',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  nombre.isNotEmpty ? 'Hola, $nombre' : 'EcoSmartBin',
+                  style: const TextStyle(
+                    color: AppColors.emeraldGlow,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
