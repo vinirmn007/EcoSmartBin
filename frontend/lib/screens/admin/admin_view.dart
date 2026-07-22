@@ -49,14 +49,18 @@ class _AdminView extends StatelessWidget {
       ),
       body: BackgroundGradient(
         child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isDesktop ? 800 : double.infinity,
-                ),
+          child: RefreshIndicator(
+            onRefresh: state._fetchMetrics,
+            color: AppColors.emeraldGlow,
+            backgroundColor: AppColors.glassSurface,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isDesktop ? 800 : double.infinity,
+                  ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -125,7 +129,7 @@ class _AdminView extends StatelessWidget {
                               Expanded(
                                 child: _buildAdminOptionCard(
                                   title: 'Gestión de\nBasureros',
-                                  badgeText: '8 ACTIVOS',
+                                  badgeText: '${state._basurerosActivos} ACTIVOS',
                                   badgeColor: AppColors.emeraldGlow,
                                   gradient: LinearGradient(
                                     colors: [
@@ -142,7 +146,7 @@ class _AdminView extends StatelessWidget {
                               Expanded(
                                 child: _buildAdminOptionCard(
                                   title: 'Gestión de\nUsuarios',
-                                  badgeText: 'REGISTRADOS',
+                                  badgeText: '${state._totalUsuarios} REGISTRADOS',
                                   badgeColor: Colors.indigoAccent,
                                   gradient: LinearGradient(
                                     colors: [
@@ -159,7 +163,7 @@ class _AdminView extends StatelessWidget {
                               Expanded(
                                 child: _buildAdminOptionCard(
                                   title: 'Gestión de\nRecompensas',
-                                  badgeText: 'CANJES',
+                                  badgeText: '${state._totalCanjes} CANJES',
                                   badgeColor: const Color(0xFFF59E0B),
                                   gradient: LinearGradient(
                                     colors: [
@@ -178,7 +182,7 @@ class _AdminView extends StatelessWidget {
                             children: [
                               _buildAdminOptionCard(
                                 title: 'Gestión de\nBasureros',
-                                badgeText: '8 ACTIVOS',
+                                badgeText: '${state._basurerosActivos} ACTIVOS',
                                 badgeColor: AppColors.emeraldGlow,
                                 gradient: LinearGradient(
                                   colors: [
@@ -193,7 +197,7 @@ class _AdminView extends StatelessWidget {
                               const SizedBox(height: 16),
                               _buildAdminOptionCard(
                                 title: 'Gestión de\nUsuarios',
-                                badgeText: 'REGISTRADOS',
+                                badgeText: '${state._totalUsuarios} REGISTRADOS',
                                 badgeColor: Colors.indigoAccent,
                                 gradient: LinearGradient(
                                   colors: [
@@ -208,7 +212,7 @@ class _AdminView extends StatelessWidget {
                               const SizedBox(height: 16),
                               _buildAdminOptionCard(
                                 title: 'Gestión de\nRecompensas',
-                                badgeText: 'CANJES',
+                                badgeText: '${state._totalCanjes} CANJES',
                                 badgeColor: const Color(0xFFF59E0B),
                                 gradient: LinearGradient(
                                   colors: [
@@ -246,28 +250,77 @@ class _AdminView extends StatelessWidget {
                       children: [
                         _buildBentoItem(
                           label: 'EFICIENCIA',
-                          value: '94%',
+                          value: '${state._eficiencia.toStringAsFixed(0)}%',
                           valueColor: AppColors.emeraldGlow,
                           icon: Icons.trending_up_rounded,
                         ),
                         _buildBentoItem(
-                          label: 'ALERTAS',
-                          value: '02',
-                          valueColor: AppColors.warning,
-                          icon: Icons.warning_amber_rounded,
+                          label: 'INACTIVOS / ALERTAS',
+                          value: state._basurerosInactivos.toString().padLeft(2, '0'),
+                          valueColor: state._basurerosInactivos > 0 ? AppColors.warning : AppColors.emeraldGlow,
+                          icon: state._basurerosInactivos > 0 ? Icons.warning_amber_rounded : Icons.check_circle_outline_rounded,
                         ),
                         _buildBentoItem(
                           label: 'USUARIOS',
-                          value: '1.2k',
+                          value: '${state._totalUsuarios}',
                           valueColor: Colors.white,
                           icon: Icons.people_outline_rounded,
                         ),
                         _buildBentoItemProgress(
-                          label: 'CARGA',
-                          value: '75%',
-                          progress: 0.75,
+                          label: 'CARGA / OCUPACIÓN',
+                          value: '${state._carga.toStringAsFixed(0)}%',
+                          progress: (state._carga / 100).clamp(0.0, 1.0),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Resumen Explicativo de Métricas
+                    GlassCard(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                color: AppColors.emeraldGlow,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Guía de Métricas en Tiempo Real',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.emeraldGlow,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          _buildMetricHelpItem(
+                            title: 'Eficiencia',
+                            description: 'Porcentaje de basureros en estado activo y funcional dentro del sistema.',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildMetricHelpItem(
+                            title: 'Inactivos / Alertas',
+                            description: 'Cantidad de basureros deshabilitados o que requieren atención/mantenimiento.',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildMetricHelpItem(
+                            title: 'Usuarios',
+                            description: 'Total de usuarios registrados en la plataforma EcoSmartBin.',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildMetricHelpItem(
+                            title: 'Carga / Ocupación',
+                            description: 'Porcentaje de basureros que tienen una sesión activa de reciclaje en este instante.',
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -276,7 +329,8 @@ class _AdminView extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildAdminOptionCard({
@@ -459,6 +513,29 @@ class _AdminView extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricHelpItem({required String title, required String description}) {
+    return RichText(
+      text: TextSpan(
+        style: GoogleFonts.poppins(fontSize: 11, height: 1.3),
+        children: [
+          TextSpan(
+            text: '• $title: ',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: description,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

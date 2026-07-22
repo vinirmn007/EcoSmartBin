@@ -614,15 +614,21 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
+        body: '{}',
       );
-      final decoded = jsonDecode(response.body);
+      
+      Map<String, dynamic>? decoded;
+      try {
+        if (response.body.isNotEmpty) {
+          decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        }
+      } catch (_) {}
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': decoded};
+        return {'success': true, 'data': decoded ?? {}};
       } else {
-        return {
-          'success': false,
-          'message': decoded['detail'] ?? 'El basurero está ocupado o no disponible.'
-        };
+        final msg = decoded?['detail'] ?? 'El basurero está ocupado o no disponible.';
+        return {'success': false, 'message': msg};
       }
     } catch (e) {
       return {'success': false, 'message': 'Sin conexión al servidor: $e'};
@@ -641,15 +647,21 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
+        body: '{}',
       );
+
+      Map<String, dynamic>? decoded;
+      try {
+        if (response.body.isNotEmpty) {
+          decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        }
+      } catch (_) {}
+
       if (response.statusCode == 200) {
         return {'success': true, 'message': 'Desconectado exitosamente'};
       } else {
-        final decoded = jsonDecode(response.body);
-        return {
-          'success': false,
-          'message': decoded['detail'] ?? 'Error al desconectarse'
-        };
+        final msg = decoded?['detail'] ?? 'Error al desconectarse';
+        return {'success': false, 'message': msg};
       }
     } catch (e) {
       return {'success': false, 'message': 'Sin conexión al servidor: $e'};
@@ -668,15 +680,21 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
+        body: '{}',
       );
-      final decoded = jsonDecode(response.body);
+
+      Map<String, dynamic>? decoded;
+      try {
+        if (response.body.isNotEmpty) {
+          decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        }
+      } catch (_) {}
+
       if (response.statusCode == 200) {
-        return {'success': true, 'data': decoded};
+        return {'success': true, 'data': decoded ?? {}};
       } else {
-        return {
-          'success': false,
-          'message': decoded['detail'] ?? 'No se pudo extender la sesión'
-        };
+        final msg = decoded?['detail'] ?? 'No se pudo extender la sesión (${response.statusCode})';
+        return {'success': false, 'message': msg};
       }
     } catch (e) {
       return {'success': false, 'message': 'Sin conexión al servidor: $e'};

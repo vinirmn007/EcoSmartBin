@@ -77,6 +77,7 @@ def listar_basureros(
     admin: dict = Depends(require_admin)
 ):
     """Lista todos los basureros registrados. Solo administradores."""
+    _limpiar_todas_las_sesiones_expiradas(db)
     return db.query(Basurero).order_by(Basurero.created_at.desc()).all()
 
 
@@ -87,6 +88,7 @@ def obtener_basurero(
     current_user: dict = Depends(get_current_user)
 ):
     """Obtiene los detalles de un basurero por su ID público."""
+    _limpiar_todas_las_sesiones_expiradas(db)
     public_id_clean = public_id.lower().strip()
     basurero = db.query(Basurero).filter(Basurero.public_id == public_id_clean).first()
     if not basurero:
@@ -301,7 +303,11 @@ def extender_sesion(
 
     # Verificar que la sesión no haya expirado
     ahora = datetime.now(timezone.utc)
-    if sesion.expires_at < ahora:
+    expira = sesion.expires_at
+    if expira.tzinfo is None:
+        expira = expira.replace(tzinfo=timezone.utc)
+
+    if expira < ahora:
         sesion.is_active = False
         basurero.is_occupied = False
         db.commit()
@@ -405,7 +411,10 @@ def estado_basurero(
     seconds_remaining = None
     if sesion_activa:
         ahora = datetime.now(timezone.utc)
-        delta = (sesion_activa.expires_at - ahora).total_seconds()
+        expira = sesion_activa.expires_at
+        if expira.tzinfo is None:
+            expira = expira.replace(tzinfo=timezone.utc)
+        delta = (expira - ahora).total_seconds()
         seconds_remaining = max(0, int(delta))
 
     return SesionStatusResponseSchema(
@@ -534,5 +543,34 @@ def _cerrar_sesiones_activas(basurero_id: str, db: Session):
 
     for sesion in sesiones:
         sesion.is_active = False
+
+    db.query(Basurero).filter(Basurero.id == basurero_id).update({"is_occupied": False})
+    db.commit()
+
+
+def _limpiar_todas_las_sesiones_expiradas(db: Session):
+    """Limpia las sesiones expiradas de TODOS los basureros y libera su estado is_occupied."""
+    ahora = datetime.now(timezone.utc)
+    sesiones_activas = db.query(SesionBasurero).filter(SesionBasurero.is_active == True).all()
+
+    basurero_ids_afectados = set()
+    for sesion in sesiones_activas:
+        expira = sesion.expires_at
+        if expira.tzinfo is None:
+            expira = expira.replace(tzinfo=timezone.utc)
+        if expira < ahora:
+            sesion.is_active = False
+            basurero_ids_afectados.add(sesion.basurero_id)
+
+    if basurero_ids_afectados:
+        db.commit()
+        for b_id in basurero_ids_afectados:
+            quedan = db.query(SesionBasurero).filter(
+                SesionBasurero.basurero_id == b_id,
+                SesionBasurero.is_active == True
+            ).first()
+            if not quedan:
+                db.query(Basurero).filter(Basurero.id == b_id).update({"is_occupied": False})
+        db.commit()
 
     db.commit()

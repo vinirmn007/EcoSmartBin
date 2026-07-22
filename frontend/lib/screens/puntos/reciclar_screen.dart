@@ -305,15 +305,20 @@ class _ReciclarScreenState extends State<ReciclarScreen>
   Future<void> _extenderSesion() async {
     final res = await ApiService.extenderSesionBasurero(_rawBinPublicId);
     if (res['success'] == true && mounted) {
-      final expiresAtStr = res['data']['expires_at'];
+      final Map<String, dynamic>? data = res['data'] is Map<String, dynamic> ? res['data'] : null;
+      final expiresAtStr = data?['expires_at'];
       if (expiresAtStr != null) {
         final expiresAt = _parseUtcDate(expiresAtStr);
         if (expiresAt != null) {
           _startSessionCountdown(expiresAt);
+        } else {
+          _startSessionCountdown(DateTime.now().add(const Duration(minutes: 5)));
         }
+      } else {
+        _startSessionCountdown(DateTime.now().add(const Duration(minutes: 5)));
       }
       _showSnack('Sesión extendida por 5 minutos más.');
-    } else {
+    } else if (mounted) {
       _showSnack(res['message'] ?? 'No se pudo extender la sesión', isError: true);
     }
   }
