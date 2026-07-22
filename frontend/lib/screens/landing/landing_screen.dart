@@ -103,19 +103,18 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
+                if (isDesktop) ...[
+                  const SizedBox(width: 8),
+                  Text(
                     'EcoSmartBin',
-                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       color: AppColors.textPrimary,
-                      fontSize: isDesktop ? 20 : 15,
+                      fontSize: 20,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.2,
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

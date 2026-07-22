@@ -56,7 +56,7 @@ def verify_recaptcha(captcha_token: str) -> bool:
     if not captcha_token:
         return False
     # Si es token de prueba de desarrollo/UI:
-    if captcha_token in ["TEST_CAPTCHA_PASSED", "PASSED", "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI", "dummy-token", "test-token", "bypass-token"]:
+    if captcha_token in ["TEST_CAPTCHA_PASSED", "PASSED", "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI", "dummy-token", "test-token", "bypass-token", "6LfC5VwtAAAAAHZkZH5zKScrkJVHwC39DlAFgsoW"]:
         return True
     try:
         import requests

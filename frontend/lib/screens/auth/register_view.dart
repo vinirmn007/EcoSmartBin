@@ -165,58 +165,97 @@ class _RegisterView extends StatelessWidget {
                           ],
 
                           // Fila de Nombres y Apellidos
-                          Row(
-                            children: [
-                              Expanded(
-                                child: PremiumTextField(
-                                  controller: state._nombresController,
-                                  hintText: 'Nombres',
-                                  prefixIcon: Icons.person_outline,
-                                  validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                          if (isDesktop) ...[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: PremiumTextField(
+                                    controller: state._nombresController,
+                                    hintText: 'Nombres',
+                                    prefixIcon: Icons.person_outline,
+                                    validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: PremiumTextField(
-                                  controller: state._apellidosController,
-                                  hintText: 'Apellidos',
-                                  prefixIcon: Icons.person_outline,
-                                  validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: PremiumTextField(
+                                    controller: state._apellidosController,
+                                    hintText: 'Apellidos',
+                                    prefixIcon: Icons.person_outline,
+                                    validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ] else ...[
+                            PremiumTextField(
+                              controller: state._nombresController,
+                              hintText: 'Nombres',
+                              prefixIcon: Icons.person_outline,
+                              validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            PremiumTextField(
+                              controller: state._apellidosController,
+                              hintText: 'Apellidos',
+                              prefixIcon: Icons.person_outline,
+                              validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                            ),
+                          ],
                           const SizedBox(height: 16),
 
                           // Fila de Cédula y Facultad
-                          Row(
-                            children: [
-                              Expanded(
-                                child: PremiumTextField(
-                                  controller: state._cedulaController,
-                                  hintText: 'Cédula / ID',
-                                  prefixIcon: Icons.badge_outlined,
-                                  keyboardType: TextInputType.number,
-                                  validator: (v) {
-                                    if (v == null || v.trim().isEmpty) return 'Requerido';
-                                    final clean = v.trim();
-                                    if (!RegExp(r'^\d{10}$').hasMatch(clean)) {
-                                      return 'Debe tener 10 números';
-                                    }
-                                    return null;
-                                  },
+                          if (isDesktop) ...[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: PremiumTextField(
+                                    controller: state._cedulaController,
+                                    hintText: 'Cédula / ID',
+                                    prefixIcon: Icons.badge_outlined,
+                                    keyboardType: TextInputType.number,
+                                    validator: (v) {
+                                      if (v == null || v.trim().isEmpty) return 'Requerido';
+                                      final clean = v.trim();
+                                      if (!RegExp(r'^\d{10}$').hasMatch(clean)) {
+                                        return 'Debe tener 10 números';
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: PremiumTextField(
-                                  controller: state._facultadController,
-                                  hintText: 'Facultad (Opc.)',
-                                  prefixIcon: Icons.school_outlined,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: PremiumTextField(
+                                    controller: state._facultadController,
+                                    hintText: 'Facultad (Opc.)',
+                                    prefixIcon: Icons.school_outlined,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ] else ...[
+                            PremiumTextField(
+                              controller: state._cedulaController,
+                              hintText: 'Cédula / ID',
+                              prefixIcon: Icons.badge_outlined,
+                              keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.trim().isEmpty) return 'Requerido';
+                                final clean = v.trim();
+                                if (!RegExp(r'^\d{10}$').hasMatch(clean)) {
+                                  return 'Debe tener 10 números';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            PremiumTextField(
+                              controller: state._facultadController,
+                              hintText: 'Facultad (Opc.)',
+                              prefixIcon: Icons.school_outlined,
+                            ),
+                          ],
                           const SizedBox(height: 16),
 
                           // Teléfono

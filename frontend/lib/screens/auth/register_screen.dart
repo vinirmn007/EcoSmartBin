@@ -40,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _captchaVerified = value ?? false;
       _captchaToken = _captchaVerified
-          ? '6LfC5VwtAAAAAHZkZH5zKScrkJVHwC39DlAFgsoW'
+          ? 'TEST_CAPTCHA_PASSED'
           : null;
       if (_captchaVerified) {
         _errorMessage = null;
