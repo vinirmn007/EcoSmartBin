@@ -12,12 +12,14 @@ def test_register_user_success(client, mock_supabase):
     mock_supabase.sign_up.return_value = mock_response
 
     # Datos de registro
+    # Datos de registro
     payload = {
         "email": "nuevo@ecosmartbin.com",
-        "password": "supersecurepassword123",
+        "password": "Supersecurepassword123!",
         "nombres": "Josué",
         "apellidos": "Pérez",
         "cedula": "1723456789",
+        "telefono": "0991234567",
         "facultad": "Sistemas"
     }
 
@@ -36,7 +38,7 @@ def test_register_user_success(client, mock_supabase):
     mock_supabase.sign_up.assert_called_once()
     args = mock_supabase.sign_up.call_args[0][0]
     assert args["email"] == "nuevo@ecosmartbin.com"
-    assert args["password"] == "supersecurepassword123"
+    assert args["password"] == "Supersecurepassword123!"
 
 
 def test_register_user_duplicate_cedula(client, db_session):
@@ -55,10 +57,11 @@ def test_register_user_duplicate_cedula(client, db_session):
 
     payload = {
         "email": "nuevo@ecosmartbin.com",
-        "password": "supersecurepassword123",
+        "password": "Supersecurepassword123!",
         "nombres": "Josué",
         "apellidos": "Pérez",
         "cedula": "1723456789",  # Cédula duplicada
+        "telefono": "0991234567",
         "facultad": "Sistemas"
     }
 
@@ -82,10 +85,11 @@ def test_register_user_duplicate_email(client, db_session):
 
     payload = {
         "email": "duplicado@ecosmartbin.com",  # Email duplicado
-        "password": "supersecurepassword123",
+        "password": "Supersecurepassword123!",
         "nombres": "Josué",
         "apellidos": "Pérez",
         "cedula": "1723456789",
+        "telefono": "0991234567",
         "facultad": "Sistemas"
     }
 
@@ -99,10 +103,11 @@ def test_register_user_supabase_fails(client, mock_supabase):
 
     payload = {
         "email": "error@ecosmartbin.com",
-        "password": "supersecurepassword123",
+        "password": "Supersecurepassword123!",
         "nombres": "Josué",
         "apellidos": "Pérez",
         "cedula": "1723456789",
+        "telefono": "0991234567",
         "facultad": "Sistemas"
     }
 
