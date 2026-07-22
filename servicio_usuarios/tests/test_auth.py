@@ -21,7 +21,7 @@ def test_register_user_success(client, mock_supabase):
         "cedula": "1723456789",
         "telefono": "0991234567",
         "facultad": "Sistemas",
-        "captcha_token": "dummy-token"
+        "captcha_token": "TEST_CAPTCHA_PASSED"
     }
 
     # Llamar endpoint
@@ -64,7 +64,7 @@ def test_register_user_duplicate_cedula(client, db_session):
         "cedula": "1723456789",  # Cédula duplicada
         "telefono": "0991234567",
         "facultad": "Sistemas",
-        "captcha_token": "dummy-token"
+        "captcha_token": "TEST_CAPTCHA_PASSED"
     }
 
     response = client.post("/auth/register", json=payload)
@@ -93,7 +93,7 @@ def test_register_user_duplicate_email(client, db_session):
         "cedula": "1723456789",
         "telefono": "0991234567",
         "facultad": "Sistemas",
-        "captcha_token": "dummy-token"
+        "captcha_token": "TEST_CAPTCHA_PASSED"
     }
 
     response = client.post("/auth/register", json=payload)
@@ -112,7 +112,7 @@ def test_register_user_supabase_fails(client, mock_supabase):
         "cedula": "1723456789",
         "telefono": "0991234567",
         "facultad": "Sistemas",
-        "captcha_token": "dummy-token"
+        "captcha_token": "TEST_CAPTCHA_PASSED"
     }
 
     response = client.post("/auth/register", json=payload)
