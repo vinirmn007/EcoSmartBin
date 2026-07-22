@@ -22,6 +22,24 @@ class UserRegisterSchema(BaseModel):
             raise ValueError("La contraseña debe contener al menos un carácter especial.")
         return v
 
+    @field_validator("cedula")
+    @classmethod
+    def validate_cedula(cls, v: str) -> str:
+        clean = v.strip()
+        if not re.match(r'^\d{10}$', clean):
+            raise ValueError("La cédula debe contener exactamente 10 dígitos numéricos.")
+        return clean
+
+    @field_validator("telefono")
+    @classmethod
+    def validate_telefono(cls, v: str) -> str:
+        if not v:
+            return v
+        clean = v.strip()
+        if not re.match(r'^09\d{8}$', clean):
+            raise ValueError("El teléfono debe tener 10 dígitos y empezar con 09.")
+        return clean
+
 
 class UserLoginSchema(BaseModel):
     email: EmailStr

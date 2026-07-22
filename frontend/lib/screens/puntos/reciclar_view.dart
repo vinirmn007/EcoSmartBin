@@ -1081,10 +1081,6 @@ class _ReciclarView extends StatelessWidget {
                     Navigator.pushReplacementNamed(context, '/profile');
                   }
                 },
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                ),
-                borderColor: Colors.white.withOpacity(0.1),
               ),
             ).animate().fadeIn(delay: 700.ms, duration: 500.ms),
           ],

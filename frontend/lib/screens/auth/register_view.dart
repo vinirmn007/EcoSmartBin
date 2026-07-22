@@ -199,7 +199,10 @@ class _RegisterView extends StatelessWidget {
                                   keyboardType: TextInputType.number,
                                   validator: (v) {
                                     if (v == null || v.trim().isEmpty) return 'Requerido';
-                                    if (v.trim().length < 5) return 'Inválido';
+                                    final clean = v.trim();
+                                    if (!RegExp(r'^\d{10}$').hasMatch(clean)) {
+                                      return 'Debe tener 10 números';
+                                    }
                                     return null;
                                   },
                                 ),
@@ -223,7 +226,11 @@ class _RegisterView extends StatelessWidget {
                             prefixIcon: Icons.phone_outlined,
                             keyboardType: TextInputType.phone,
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Por favor ingresa tu teléfono';
+                              if (v == null || v.trim().isEmpty) return 'Requerido';
+                              final clean = v.trim();
+                              if (!RegExp(r'^09\d{8}$').hasMatch(clean)) {
+                                return 'Debe tener 10 números y empezar con 09';
+                              }
                               return null;
                             },
                           ),

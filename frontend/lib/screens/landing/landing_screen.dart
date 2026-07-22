@@ -62,8 +62,8 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 64.0 : 24.0,
-        vertical: 18.0,
+        horizontal: isDesktop ? 64.0 : 12.0,
+        vertical: 14.0,
       ),
       decoration: BoxDecoration(
         color: _navScrolled
@@ -80,69 +80,87 @@ class _LandingScreenState extends State<LandingScreen> with TickerProviderStateM
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Logo
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.emeraldGlow.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.25), width: 1.2),
-                ),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: 24,
-                  height: 24,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.recycling_rounded,
-                    color: AppColors.emeraldGlow,
-                    size: 22,
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: AppColors.emeraldGlow.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.emeraldGlow.withOpacity(0.25), width: 1.2),
+                  ),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.recycling_rounded,
+                      color: AppColors.emeraldGlow,
+                      size: 20,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'EcoSmartBin',
-                style: GoogleFonts.poppins(
-                  color: AppColors.textPrimary,
-                  fontSize: isDesktop ? 20 : 17,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.3,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'EcoSmartBin',
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      color: AppColors.textPrimary,
+                      fontSize: isDesktop ? 20 : 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+
+          const SizedBox(width: 8),
 
           // Actions
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextButton(
                 onPressed: () => Navigator.pushNamed(context, '/login'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 12 : 6,
+                    vertical: 8,
+                  ),
+                ),
                 child: Text(
                   'Iniciar Sesión',
                   style: GoogleFonts.poppins(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontSize: isDesktop ? 13 : 11,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: isDesktop ? 8 : 4),
               ElevatedButton(
                 onPressed: () => Navigator.pushNamed(context, '/register'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.emeraldGlow,
                   foregroundColor: AppColors.deepObsidian,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 18 : 12,
+                    vertical: isDesktop ? 10 : 8,
+                  ),
                   elevation: 0,
                 ),
                 child: Text(
                   'Registrarse',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: isDesktop ? 13 : 11,
                   ),
                 ),
               ),
