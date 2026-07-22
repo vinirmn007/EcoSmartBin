@@ -80,8 +80,6 @@ public class ClasificacionPendienteController {
 
         request.setTimestamp(System.currentTimeMillis());
 
-        request.setTimestamp(System.currentTimeMillis());
-
         // Guardar en memoria (normalizado a minúsculas para coincidencia insensible)
         String binId = request.getBinId() != null ? request.getBinId().toLowerCase().trim() : "default-bin";
         pendientes.put(binId, request);
@@ -95,16 +93,34 @@ public class ClasificacionPendienteController {
     /**
      * GET /points/clasificacion-pendiente/{binId}
      * El frontend consulta si hay una clasificación pendiente para un basurero.
+     * Expira automáticamente si tiene más de 60 segundos de antigüedad.
      */
     @GetMapping("/{binId}")
     public ResponseEntity<ClasificacionPendienteDTO> obtenerClasificacion(
-            @PathVariable String binId) {
+            @PathVariable String binId,
+            @RequestHeader(value = "X-User-Id", required = false) String requestingUserId) {
 
         String key = binId != null ? binId.toLowerCase().trim() : "";
         ClasificacionPendienteDTO pendiente = pendientes.get(key);
 
         if (pendiente == null) {
             return ResponseEntity.noContent().build(); // 204: no hay clasificación pendiente
+        }
+
+        // 1. Expiración automática tras 60 segundos (evita fotos obsoletas de sesiones previas)
+        long age = System.currentTimeMillis() - (pendiente.getTimestamp() != null ? pendiente.getTimestamp() : 0);
+        if (age > 60000) {
+            pendientes.remove(key);
+            System.out.println("⏰ Clasificación pendiente expirada por antigüedad (" + age + "ms) para bin: " + key);
+            return ResponseEntity.noContent().build();
+        }
+
+        // 2. Si se proporciona el ID de usuario activo y no coincide, ignorar
+        if (requestingUserId != null && !requestingUserId.isEmpty()
+                && pendiente.getUsuarioId() != null && !pendiente.getUsuarioId().isEmpty()
+                && !pendiente.getUsuarioId().equalsIgnoreCase(requestingUserId)) {
+            System.out.println("🔒 Ignorando clasificación pendiente pertenenciente a otro usuario (" + pendiente.getUsuarioId() + " vs " + requestingUserId + ")");
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(pendiente);

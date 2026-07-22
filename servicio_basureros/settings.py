@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     # URL del servicio de usuarios (para validaciones futuras)
     USERS_SERVICE_URL: str = "http://localhost:8000"
+    PUNTOS_SERVICE_URL: str = os.getenv("PUNTOS_SERVICE_URL", "http://servicio-puntos:8082")
 
     # Lista de orígenes para producción (separados por comas en el .env)
     ALLOWED_ORIGINS_PROD: str = ""

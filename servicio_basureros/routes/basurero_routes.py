@@ -243,6 +243,14 @@ def conectar_usuario(
     db.commit()
     db.refresh(nueva_sesion)
 
+    # Limpiar clasificaciones pendientes residuales de sesiones previas en servicio_puntos
+    try:
+        import httpx
+        with httpx.Client(timeout=2.0) as client:
+            client.delete(f"{settings.PUNTOS_SERVICE_URL}/points/clasificacion-pendiente/{public_id}")
+    except Exception as clr_err:
+        business_logger.warning(f"No se pudo limpiar la clasificación pendiente previa: {clr_err}")
+
     business_logger.info("Usuario conectado a basurero", extra={
         "event_type": "BIN_SESSION_STARTED",
         "public_id": basurero.public_id,

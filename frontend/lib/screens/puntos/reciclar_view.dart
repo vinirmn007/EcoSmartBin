@@ -18,15 +18,14 @@ class _ReciclarView extends StatelessWidget {
   static const Map<String, String> _tipoNombreES = {
     'plastic': 'Plástico',
     'paper': 'Papel',
+    'cardboard': 'Papel',
     'glass': 'Vidrio',
-    'metal': 'Metal',
-    'cardboard': 'Cartón',
-    'trash': 'Basura General',
   };
 
   static const Color _emerald = AppColors.emeraldGlow;
   static const Color _bgLight = AppColors.background;
   static const Color _cardLight = AppColors.glassSurface;
+  static const Color _cardDark = Color(0xFF1A211D);
   static const Color _textDark = AppColors.textPrimary;
   static const Color _textGray = AppColors.textSecondary;
   static const Color _borderLight = AppColors.glassBorder;
@@ -433,36 +432,6 @@ class _ReciclarView extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: _cardLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _borderLight),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(_emerald),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Intento ${state._pollingAttempts}/${_ReciclarScreenState._maxPollingAttempts}',
-                    style: GoogleFonts.poppins(
-                      color: _textGray,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -473,182 +442,46 @@ class _ReciclarView extends StatelessWidget {
   // PASO 2: Confirmar Clasificación (IA o Manual)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildConfirmationStep() {
-    final bool tieneIA =
-        state._clasificacionIA != null && !state._modoManual;
+    final clasificacion = state._clasificacionIA;
+    final String rawTipo = (clasificacion?['tipoDetectado'] ?? '').toString().toLowerCase();
+    final bool isReciclable = (rawTipo == 'plastic' || rawTipo == 'paper' || rawTipo == 'cardboard' || rawTipo == 'glass');
 
     return SingleChildScrollView(
       key: const ValueKey('confirmation'),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildConnectedBanner(),
-          const SizedBox(height: 24),
-
-          // ── Resultado IA ──
-          if (tieneIA) ...[
-            _buildIADetectionCard(),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _ActionChip(
-                    icon: Icons.edit_rounded,
-                    label: 'Cambiar manual',
-                    onTap: state._switchToManualMode,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildConnectedBanner(),
+              const SizedBox(height: 24),
+              _buildIADetectionCard(),
+              const SizedBox(height: 28),
+              if (isReciclable)
+                _GradientButton(
+                  label: 'Confirmar Clasificación IA',
+                  icon: Icons.eco_rounded,
+                  onTap: state._submitReciclaje,
+                )
+              else
+                _GradientButton(
+                  label: 'No Reciclable — Toma otra foto',
+                  icon: Icons.camera_alt_rounded,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
                   ),
+                  onTap: () {
+                    state._showSnack(
+                      'Este basurero inteligente solo acepta Papel, Plástico o Vidrio. Presiona el botón del basurero para capturar otro residuo.',
+                      isError: true,
+                    );
+                  },
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionChip(
-                    icon: Icons.camera_alt_rounded,
-                    label: 'Tomar otra foto',
-                    onTap: state._retryScan,
-                  ),
-                ),
-              ],
-            ),
-          ] else ...[
-            // ── Modo Manual ──
-            Text(
-              'Selección Manual',
-              style: GoogleFonts.poppins(
-                color: _textDark,
-                fontWeight: FontWeight.w800,
-                fontSize: 20,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Selecciona el residuo que vas a depositar en el basurero',
-              style: GoogleFonts.poppins(
-                color: _textGray,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 24),
-            if (state._loadingTipos)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(_emerald),
-                  ),
-                ),
-              )
-            else ...[
-              Text(
-                'Material:',
-                style: GoogleFonts.poppins(
-                  color: _textGray,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<int>(
-                value: state._tipoSeleccionado,
-                dropdownColor: _cardLight,
-                style: GoogleFonts.poppins(
-                    color: _textDark, fontSize: 14),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: _cardLight,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: _borderLight),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: _emerald, width: 1.5),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-                items: state._tiposReciclaje
-                    .map<DropdownMenuItem<int>>((t) {
-                  return DropdownMenuItem<int>(
-                    value: t['id'] as int,
-                    child: Text(
-                        '${t['nombre']} — ${t['puntosPorUnidad']} pts/ud'),
-                  );
-                }).toList(),
-                onChanged: (v) =>
-                    state.setState(() => state._tipoSeleccionado = v),
-              ),
             ],
-          ],
-
-          const SizedBox(height: 28),
-
-          // ── Selector de Cantidad ──
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: _cardLight,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: _borderLight),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Cantidad de unidades',
-                  style: GoogleFonts.poppins(
-                    color: _textGray,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _QuantityButton(
-                      icon: Icons.remove_rounded,
-                      onTap: () {
-                        if (state._cantidad > 1) {
-                          state.setState(() => state._cantidad--);
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Text(
-                        '${state._cantidad}',
-                        style: GoogleFonts.poppins(
-                          color: _textDark,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    _QuantityButton(
-                      icon: Icons.add_rounded,
-                      onTap: () =>
-                          state.setState(() => state._cantidad++),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
-          const SizedBox(height: 32),
-
-          // ── Botón Confirmar ──
-          _GradientButton(
-            label:
-                tieneIA ? 'Confirmar Clasificación IA' : 'Confirmar Depósito',
-            icon: Icons.eco_rounded,
-            onTap: state._submitReciclaje,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -746,178 +579,282 @@ class _ReciclarView extends StatelessWidget {
   /// Card de resultado de la IA
   Widget _buildIADetectionCard() {
     final clasificacion = state._clasificacionIA!;
-    final tipoDetectado =
-        clasificacion['tipoDetectado'] as String? ?? 'trash';
-    final confianza =
-        (clasificacion['confianza'] as num?)?.toDouble() ?? 0.0;
-    final nombreTipo = clasificacion['nombreTipo'] as String? ??
-        _tipoNombreES[tipoDetectado] ?? 'Desconocido';
+    final String rawTipo = (clasificacion['tipoDetectado'] ?? '').toString().toLowerCase();
+    final bool isReciclable = (rawTipo == 'plastic' || rawTipo == 'paper' || rawTipo == 'cardboard' || rawTipo == 'glass');
 
-    final visual = _tipoVisual[tipoDetectado] ?? _tipoVisual['trash']!;
-    final color = Color(visual['color'] as int);
-    final icon = visual['icon'] as IconData;
+    final String nombreTipo = isReciclable
+        ? (_tipoNombreES[rawTipo] ?? 'Papel')
+        : 'Basura General';
+
+    final Color color = isReciclable
+        ? Color((_tipoVisual[rawTipo] ?? _tipoVisual['paper']!)['color'] as int)
+        : const Color(0xFFEF4444);
+
+    final IconData icon = isReciclable
+        ? (_tipoVisual[rawTipo] ?? _tipoVisual['paper']!)['icon'] as IconData
+        : Icons.delete_forever_rounded;
+
+    final confianza = (clasificacion['confianza'] as num?)?.toDouble() ?? 0.0;
     final confianzaPct = (confianza * 100).toStringAsFixed(1);
+    final bytes = state._decodedImageBytes;
 
-    final String? imagenBase64Full =
-        clasificacion['imagenBase64'] as String?;
-    String? base64Str;
-    if (imagenBase64Full != null && imagenBase64Full.contains(',')) {
-      base64Str = imagenBase64Full.split(',').last;
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isDesktop = constraints.maxWidth > 650;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: _cardLight,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _borderLight, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Imagen capturada por ESP32
-          if (base64Str != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 280),
-                child: Image.memory(
-                  base64Decode(base64Str),
-                  width: double.infinity,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: double.infinity,
-                      height: 160,
-                      decoration: BoxDecoration(
-                        color: Colors.black26,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.broken_image_rounded,
-                          color: Colors.white54, size: 44),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-
-          // Icono del tipo con badge IA
-          Stack(
-            alignment: Alignment.center,
+        Widget buildImageFrame() {
+          return Stack(
+            clipBehavior: Clip.none,
             children: [
               Container(
-                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  shape: BoxShape.circle,
+                  color: const Color(0xFF09100C),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: color.withOpacity(0.3), width: 1),
-                ),
-                child: Icon(icon, color: color, size: 48),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: _cardLight,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: color, width: 2),
+                      color: (isReciclable ? _emerald : const Color(0xFFEF4444)).withOpacity(0.6),
+                      width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isReciclable ? _emerald : const Color(0xFFEF4444)).withOpacity(0.25),
+                      blurRadius: 24,
+                      spreadRadius: 1,
                     ),
-                    child: Icon(Icons.smart_toy_rounded,
-                        color: color, size: 15),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: isDesktop ? 320 : 260,
+                      minHeight: 180,
+                    ),
+                    child: bytes != null
+                        ? Image.memory(
+                            bytes,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 180,
+                                color: Colors.black54,
+                                child: const Center(
+                                  child: Icon(Icons.broken_image_rounded,
+                                      color: Colors.white38, size: 44),
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            height: 180,
+                            color: Colors.black54,
+                            child: const Center(
+                              child: Icon(Icons.camera_alt_rounded,
+                                  color: Colors.white38, size: 44),
+                            ),
+                          ),
                   ),
+                ),
+              ),
+              // Badge flotante "IA VERIFIED" o "NO RECICLABLE" estilo Stitch
+              Positioned(
+                top: -12,
+                right: 14,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isReciclable ? _emerald : const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isReciclable ? _emerald : const Color(0xFFEF4444)).withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(isReciclable ? Icons.verified_rounded : Icons.warning_rounded,
+                          color: isReciclable ? const Color(0xFF003824) : Colors.white, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        isReciclable ? 'IA VERIFIED' : 'NO RECICLABLE',
+                        style: GoogleFonts.poppins(
+                          color: isReciclable ? const Color(0xFF003824) : Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
+          );
+        }
 
-          // Label "IA detectó"
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '🤖 Detectado por IA',
-              style: GoogleFonts.poppins(
-                color: _textGray,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          // Nombre del tipo
-          Text(
-            nombreTipo,
-            style: GoogleFonts.poppins(
-              color: color,
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.3,
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // Confianza texto
-          Row(
+        Widget buildDetails() {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Confianza: ',
+                isReciclable ? 'DETECCIÓN FINALIZADA' : 'RESIDUO NO RECICLABLE',
+                style: GoogleFonts.poppins(
+                  color: isReciclable ? _emerald : const Color(0xFFEF4444),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2.0,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: color.withOpacity(0.4)),
+                    ),
+                    child: Icon(icon, color: color, size: 28),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      nombreTipo,
+                      style: GoogleFonts.poppins(
+                        color: color,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                isReciclable
+                    ? 'Residuo identificado correctamente por la cámara inteligente del basurero.'
+                    : 'Este basurero inteligente solo recicla Papel, Plástico y Vidrio. Por favor toma otra foto presionando el botón físico en el basurero.',
                 style: GoogleFonts.poppins(
                   color: _textGray,
                   fontSize: 13,
+                  height: 1.5,
                 ),
               ),
-              Text(
-                '$confianzaPct%',
-                style: GoogleFonts.poppins(
-                  color: confianza >= 0.7
-                      ? _emerald
-                      : const Color(0xFFD97706),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(height: 24),
+              // Medidor de Confianza Stitch
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Confianza de la IA',
+                          style: GoogleFonts.poppins(
+                            color: _textGray,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          '$confianzaPct%',
+                          style: GoogleFonts.poppins(
+                            color: isReciclable ? _emerald : const Color(0xFFEF4444),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: confianza,
+                        minHeight: 7,
+                        backgroundColor: Colors.white12,
+                        valueColor: AlwaysStoppedAnimation(
+                          isReciclable ? _emerald : const Color(0xFFEF4444),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 14),
+          );
+        }
 
-          // Barra visual de confianza
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: confianza,
-              minHeight: 6,
-              backgroundColor: _borderLight,
-              valueColor: AlwaysStoppedAnimation(
-                confianza >= 0.7
-                    ? _emerald
-                    : const Color(0xFFD97706),
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: Colors.white.withOpacity(0.1), width: 0.8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.6),
+                blurRadius: 32,
+                offset: const Offset(0, 8),
               ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Stack(
+              children: [
+                // Top Light Sweep
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 1.5,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          _emerald,
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: isDesktop
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(flex: 6, child: buildImageFrame()),
+                            const SizedBox(width: 32),
+                            Expanded(flex: 6, child: buildDetails()),
+                          ],
+                        )
+                      : Column(
+                          children: [
+                            buildImageFrame(),
+                            const SizedBox(height: 28),
+                            buildDetails(),
+                          ],
+                        ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -1311,8 +1248,8 @@ class _GradientButtonState extends State<_GradientButton> {
             gradient: widget.gradient ??
                 LinearGradient(
                   colors: _hovered
-                      ? [const Color(0xFF34D399), const Color(0xFF10B981)]
-                      : [const Color(0xFF10B981), const Color(0xFF059669)],
+                      ? [const Color(0xFF6EE7B7), const Color(0xFF10B981)]
+                      : [const Color(0xFF4EDEA3), const Color(0xFF10B981)],
                 ),
             borderRadius: BorderRadius.circular(18),
             border: widget.borderColor != null
@@ -1320,11 +1257,9 @@ class _GradientButtonState extends State<_GradientButton> {
                 : null,
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF10B981)
-                    .withOpacity(widget.gradient == null
-                        ? (_hovered ? 0.4 : 0.2)
-                        : 0.0),
-                blurRadius: 20,
+                color: const Color(0xFF4EDEA3)
+                    .withOpacity(_hovered ? 0.5 : 0.25),
+                blurRadius: _hovered ? 28 : 16,
                 offset: const Offset(0, 6),
               ),
             ],
@@ -1333,15 +1268,16 @@ class _GradientButtonState extends State<_GradientButton> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.icon != null) ...[
-                Icon(widget.icon, color: Colors.white, size: 18),
+                Icon(widget.icon, color: const Color(0xFF003824), size: 20),
                 const SizedBox(width: 10),
               ],
               Text(
                 widget.label,
                 style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF003824),
+                  fontWeight: FontWeight.w800,
                   fontSize: 15,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],

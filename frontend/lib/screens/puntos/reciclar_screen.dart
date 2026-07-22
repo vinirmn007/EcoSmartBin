@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,19 +45,18 @@ class _ReciclarScreenState extends State<ReciclarScreen>
 
   // Datos de la IA
   Map<String, dynamic>? _clasificacionIA;
+  Uint8List? _decodedImageBytes;
   Timer? _pollingTimer;
   int _pollingAttempts = 0;
   static const int _maxPollingAttempts = 15; // 15 intentos × 2s = 30s máx
 
-  // Datos para registrar
+  // Timestamp de inicio de la sesión activa para descartar fotos antiguas
+  DateTime? _sessionStartTimestamp;
   List<dynamic> _tiposReciclaje = [];
   int? _tipoSeleccionado;
   int _cantidad = 1;
   bool _loadingTipos = false;
   int _puntosGanados = 0;
-
-  // Modo manual (fallback si la IA falla o clasifica mal)
-  bool _modoManual = false;
 
   @override
   void initState() {
@@ -224,8 +224,14 @@ class _ReciclarScreenState extends State<ReciclarScreen>
       if (res['success'] == true) {
         final expiresAtStr = res['data']['expires_at'];
         
+        // Registrar timestamp de inicio y borrar clasificaciones antiguas de la memoria
+        _sessionStartTimestamp = DateTime.now();
+        await ApiService.limpiarClasificacionPendiente(_rawBinPublicId);
+
         setState(() {
           _detectedBinId = res['data']['basurero_nombre'] ?? publicId;
+          _clasificacionIA = null;
+          _decodedImageBytes = null;
           _step = 1; // Esperando clasificación de la IA
         });
 
@@ -338,9 +344,12 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     }
   }
 
-  /// Polling cada 2 segundos al servicio de puntos para ver si la IA ya clasificó
+  dynamic _lastClasificacionToken;
+
+  /// Polling continuo cada 2 segundos al servicio de puntos para ver si la IA clasificó o envió nueva foto
   void _startPollingClasificacion() {
     _pollingAttempts = 0;
+    _lastClasificacionToken = null;
     _pollingTimer?.cancel();
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       _pollingAttempts++;
@@ -348,41 +357,55 @@ class _ReciclarScreenState extends State<ReciclarScreen>
       final clasificacion = await ApiService.getClasificacionPendiente(_rawBinPublicId);
 
       if (clasificacion != null && mounted) {
-        timer.cancel();
-        setState(() {
-          _clasificacionIA = clasificacion;
-          // Auto-seleccionar el tipo de reciclaje detectado
-          final tipoReciclajeId = clasificacion['tipoReciclajeId'];
-          if (tipoReciclajeId != null) {
-            _tipoSeleccionado = (tipoReciclajeId is int)
-                ? tipoReciclajeId
-                : int.tryParse(tipoReciclajeId.toString());
+        // 1. Ignorar clasificaciones antiguas que fueron tomadas antes de iniciar la sesión activa
+        final int timestampMs = (clasificacion['timestamp'] as num?)?.toInt() ?? 0;
+        if (_sessionStartTimestamp != null && timestampMs > 0) {
+          final int sessionStartMs = _sessionStartTimestamp!.millisecondsSinceEpoch - 2000;
+          if (timestampMs < sessionStartMs) {
+            return; // Foto antigua capturada antes del inicio de esta sesión
           }
-          _step = 2; // Mostrar resultado de la IA
-        });
-        return;
-      }
+        }
 
-      // Timeout: después de 30 segundos sin respuesta, ir a modo manual
-      if (_pollingAttempts >= _maxPollingAttempts && mounted) {
-        timer.cancel();
-        setState(() {
-          _modoManual = true;
-          _step = 2; // Ir a selección, pero en modo manual
-        });
-        _showSnack(
-          'La IA no respondió. Selecciona el tipo manualmente.',
-          isError: true,
-        );
-      }
-    });
-  }
+        // 2. Ignorar clasificaciones que pertenecen a un usuario distinto (sesión anterior)
+        final String? photoUserId = clasificacion['usuarioId'] as String?;
+        if (photoUserId != null && photoUserId.isNotEmpty) {
+          final profile = await ApiService.getProfile();
+          final String? myUserId = profile?.userId;
+          if (myUserId != null && myUserId.isNotEmpty && photoUserId != myUserId) {
+            return;
+          }
+        }
 
-  /// Cambiar a modo manual (si la IA clasificó mal)
-  void _switchToManualMode() {
-    setState(() {
-      _modoManual = true;
-      _clasificacionIA = null;
+        final currentToken = clasificacion['imagenBase64'] ?? clasificacion['tipoDetectado'] ?? clasificacion.hashCode;
+        
+        if (currentToken != _lastClasificacionToken) {
+          _lastClasificacionToken = currentToken;
+
+          Uint8List? bytes;
+          final String? imgFull = clasificacion['imagenBase64'] as String?;
+          if (imgFull != null && imgFull.isNotEmpty) {
+            try {
+              final rawStr = imgFull.contains(',') ? imgFull.split(',').last : imgFull;
+              bytes = base64Decode(rawStr);
+            } catch (e) {
+              bytes = null;
+            }
+          }
+
+          setState(() {
+            _clasificacionIA = clasificacion;
+            _decodedImageBytes = bytes;
+            // Auto-seleccionar el tipo de reciclaje detectado
+            final tipoReciclajeId = clasificacion['tipoReciclajeId'];
+            if (tipoReciclajeId != null) {
+              _tipoSeleccionado = (tipoReciclajeId is int)
+                  ? tipoReciclajeId
+                  : int.tryParse(tipoReciclajeId.toString());
+            }
+            _step = 2; // Mostrar resultado de la IA automáticamente
+          });
+        }
+      }
     });
   }
 
@@ -391,13 +414,20 @@ class _ReciclarScreenState extends State<ReciclarScreen>
     ApiService.limpiarClasificacionPendiente(_rawBinPublicId);
     setState(() {
       _clasificacionIA = null;
-      _modoManual = false;
       _step = 1; // Volver a "Esperando IA"
     });
     _startPollingClasificacion();
   }
 
   Future<void> _submitReciclaje() async {
+    final String rawTipo = (_clasificacionIA?['tipoDetectado'] ?? '').toString().toLowerCase();
+    final bool isReciclable = (rawTipo == 'plastic' || rawTipo == 'paper' || rawTipo == 'cardboard' || rawTipo == 'glass');
+
+    if (!isReciclable) {
+      _showSnack('Basura General no reciclable. Por favor toma otra foto (Papel, Plástico o Vidrio).', isError: true);
+      return;
+    }
+
     if (_tipoSeleccionado == null) {
       _showSnack('Por favor selecciona un tipo de material', isError: true);
       return;
