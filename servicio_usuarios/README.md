@@ -1,6 +1,7 @@
 # EcoSmartBin - Servicio de Usuarios 👤🔒
 
 Este microservicio es el núcleo de gestión de usuarios, perfiles y autenticación para el ecosistema **EcoSmartBin**. Está construido sobre **FastAPI**, utilizando una arquitectura híbrida que combina **Supabase Auth** (para la gestión segura de credenciales y generación de JWTs) y una base de datos relacional **PostgreSQL** a través de **SQLAlchemy** (para almacenar los perfiles de usuario y puntajes ecológicos).
+hola
 
 ---
 
