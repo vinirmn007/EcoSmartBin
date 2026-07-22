@@ -13,7 +13,7 @@ PUNTOS_SERVICE_URL = os.getenv("PUNTOS_SERVICE_URL", "http://host.docker.interna
 # URL del servicio de basureros para validar sesiones activas
 BASUREROS_SERVICE_URL = os.getenv("BASUREROS_SERVICE_URL", "http://host.docker.internal:8082")
 # ID del basurero asociado a este servicio de IA
-BIN_ID = os.getenv("BIN_ID", "EcoSmartBin-Q04")
+BIN_ID = os.getenv("BIN_ID", "eco01")
 
 # Variables de configuración del Modelo (YOLO vs ViT)
 MODEL_TYPE = os.getenv("MODEL_TYPE", "yolo").lower().strip()

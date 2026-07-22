@@ -3,3 +3,7 @@ __pycache__
 .pytest_cache
 pruebas/
 *.md
+*.pt
+models/garbage_model.onnx.data
+models/garbage_model.onnx
+models/modelo.pt
